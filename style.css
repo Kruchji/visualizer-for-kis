@@ -1,0 +1,49 @@
+body{
+    background-color: #292929;
+}
+
+
+/* Navigation bar */
+.navbar {
+    background-color: #ff9600;
+}
+
+.navbar-nav {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    margin-left: 3%;
+    margin-right: 3%;
+}
+
+.form-check-input {
+    margin-top: 0.3rem;
+}
+
+
+
+/* Image grid */
+#imageGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 10px;
+    padding: 20px;
+    overflow: hidden;
+
+    margin-top: 60px;
+}
+
+.image-item {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 0.2s ease-in-out;
+}
+
+.image-item:hover {
+    transform: scale(1.1);
+}
