@@ -37,13 +37,55 @@ body{
     margin-top: 60px;
 }
 
-.image-item {
-    display: block;
+.image-container {
+    position: relative;
     width: 100%;
-    height: auto;
     transition: transform 0.2s ease-in-out;
 }
-
-.image-item:hover {
+.image-container:hover {
     transform: scale(1.1);
+    z-index: 5;
 }
+
+.image-container img {
+    width: 100%;
+    display: block;
+    height: auto;
+}
+
+/* hover buttons */
+.hover-buttons {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+.image-container:hover .hover-buttons {
+    opacity: 1;
+    transform: translate(-50%, -20%) scale(1.1);
+}
+.btn {
+    margin: 5px;
+}
+
+
+/* target image */
+#targetImageDiv {
+    z-index: 10;
+    background-color: rgba(0,0,0,0.7);;
+    display: flex;             
+    justify-content: center;    
+    align-items: center;        
+    height: 100vh;              
+    width: 100vw;
+    position: fixed;
+}
+
+#targetImageDiv img {
+    width: 50%;                 
+    height: auto;              
+    object-fit: cover;      
+}
+

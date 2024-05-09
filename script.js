@@ -1,6 +1,6 @@
 function displayTargetImage() {
-    // placeholder
-    alert('Displaying Target Image...');
+    const targetImageDiv = $('#targetImageDiv');
+    targetImageDiv.toggle();
 }
 
 // example implementation: Update time left every minute
@@ -11,6 +11,11 @@ setInterval(() => {
         timeLeftDisplay.textContent = currentTime - 1;
     }
 }, 60000); // Updates every minute
+
+
+setInterval(() => {
+    console.log(document.documentElement.scrollTop);
+}, 1000);
 
 // button for toggling fullscreen
 function toggleFullScreen() {
@@ -33,8 +38,25 @@ $(document).ready(function () {
 
     const imageGrid = $('#imageGrid');
     imageFilenames.forEach(function (filename) {
-        imageGrid.append($('<img>', { src: 'Data/12/' + filename, class: 'image-item' }));
+        imageGrid.append(
+            $('<div>', { class: 'image-container' }).append(
+                $('<img>', { src: 'Data/12/' + filename, class: 'image-item', draggable: 'false' }),
+                $('<div>', { class: 'hover-buttons' }).append(
+                    $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick }),
+                    $('<button>', { class: 'btn btn-primary', text: 'Compare', click: function() { alert('Compare clicked'); } })
+                )
+            )
+        );
+        
     });
+
+    const imageToFind = imageFilenames[Math.floor(Math.random() * imageFilenames.length)];
+    console.log(imageToFind);
+    const targetImageDiv = $('#targetImageDiv');
+    targetImageDiv.hide();
+
+    targetImageDiv.append($('<img>', { src: 'Data/12/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
+
 
     $('#imageGrid').waitForImages(function () {
         alert('All images have loaded.');
@@ -52,4 +74,22 @@ function shuffleArray(array) {
         // Swap elements array[i] and array[randomIndex]
         [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
     }
+}
+
+
+function handleSubmitClick(event) {
+    // Find the img element within the same .image-container as the clicked button
+    const imgSrc = $(event.target).closest('.image-container').find('img').attr('src');
+    // Extract the last part of the src URL after the last '/'
+    const imageName = imgSrc.substring(imgSrc.lastIndexOf('/') + 1);
+
+    const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
+    const targetImageName = imageToFindSrc.substring(imageToFindSrc.lastIndexOf('/') + 1);
+
+    if(imageName === targetImageName){
+        alert('Correct image: ' + imageName);
+    }else{
+        alert('Incorrect image: ' + imageName);
+    }
+    
 }
