@@ -93,3 +93,16 @@ body{
     border: solid #ff9600 10px; 
 }
 
+
+
+/* shine effect */
+@keyframes shine {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.shining {
+    animation: shine 2s infinite;
+    box-shadow: 0 0 30px gold;
+}

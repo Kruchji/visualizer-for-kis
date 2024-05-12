@@ -187,4 +187,24 @@ function storeSubmissionAttempt(uid,iteration,image, correct){
         body: JSON.stringify( payload )
     });
   
-  }
+}
+
+
+function toggleSolutionDisplay(){
+    const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
+
+    const desiredImage = $('div.image-container').find('img[src="' + imageToFindSrc + '"]');
+
+    const windowHeight = $(window).height();
+    const imageTopOffset = desiredImage.offset().top;
+    const scrollPosition = imageTopOffset - (windowHeight / 2) + (desiredImage.height() / 2);
+
+    if(!desiredImage.hasClass('shining')){
+        $('html, body').animate({
+            scrollTop: scrollPosition
+        }, 0); // Adjust the duration as needed
+    }
+
+
+    desiredImage.toggleClass('shining');
+}
