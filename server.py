@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json, http.server
+import json, http.server, os, random
 from urllib.parse import urlparse, parse_qs
 
 class TrackingServer (http.server.SimpleHTTPRequestHandler):
@@ -76,6 +76,24 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
             return
 
+        # get images in a folder
+        elif self.path.startswith('/getImages'):    
+            imageSets = [folder for folder in os.listdir("./Data/")]
+
+            chosenFolder = random.choice(imageSets)
+            images = []
+            for file_name in os.listdir("./Data/" + chosenFolder + "/"):
+                if file_name.endswith('.jpg'):
+                    images.append(file_name)
+
+            self.send_response(200) 
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+
+            response = {'images': images, 'folder' : chosenFolder}
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+
+            return
 
 
         # stores just generated layout of images
@@ -85,19 +103,24 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             jsonPayload = json.loads(dt)
             positions = json.loads(jsonPayload["positions"])
             target = jsonPayload["target"]
+            dataSet = jsonPayload["dataSet"]
             
                     
             with open("userData.json", "r") as fh:
                 logs = json.load(fh)
                 userLogs = logs.get(uid,{})
 
-            posData =  userLogs.get("imagePos",{})
+            posData = userLogs.get("imagePos",{})
             posData[iteration] = positions
             userLogs["imagePos"] = posData
 
-            targetsData =  userLogs.get("targets",{})
+            targetsData = userLogs.get("targets",{})
             targetsData[iteration] = target
             userLogs["targets"] = targetsData
+
+            dataSets = userLogs.get("dataSets",{})
+            dataSets[iteration] = dataSet
+            userLogs["dataSets"] = dataSets
             
             logs[uid] = userLogs
             logsStr = json.dumps(logs, indent=4)
