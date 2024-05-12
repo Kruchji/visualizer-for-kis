@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+
+import json, http.server
+from urllib.parse import urlparse, parse_qs
+
+class TrackingServer (http.server.SimpleHTTPRequestHandler):
+
+    def do_POST(self):
+
+        query_params = parse_qs(urlparse(self.path).query)
+
+        try:
+            uid = str(int(query_params.get("uid", [0])[0]))
+            iteration = str(int(query_params.get("iteration", [0])[0]))
+        except (KeyError, ValueError) as e:
+            # Handle missing parameters or non-integer values
+            uid = "0"
+            iteration = "0"
+
+
+        # tracking scrollbar position
+        if self.path.startswith('/scrollPositions.txt'):
+            length = int(self.headers.get('content-length'))
+            dt = self.rfile.read(length).decode()
+            logJSON = json.loads(dt)
+            logList = logJSON["log"] 
+
+            toLogText = ""
+            for logRecord in logList:
+                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(logRecord["missedTarget"])+"\n"
+
+            with open("scrollPositions.txt", 'a') as fh:
+                fh.write(toLogText)
+            self.send_response(200)
+
+        # clicking submit
+        if self.path.startswith('/submissions.txt'):
+            length = int(self.headers.get('content-length'))
+            dt = self.rfile.read(length).decode()
+            logJSON = json.loads(dt)
+            logList = logJSON["log"] 
+
+            toLogText = ""
+            for logRecord in logList:
+                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(logRecord["correct"])+";"+str(logRecord["image"])+"\n"
+
+            with open("submissions.txt", 'a') as fh:
+                fh.write(toLogText)
+            self.send_response(200)
+        
+
+        # creates a new user
+        elif self.path.startswith('/newUser'):           
+            newUid = 0
+            try:
+                with open("userData.json", "r") as fh:
+                    logs = json.load(fh)
+                    newUid = max(map(int, logs.keys())) + 1
+            except json.JSONDecodeError:  # file empty
+                logs = {}
+
+            logs[str(newUid)] = {"targets" : {}}
+            logsStr = json.dumps(logs, indent=4)
+            
+            with open("userData.json", "w") as outfile:
+                outfile.write(logsStr)
+            self.send_response(200) 
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+
+            response = {'new_id': newUid}
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+
+            return
+
+
+
+        # stores just generated layout of images
+        elif self.path.startswith('/imageConfig'):
+            length = int(self.headers.get('content-length'))
+            dt = self.rfile.read(length).decode()
+            jsonPayload = json.loads(dt)
+            positions = json.loads(jsonPayload["positions"])
+            target = jsonPayload["target"]
+            
+                    
+            with open("userData.json", "r") as fh:
+                logs = json.load(fh)
+                userLogs = logs.get(uid,{})
+
+            posData =  userLogs.get("imagePos",{})
+            posData[iteration] = positions
+            userLogs["imagePos"] = posData
+
+            targetsData =  userLogs.get("targets",{})
+            targetsData[iteration] = target
+            userLogs["targets"] = targetsData
+            
+            logs[uid] = userLogs
+            logsStr = json.dumps(logs, indent=4)
+            
+            with open("userData.json", "w") as outfile:
+                outfile.write(logsStr)
+            self.send_response(200) 
+
+
+        self.send_header('Content-Type', 'text/html')
+        self.end_headers()
+        return
+
+
+
+
+if __name__ == '__main__':
+    http.server.test(TrackingServer, http.server.HTTPServer, port=8001)
