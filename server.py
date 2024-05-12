@@ -24,10 +24,12 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             dt = self.rfile.read(length).decode()
             logJSON = json.loads(dt)
             logList = logJSON["log"] 
+            windowW = logJSON["windowW"]
+            windowH = logJSON["windowH"]
 
             toLogText = ""
             for logRecord in logList:
-                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(logRecord["missedTarget"])+"\n"
+                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(windowW)+";"+str(windowH)+";"+str(logRecord["missedTarget"])+"\n"
 
             with open("scrollPositions.txt", 'a') as fh:
                 fh.write(toLogText)
@@ -39,6 +41,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             dt = self.rfile.read(length).decode()
             logJSON = json.loads(dt)
             logList = logJSON["log"] 
+            
 
             toLogText = ""
             for logRecord in logList:
@@ -50,7 +53,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
         
 
         # creates a new user
-        elif self.path.startswith('/newUser'):           
+        elif self.path.startswith('/newUser'):        
             newUid = 0
             try:
                 with open("userData.json", "r") as fh:

@@ -26,10 +26,7 @@ setInterval(() => {
 
 const SCROLL_LOG_INTERVAL = 1000;
 
-setInterval(() => {
-    console.log();
-    storeScrollbarPos(UserID,0)
-}, SCROLL_LOG_INTERVAL);
+
 
 
 function storeScrollbarPos(uid,iteration){
@@ -37,7 +34,9 @@ function storeScrollbarPos(uid,iteration){
     let payload = {
       "uid": uid,
       "iteration": iteration,
-      "log": logData
+      "log": logData,
+      "windowW" : window.innerWidth,
+      "windowH" : window.innerHeight - (document.getElementsByClassName("navbar")[0].clientHeight + 16) // account for navbar and its padding
     };
   
     fetch("scrollPositions.txt?uid="+uid+"&iteration="+iteration,
@@ -74,7 +73,6 @@ function createNewUser(){
         throw new Error('Network response was not ok.');
     }).then(data => {
         UserID = data.new_id;
-        console.log(UserID);
     }).catch(error => {
         console.error('There was a problem with the fetch operation:', error);
     });
@@ -114,13 +112,16 @@ $(document).ready(function () {
 
     return [imageToFind, imageFilenames]
         
-    }).then(imageData => storeImageConfig(UserID, 0, imageData[0], imageData[1]));
+    }).then(imageData => storeImageConfig(UserID, 0, imageData[0], imageData[1])).then(resp => {
+        setInterval(() => {
+            storeScrollbarPos(UserID,0)
+        }, SCROLL_LOG_INTERVAL);
+    });
     
 
     $('#imageGrid').waitForImages(function () {
         alert('All images have loaded.');
         // ... actions after images load
-        
     });
 });
 
