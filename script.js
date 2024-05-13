@@ -27,8 +27,6 @@ setInterval(() => {
 const SCROLL_LOG_INTERVAL = 1000;
 
 
-
-
 function storeScrollbarPos(uid,iteration){
     let logData = [{"timestamp" : Date.now(), "scrollPos" : document.documentElement.scrollTop, "missedTarget" : 0}]
     let payload = {
@@ -61,6 +59,7 @@ function toggleFullScreen() {
 }
 
 let UserID = -1;
+let currentIteration = 0;
 
 function createNewUser(){
     return fetch("newUser",
@@ -133,12 +132,12 @@ $(document).ready(function () {
         setInterval(() => {
             storeScrollbarPos(UserID,0)
         }, SCROLL_LOG_INTERVAL);
+    }).then(result => { 
+    return $('#imageGrid').waitForImages(function () {
+        // actions after images load
+        toggleLoadingScreen();
     });
-    
 
-    $('#imageGrid').waitForImages(function () {
-        alert('All images have loaded.');
-        // ... actions after images load
     });
 });
 
@@ -157,6 +156,13 @@ function storeImageConfig(uid, iteration, target, allImages, dataSetNum){
         method: "POST",
         body: JSON.stringify( payload )
     });
+}
+
+
+function toggleLoadingScreen() {
+    const loadingScreen = $('#loading-screen');
+
+    loadingScreen.fadeToggle('slow');
 }
 
 
