@@ -99,14 +99,14 @@ function getImageList() {
 const SCROLL_LOG_INTERVAL = 1000;   // every second
 let trackerIntervalID;
 
-function startScrollTracker(){
+function startScrollTracker() {
     trackerIntervalID = setInterval(() => {
         storeScrollbarPos(UserID, currentIteration)
     }, SCROLL_LOG_INTERVAL);
 }
 
 
-function stopScrollTracker(){
+function stopScrollTracker() {
     clearInterval(trackerIntervalID);
 }
 
@@ -148,7 +148,7 @@ function loadNextIteration() {
 
         targetImageDiv.append($('<img>', { src: 'Data/' + response['folder'] + '/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
 
-        return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering" : orderingName }
+        return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering": orderingName }
 
     }).then(result => storeImageConfig(UserID, currentIteration, result["target"], result["allImages"], result["dataset"], result["ordering"])).then(result => {
         return $('#imageGrid').waitForImages(function () {
@@ -211,7 +211,7 @@ function toggleLoadingScreen(boolScroll) {
 }
 
 
-function orderImages(imageArray, ordering){
+function orderImages(imageArray, ordering) {
     let orderingName = "default";
 
     switch (ordering) {
@@ -224,7 +224,7 @@ function orderImages(imageArray, ordering){
         default:
             break;
     }
-    
+
     return orderingName;
 }
 
@@ -238,6 +238,19 @@ function shuffleArray(array) {
         // Swap elements array[i] and array[randomIndex]
         [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
     }
+}
+
+
+function skipCurrentIteration() {
+    storeSubmissionAttempt(UserID, currentIteration, "SKIP", 2);
+    stopScrollTracker();
+    showResult("skip");
+
+    setTimeout(function () {
+        hideResult("skip");
+        toggleLoadingScreen(false);
+        loadNextIteration();
+    }, 2000);
 }
 
 
@@ -288,6 +301,8 @@ function showResult(result) {
 
     if (result === "correct") {
         resultOverlay.append("<div class='correct'>Correct image! Moving to another example...</div>")
+    } else if (result === "skip") {
+        resultOverlay.append("<div class='skipped'>Example skipped! Moving to another example...</div>")
     } else {
         resultOverlay.append("<div class='incorrect'>Incorrect image, try again.</div>")
     }

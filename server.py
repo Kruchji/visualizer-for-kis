@@ -43,6 +43,8 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             logList = logJSON["log"] 
             
 
+            # correct: 0 = incorrect, 1 = correct, 2 = skip
+
             toLogText = ""
             for logRecord in logList:
                 toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(logRecord["correct"])+";"+str(logRecord["image"])+"\n"

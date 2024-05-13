@@ -154,16 +154,23 @@ body {
     border: solid #ff9600 10px;
 }
 
-.correct {
-    color: rgb(37, 197, 1);
+.skipped,
+.correct,
+.incorrect {
     font-weight: bold;
     font-size: 2vw;
 }
 
+.correct {
+    color: rgb(37, 197, 1);
+}
+
 .incorrect {
     color: rgb(207, 10, 10);
-    font-weight: bold;
-    font-size: 2vw;
+}
+
+.skipped {
+    color: rgb(0, 154, 214);
 }
 
 /* Image shake */
