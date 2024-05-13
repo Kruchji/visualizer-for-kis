@@ -25,16 +25,31 @@ setInterval(() => {
 }, 60000); // Updates every minute
 
 
-
+let targetMissed = 0;
 
 function storeScrollbarPos(uid, iteration) {
-    let logData = [{ "timestamp": Date.now(), "scrollPos": document.documentElement.scrollTop, "missedTarget": 0 }]
+    if (targetMissed === 0){
+        const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
+        const bottomOfTargetPos = $('div.image-container').find('img[src="' + imageToFindSrc + '"]')[0].getBoundingClientRect().bottom;
+        if (bottomOfTargetPos < 0){
+            targetMissed = 1;
+        }
+    }
+
+    let logData = [{ "timestamp": Date.now(), "scrollPos": document.documentElement.scrollTop, "missedTarget": targetMissed }]
+
+    let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
+    let secondRowImage = $('#imageGrid > div:nth-child(5)')[0];
+
     let payload = {
         "uid": uid,
         "iteration": iteration,
         "log": logData,
         "windowW": window.innerWidth,
-        "windowH": window.innerHeight - (document.getElementsByClassName("navbar")[0].clientHeight + 16) // account for navbar and its padding
+        "windowH": window.innerHeight - (document.getElementsByClassName("navbar")[0].clientHeight + 16), // account for navbar and its padding
+        "firstRowStart": firstRowImage.offsetTop,
+        "secondRowStart": secondRowImage.offsetTop,
+        "imageHeight": firstRowImage.offsetHeight
     };
 
     fetch("scrollPositions.txt?uid=" + uid + "&iteration=" + iteration,
@@ -114,6 +129,8 @@ function stopScrollTracker() {
 function loadNextIteration() {
     currentIteration += 1;
 
+    targetMissed = 0;
+
     // empty everything that will be reloaded
     $('#cursorCheckbox').prop('checked', false);
     $('#imageGrid').empty();
@@ -162,6 +179,24 @@ function loadNextIteration() {
 }
 
 
+function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderingName) {
+    let payload = {
+        "uid": uid,
+        "iteration": iteration,
+        "positions": JSON.stringify(allImages.map(image => ({ "image": image }))),
+        "target": target,
+        "dataSet": dataSetNum,
+        "ordering": orderingName
+    };
+
+    return fetch("imageConfig?uid=" + uid + "&iteration=" + iteration,
+        {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+}
+
+
 $(document).ready(function () {
     // setup image compare overlay
     let imageCompare = $("#image-compare");
@@ -181,24 +216,6 @@ $(document).ready(function () {
     // load everything
     createNewUser().then(result => { loadNextIteration(); });
 });
-
-
-function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderingName) {
-    let payload = {
-        "uid": uid,
-        "iteration": iteration,
-        "positions": JSON.stringify(allImages.map(image => ({ "image": image }))),
-        "target": target,
-        "dataSet": dataSetNum,
-        "ordering": orderingName
-    };
-
-    fetch("imageConfig?uid=" + uid + "&iteration=" + iteration,
-        {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-}
 
 
 function toggleLoadingScreen(boolScroll) {
