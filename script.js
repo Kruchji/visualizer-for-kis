@@ -1,6 +1,6 @@
 function displayTargetImage() {
     const targetImageDiv = $('#targetImageDiv');
-    targetImageDiv.toggle();
+    targetImageDiv.fadeToggle();
     toggleScroll();
 }
 
@@ -98,6 +98,16 @@ function getImageList(){
 
 
 $(document).ready(function () {
+    let imageCompare = $("#image-compare");
+    imageCompare.click(function(){
+        imageCompare.fadeOut("fast", function() { imageCompare.empty(); });
+        toggleScroll();
+    });
+    imageCompare.fadeOut();
+
+
+    let targetImageDiv = $('#targetImageDiv');
+    targetImageDiv.click(function(){ displayTargetImage(); });
 
     createNewUser().then(result => getImageList()).then(response => {
 
@@ -112,7 +122,7 @@ $(document).ready(function () {
                 $('<img>', { src: 'Data/'+ response['folder'] +'/' + filename, class: 'image-item', draggable: 'false' }),
                 $('<div>', { class: 'hover-buttons' }).append(
                     $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick }),
-                    $('<button>', { class: 'btn btn-primary', text: 'Compare', click: function() { alert('Compare clicked'); } })
+                    $('<button>', { class: 'btn btn-primary', text: 'Compare', click: handleCompareClick })
                 )
             )
         );
@@ -128,14 +138,14 @@ $(document).ready(function () {
 
     return {"target" : imageToFind, "allImages" : imageFilenames, "dataset" : response['folder']}
         
-    }).then(result => storeImageConfig(UserID, 0, result["target"], result["allImages"], result["dataset"])).then(resp => {
-        setInterval(() => {
-            storeScrollbarPos(UserID,0)
-        }, SCROLL_LOG_INTERVAL);
-    }).then(result => { 
+    }).then(result => storeImageConfig(UserID, 0, result["target"], result["allImages"], result["dataset"])).then(result => { 
     return $('#imageGrid').waitForImages(function () {
         // actions after images load
         toggleLoadingScreen();
+
+        setInterval(() => {
+            storeScrollbarPos(UserID,0)
+        }, SCROLL_LOG_INTERVAL);
     });
 
     });
@@ -232,4 +242,17 @@ function toggleSolutionDisplay(){
 
 
     desiredImage.toggleClass('shining');
+}
+
+
+function handleCompareClick(event){
+    let clonedImage = $(event.target).closest('.image-container').find('img').clone();
+    let clonedTarget = $('#targetImageDiv').find('img').clone();
+    
+    let compareOverlay = $('#image-compare');
+    compareOverlay.append(clonedImage);
+    compareOverlay.append(clonedTarget);
+
+    compareOverlay.fadeIn();
+    toggleScroll();
 }

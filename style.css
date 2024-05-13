@@ -91,6 +91,7 @@ body{
     object-fit: cover;  
     border-radius: 10px;   
     border: solid #ff9600 10px; 
+    margin-bottom: 3%;
 }
 
 
@@ -109,12 +110,11 @@ body{
 
 
 
-/* loading screen */
-#loading-screen {
+/* overlays */
+#loading-screen, #image-compare {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
     position: fixed;
     top: 0;
     left: 0;
@@ -124,4 +124,15 @@ body{
     z-index: 9999;
     color: rgba(13, 110, 253, 255);
     font-size: 2vw;
+}
+
+#loading-screen {
+    flex-direction: column;
+}
+
+#image-compare img{
+    width: 45vw;
+    margin: 2vw;
+    border-radius: 10px;   
+    border: solid #ff9600 10px;
 }
