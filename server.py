@@ -104,6 +104,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             positions = json.loads(jsonPayload["positions"])
             target = jsonPayload["target"]
             dataSet = jsonPayload["dataSet"]
+            ordering = jsonPayload["ordering"]
             
                     
             with open("userData.json", "r") as fh:
@@ -121,6 +122,10 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             dataSets = userLogs.get("dataSets",{})
             dataSets[iteration] = dataSet
             userLogs["dataSets"] = dataSets
+
+            orderings = userLogs.get("orderings",{})
+            orderings[iteration] = ordering
+            userLogs["orderings"] = orderings
             
             logs[uid] = userLogs
             logsStr = json.dumps(logs, indent=4)

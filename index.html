@@ -18,12 +18,15 @@
     <script src="jquery.waitforimages.min.js"></script>
 </head>
 
-<body>
+<body style="overflow: hidden;">
     <!-- Loading screen -->
     <div id="loading-screen">
         <div class="spinner-border text-primary mb-3" role="status"></div>
         <div>Loading images...</div>
     </div>
+
+    <!-- Result overlay -->
+    <div id="result-overlay"></div>
 
     <!-- Image compare -->
     <div id="image-compare"></div>
@@ -34,7 +37,8 @@
         <div class="navbar-nav">
             <div class="nav-item">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="cursorCheckbox" onclick="toggleSolutionDisplay()">
+                    <input class="form-check-input" type="checkbox" id="cursorCheckbox"
+                        onclick="toggleSolutionDisplay()">
                     <label class="form-check-label" for="cursorCheckbox">Show solution</label>
                 </div>
             </div>
@@ -43,7 +47,8 @@
                     Image</button>
             </div>
             <div class="nav-item">
-                <button type="button" class="btn btn-secondary ml-2" onclick="alert('Skipping...')">Skip this ordering</button>
+                <button type="button" class="btn btn-secondary ml-2" onclick="alert('Skipping...')">Skip this
+                    ordering</button>
             </div>
             <div class="nav-item">
                 <span class="navbar-text">

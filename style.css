@@ -1,4 +1,4 @@
-body{
+body {
     background-color: #292929;
 }
 
@@ -42,6 +42,7 @@ body{
     width: 100%;
     transition: transform 0.2s ease-in-out;
 }
+
 .image-container:hover {
     transform: scale(1.1);
     z-index: 5;
@@ -52,6 +53,8 @@ body{
     display: block;
     height: auto;
     border-radius: 10px;
+    transition: transform 0.1s ease-in-out;
+    /* transition for shake */
 }
 
 /* hover buttons */
@@ -64,10 +67,12 @@ body{
     opacity: 0;
     transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
+
 .image-container:hover .hover-buttons {
     opacity: 1;
     transform: translate(-50%, -20%) scale(1.1);
 }
+
 .btn {
     margin: 5px;
 }
@@ -76,21 +81,22 @@ body{
 /* target image */
 #targetImageDiv {
     z-index: 10;
-    background-color: rgba(0,0,0,0.7);;
-    display: flex;             
-    justify-content: center;    
-    align-items: center;        
-    height: 100vh;              
+    background-color: rgba(0, 0, 0, 0.7);
+    ;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     width: 100vw;
     position: fixed;
 }
 
 #targetImageDiv img {
-    width: 60%;                 
-    height: auto;              
-    object-fit: cover;  
-    border-radius: 10px;   
-    border: solid #ff9600 10px; 
+    width: 60%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+    border: solid #ff9600 10px;
     margin-bottom: 3%;
 }
 
@@ -98,9 +104,17 @@ body{
 
 /* shine effect */
 @keyframes shine {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .shining {
@@ -111,7 +125,9 @@ body{
 
 
 /* overlays */
-#loading-screen, #image-compare {
+#loading-screen,
+#image-compare,
+#result-overlay {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -120,19 +136,63 @@ body{
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     z-index: 9999;
     color: rgba(13, 110, 253, 255);
     font-size: 2vw;
 }
 
-#loading-screen {
+#loading-screen,
+#result-overlay {
     flex-direction: column;
 }
 
-#image-compare img{
+#image-compare img {
     width: 45vw;
     margin: 2vw;
-    border-radius: 10px;   
+    border-radius: 10px;
     border: solid #ff9600 10px;
+}
+
+.correct {
+    color: rgb(37, 197, 1);
+    font-weight: bold;
+    font-size: 2vw;
+}
+
+.incorrect {
+    color: rgb(207, 10, 10);
+    font-weight: bold;
+    font-size: 2vw;
+}
+
+/* Image shake */
+.shake {
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-10px);
+    }
+
+    40% {
+        transform: translateX(10px);
+    }
+
+    60% {
+        transform: translateX(-10px);
+    }
+
+    80% {
+        transform: translateX(10px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
