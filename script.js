@@ -1,121 +1,29 @@
-function displayTargetImage() {
-    const targetImageDiv = $('#targetImageDiv');
-    targetImageDiv.fadeToggle();
-    toggleScroll();
-}
+// start javascript after page loads
+$(document).ready(function () {
+    // setup image compare overlay
+    let imageCompare = $("#image-compare");
+    imageCompare.click(function () {
+        imageCompare.fadeOut("fast", function () { imageCompare.empty(); });
+        toggleScroll();
+    });
+    imageCompare.fadeOut();
+
+    // setup results overlay
+    hideResult("setup");
+
+    // setup target image overlay
+    let targetImageDiv = $('#targetImageDiv');
+    targetImageDiv.click(function () { toggleTargetImage(); });
+
+    // setup end overlay
+    $('#end-overlay').fadeOut();
+
+    // load everything
+    createNewUser().then(result => { loadNextIteration(); });
+});
 
 
-function toggleScroll() {
-    const body = document.body;
-
-    if (body.style.overflow === 'hidden') {
-        body.style.overflow = ''; // Re-enable scrolling
-    } else {
-        body.style.overflow = 'hidden'; // Disable scrolling
-    }
-}
-
-
-const TEST_TIME = 30; // in minutes
-let testEnd = Date.now() + TEST_TIME * 60 * 1000;     // calculate end time
-// Update time left every second
-const clockInterval = setInterval(() => {
-    const timeLeftDisplay = document.getElementById('timeLeft');
-
-    let timeLeft = testEnd - Date.now();
-
-    if (timeLeft > 0){
-        timeLeftDisplay.textContent = formatTime(timeLeft);
-    }else{
-        endTesting();
-    }
-
-}, 1000); // Updates every second
-
-
-function formatTime(millisecondsDiff){
-    let milliseconds = Math.abs(millisecondsDiff);
-    
-    // Calculate seconds and minutes
-    let minutes = Math.floor(milliseconds / 60000); // 1 minute = 60000 milliseconds
-    let seconds = Math.floor((milliseconds % 60000) / 1000);
-    
-    // Format seconds and minutes with leading zeros
-    let formattedMinutes = ('0' + minutes).slice(-2);
-    let formattedSeconds = ('0' + seconds).slice(-2);
-    
-    // Return formatted time
-    return formattedMinutes + ':' + formattedSeconds;
-}
-
-let gameEnded = false;
-
-function endTesting(){
-    clearInterval(clockInterval);
-    stopScrollTracker();
-    $('#end-overlay').css('background-color', 'black');
-    showEndOverlay();
-    gameEnded = true;
-}
-
-
-let targetMissed = 0;
-let targetWasOnScreen = false;
-
-function storeScrollbarPos(uid, iteration) {
-    if (targetMissed === 0){
-        const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
-        const targetPos = $('div.image-container').find('img[src="' + imageToFindSrc + '"]')[0].getBoundingClientRect();
-        const bottomOfTargetPos = targetPos.bottom;
-        const topOfTargetPos = targetPos.top;
-
-        if (bottomOfTargetPos < 0){
-            targetMissed = 1;
-        } else if (topOfTargetPos < window.innerHeight){    // on screen
-            targetWasOnScreen = true;
-        } else if (targetWasOnScreen && topOfTargetPos >= window.innerHeight){  // already was on screen but then user scrolled up again
-            targetMissed = 1;
-        }
-    }
-
-    let logData = [{ "timestamp": Date.now(), "scrollPos": document.documentElement.scrollTop, "missedTarget": targetMissed }]
-
-    let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
-    let secondRowImage = $('#imageGrid > div:nth-child(5)')[0];
-
-    let payload = {
-        "uid": uid,
-        "iteration": iteration,
-        "log": logData,
-        "totalScroll": document.documentElement.scrollHeight,
-        "windowW": window.innerWidth,
-        "windowH": window.innerHeight,
-        "navbarH": document.getElementsByClassName("navbar")[0].clientHeight,
-        "firstRowStart": firstRowImage.offsetTop,
-        "secondRowStart": secondRowImage.offsetTop,
-        "imageHeight": firstRowImage.offsetHeight
-    };
-
-    fetch("scrollPositions.txt?uid=" + uid + "&iteration=" + iteration,
-        {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-
-}
-
-// button for toggling fullscreen
-function toggleFullScreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch((e) => {
-            alert('Error attempting to enable full-screen mode: ' + e.message);
-        });
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }
-}
+//=============== New user creation (first iteration) ===============//
 
 let UserID = -1;
 let currentIteration = -1;
@@ -130,30 +38,27 @@ function createNewUser() {
             }
             throw new Error('Network response error.');
         }).then(data => {
-            UserID = data.new_id;
+            UserID = data.new_id;       // receive next user ID
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
 }
 
-// loads list of images in a dataset from server
-function getImageList() {
-    return fetch("getImages",
-        {
-            method: "POST"
-        }).then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Network response error.');
-        }).then(data => {
-            const dataSet = data.images;
-            const folder = data.folder;
-            return { "dataSet": dataSet, "folder": folder };
-        }).catch(error => {
-            console.error('There was a problem with a fetch operation:', error);
-        });
+
+//=============== Enable / disable scrolling ===============//
+
+function toggleScroll() {
+    const body = document.body;
+
+    if (body.style.overflow === 'hidden') {
+        body.style.overflow = ''; // Re-enable scrolling
+    } else {
+        body.style.overflow = 'hidden'; // Disable scrolling
+    }
 }
+
+
+//=============== Scroll tracking ===============//
 
 const SCROLL_LOG_INTERVAL = 300;   // how often to log
 let trackerIntervalID;
@@ -169,6 +74,50 @@ function stopScrollTracker() {
     clearInterval(trackerIntervalID);
 }
 
+let targetMissed = 0;
+let targetWasOnScreen = false;
+
+function storeScrollbarPos(uid, iteration) {
+    if (targetMissed === 0) {
+        const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
+        const targetPos = $('div.image-container').find('img[src="' + imageToFindSrc + '"]')[0].getBoundingClientRect();    // position relative to viewport
+        const bottomOfTargetPos = targetPos.bottom;
+        const topOfTargetPos = targetPos.top;
+
+        if (bottomOfTargetPos < 0) {
+            targetMissed = 1;
+        } else if (topOfTargetPos < window.innerHeight) {    // on screen
+            targetWasOnScreen = true;
+        } else if (targetWasOnScreen && topOfTargetPos >= window.innerHeight) {  // already was on screen but then user scrolled up again
+            targetMissed = 1;
+        }
+    }
+
+    let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
+    let secondRowImage = $('#imageGrid > div:nth-child(5)')[0];
+
+    let payload = {
+        "timestamp": Date.now(),
+        "scrollPos": document.documentElement.scrollTop,
+        "totalScroll": document.documentElement.scrollHeight,
+        "windowW": window.innerWidth,
+        "windowH": window.innerHeight,
+        "navbarH": document.getElementsByClassName("navbar")[0].clientHeight,
+        "firstRowStart": firstRowImage.offsetTop,
+        "secondRowStart": secondRowImage.offsetTop,
+        "imageHeight": firstRowImage.offsetHeight,
+        "missedTarget": targetMissed
+    };
+
+    fetch("scrollPositions?uid=" + uid + "&iteration=" + iteration,
+        {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+}
+
+
+//=============== Load new iteration of images ===============//
 
 function loadNextIteration() {
     currentIteration += 1;
@@ -213,14 +162,14 @@ function loadNextIteration() {
         return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering": orderingName }
 
     }).then(result => storeImageConfig(UserID, currentIteration, result["target"], result["allImages"], result["dataset"], result["ordering"])).then(result => {
-        return $('#imageGrid').waitForImages(function () {
-             // actions after images load
+        return $('#imageGrid').waitForImages(function () {      // wait for images to load before starting tracker
+            // actions after images load
 
-            if (!gameEnded){
+            if (!gameEnded) {
                 document.documentElement.scrollTop = 0;
-                toggleLoadingScreen(true);
+                toggleLoadingScreen(true);      // true = also toggle scroll
 
-                displayTargetImage();
+                toggleTargetImage();
 
                 startScrollTracker();
             }
@@ -229,11 +178,29 @@ function loadNextIteration() {
     });
 }
 
+// load a list of images in a dataset from server
+function getImageList() {
+    return fetch("getImages",
+        {
+            method: "POST"
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response error.');
+        }).then(data => {
+            const dataSet = data.images;
+            const folder = data.folder;
+            return { "dataSet": dataSet, "folder": folder };
+        }).catch(error => {
+            console.error('There was a problem with a fetch operation:', error);
+        });
+}
+
+//=============== Store current image grid info ===============//
 
 function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderingName) {
     let payload = {
-        "uid": uid,
-        "iteration": iteration,
         "positions": JSON.stringify(allImages.map(image => ({ "image": image }))),
         "target": target,
         "dataSet": dataSetNum,
@@ -248,39 +215,8 @@ function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderin
 }
 
 
-$(document).ready(function () {
-    // setup image compare overlay
-    let imageCompare = $("#image-compare");
-    imageCompare.click(function () {
-        imageCompare.fadeOut("fast", function () { imageCompare.empty(); });
-        toggleScroll();
-    });
-    imageCompare.fadeOut();
 
-    // setup results overlay
-    hideResult("setup");
-
-    // setup target image overlay
-    let targetImageDiv = $('#targetImageDiv');
-    targetImageDiv.click(function () { displayTargetImage(); });
-
-    // setup end overlay
-    $('#end-overlay').fadeOut();
-
-    // load everything
-    createNewUser().then(result => { loadNextIteration(); });
-});
-
-
-function toggleLoadingScreen(boolScroll) {
-    const loadingScreen = $('#loading-screen');
-
-    loadingScreen.fadeToggle('slow');
-    if (boolScroll) {
-        toggleScroll();
-    }
-}
-
+//=============== Ordering implementations ===============//
 
 function orderImages(imageArray, ordering) {
     let orderingName = "default";
@@ -300,7 +236,7 @@ function orderImages(imageArray, ordering) {
 }
 
 
-// Fisher–Yates shuffle
+// Fisher–Yates shuffle (random)
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         // Generate a random index between 0 and i (inclusive)
@@ -312,18 +248,7 @@ function shuffleArray(array) {
 }
 
 
-function skipCurrentIteration() {
-    storeSubmissionAttempt(UserID, currentIteration, "SKIP", 2);
-    stopScrollTracker();
-    showResult("skip");
-
-    setTimeout(function () {
-        hideResult("skip");
-        toggleLoadingScreen(false);
-        loadNextIteration();
-    }, 2000);
-}
-
+//=============== Submitting an image ===============//
 
 function handleSubmitClick(event) {
     // Find the img element within the same .image-container as the clicked button
@@ -358,12 +283,42 @@ function handleSubmitClick(event) {
 
 }
 
+// store any submission attempt
+function storeSubmissionAttempt(uid, iteration, image, correct) {
+
+    let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
+    let secondRowImage = $('#imageGrid > div:nth-child(5)')[0];
+
+    let payload = {
+        "timestamp": Date.now(),
+        "scrollPos": document.documentElement.scrollTop,
+        "totalScroll": document.documentElement.scrollHeight,
+        "navbarH": document.getElementsByClassName("navbar")[0].clientHeight,
+        "windowH": window.innerHeight,
+        "firstRowStart": firstRowImage.offsetTop,
+        "secondRowStart": secondRowImage.offsetTop,
+        "imageHeight": firstRowImage.offsetHeight, 
+        "correct": correct,
+        "image": image
+    };
+
+    fetch("submissions?uid=" + uid + "&iteration=" + iteration,
+        {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+}
+
+// shake image on incorrect submission
 function shakeImage(image) {
     image.addClass("shake");
     setTimeout(function () {
         image.removeClass("shake");
     }, 500);
 }
+
+
+//=============== Result overlay ===============//
 
 function showResult(result) {
 
@@ -394,40 +349,101 @@ function hideResult(result) {
 }
 
 
-function showEndOverlay(){
+//=============== Time left display ===============//
+
+const TEST_TIME = 30; // in minutes
+const testEnd = Date.now() + TEST_TIME * 60 * 1000;     // calculate end time
+
+// Update time left display every second
+const clockInterval = setInterval(() => {
+    const timeLeftDisplay = document.getElementById('timeLeft');
+
+    let timeLeft = testEnd - Date.now();
+
+    if (timeLeft > 0) {
+        timeLeftDisplay.textContent = formatTime(timeLeft);
+    } else {
+        endTesting();
+    }
+
+}, 1000); // Updates every second
+
+
+function formatTime(millisecondsDiff) {
+    let milliseconds = Math.abs(millisecondsDiff);
+
+    let minutes = Math.floor(milliseconds / 60000); // 1 minute = 60000 milliseconds
+    let seconds = Math.floor((milliseconds % 60000) / 1000);
+
+    // Add leading zeros
+    let formattedMinutes = ('0' + minutes).slice(-2);
+    let formattedSeconds = ('0' + seconds).slice(-2);
+
+    return formattedMinutes + ':' + formattedSeconds;   // formatted time - 00:00
+}
+
+
+//=============== End of test (overlay) ===============//
+
+let gameEnded = false;
+
+function endTesting() {
+    clearInterval(clockInterval);
+    stopScrollTracker();
+    $('#end-overlay').css('background-color', 'black');
+    showEndOverlay();
+    gameEnded = true;
+}
+
+function showEndOverlay() {
     let endOverlay = $('#end-overlay');
 
     endOverlay.empty();
     endOverlay.append("<div class='endOfTest'>Time is up! This marks the end of the test.</div>");
     endOverlay.fadeIn();
-    
+
     const body = document.body;
     body.style.overflow = 'hidden';
 }
 
 
+//=============== Loading overlay ===============//
 
-function storeSubmissionAttempt(uid, iteration, image, correct) {
+function toggleLoadingScreen(boolScroll) {
+    const loadingScreen = $('#loading-screen');
 
-    let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
-    let secondRowImage = $('#imageGrid > div:nth-child(5)')[0];
-
-    let logData = [{ "timestamp": Date.now(), "scrollPos": document.documentElement.scrollTop,"totalScroll": document.documentElement.scrollHeight,"navbarH": document.getElementsByClassName("navbar")[0].clientHeight,"windowH": window.innerHeight,
-    "firstRowStart": firstRowImage.offsetTop, "secondRowStart": secondRowImage.offsetTop, "imageHeight": firstRowImage.offsetHeight, "correct": correct, "image": image }]
-    let payload = {
-        "uid": uid,
-        "iteration": iteration,
-        "log": logData
-    };
-
-    fetch("submissions.txt?uid=" + uid + "&iteration=" + iteration,
-        {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-
+    loadingScreen.fadeToggle('slow');
+    if (boolScroll) {
+        toggleScroll();
+    }
 }
 
+
+//=============== Target image overlay ===============//
+
+function toggleTargetImage() {
+    const targetImageDiv = $('#targetImageDiv');
+    targetImageDiv.fadeToggle();
+    toggleScroll();
+}
+
+
+//=============== Image compare overlay ===============//
+
+function handleCompareClick(event) {
+    let clonedImage = $(event.target).closest('.image-container').find('img').clone();
+    let clonedTarget = $('#targetImageDiv').find('img').clone();
+
+    let compareOverlay = $('#image-compare');
+    compareOverlay.append(clonedImage);
+    compareOverlay.append(clonedTarget);
+
+    compareOverlay.fadeIn();
+    toggleScroll();
+}
+
+
+//=============== Display solution checkmark ===============//
 
 function toggleSolutionDisplay() {
     const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
@@ -449,14 +465,31 @@ function toggleSolutionDisplay() {
 }
 
 
-function handleCompareClick(event) {
-    let clonedImage = $(event.target).closest('.image-container').find('img').clone();
-    let clonedTarget = $('#targetImageDiv').find('img').clone();
+//=============== Skip button ===============//
 
-    let compareOverlay = $('#image-compare');
-    compareOverlay.append(clonedImage);
-    compareOverlay.append(clonedTarget);
+function skipCurrentIteration() {
+    storeSubmissionAttempt(UserID, currentIteration, "SKIP", 2);
+    stopScrollTracker();
+    showResult("skip");
 
-    compareOverlay.fadeIn();
-    toggleScroll();
+    setTimeout(function () {
+        hideResult("skip");
+        toggleLoadingScreen(false);
+        loadNextIteration();
+    }, 2000);
+}
+
+
+//=============== Fullscreen button ===============//
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch((e) => {
+            alert('Error attempting to enable full-screen mode: ' + e.message);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
 }

@@ -20,17 +20,17 @@
 <body style="overflow: hidden;">
     <!-- Loading screen -->
     <div id="loading-screen">
-        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <div class="spinner-border text-primary mb-3" role="status"></div> <!-- Loading icon -->
         <div>Loading images...</div>
     </div>
 
-    <!-- End overlay -->
+    <!-- End of test overlay -->
     <div id="end-overlay"></div>
 
-    <!-- Result overlay -->
+    <!-- Submit result overlay -->
     <div id="result-overlay"></div>
 
-    <!-- Image compare -->
+    <!-- Image comparison overlay -->
     <div id="image-compare"></div>
 
 
@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="nav-item">
-                <button type="button" class="btn btn-primary" onclick="displayTargetImage()">Toggle Target
+                <button type="button" class="btn btn-primary" onclick="toggleTargetImage()">Toggle Target
                     Image</button>
             </div>
             <div class="nav-item">
@@ -64,7 +64,7 @@
         </div>
     </nav>
 
-    <!-- Target Image overlay -->
+    <!-- Target image overlay -->
     <div id="targetImageDiv"></div>
 
     <!-- Image grid container -->
