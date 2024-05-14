@@ -15,14 +15,45 @@ function toggleScroll() {
     }
 }
 
-// example implementation: Update time left every minute
-setInterval(() => {
+
+const TEST_TIME = 30; // in minutes
+let testEnd = Date.now() + TEST_TIME * 60 * 1000;     // calculate end time
+// Update time left every second
+const clockInterval = setInterval(() => {
     const timeLeftDisplay = document.getElementById('timeLeft');
-    let currentTime = parseInt(timeLeftDisplay.textContent);
-    if (currentTime > 0) {
-        timeLeftDisplay.textContent = currentTime - 1;
+
+    let timeLeft = testEnd - Date.now();
+
+    if (timeLeft > 0){
+        timeLeftDisplay.textContent = formatTime(timeLeft);
+    }else{
+        endTesting();
     }
-}, 60000); // Updates every minute
+
+}, 1000); // Updates every second
+
+
+function formatTime(millisecondsDiff){
+    let milliseconds = Math.abs(millisecondsDiff);
+    
+    // Calculate seconds and minutes
+    let minutes = Math.floor(milliseconds / 60000); // 1 minute = 60000 milliseconds
+    let seconds = Math.floor((milliseconds % 60000) / 1000);
+    
+    // Format seconds and minutes with leading zeros
+    let formattedMinutes = ('0' + minutes).slice(-2);
+    let formattedSeconds = ('0' + seconds).slice(-2);
+    
+    // Return formatted time
+    return formattedMinutes + ':' + formattedSeconds;
+}
+
+function endTesting(){
+    clearInterval(clockInterval);
+    stopScrollTracker();
+    $('#end-overlay').css('background-color', 'black');
+    showEndOverlay();
+}
 
 
 let targetMissed = 0;
@@ -213,6 +244,9 @@ $(document).ready(function () {
     let targetImageDiv = $('#targetImageDiv');
     targetImageDiv.click(function () { displayTargetImage(); });
 
+    // setup end overlay
+    $('#end-overlay').fadeOut();
+
     // load everything
     createNewUser().then(result => { loadNextIteration(); });
 });
@@ -320,6 +354,8 @@ function showResult(result) {
         resultOverlay.append("<div class='correct'>Correct image! Moving to another example...</div>")
     } else if (result === "skip") {
         resultOverlay.append("<div class='skipped'>Example skipped! Moving to another example...</div>")
+    } else if (result === "endOfTest") {
+        resultOverlay.append("<div class='endOfTest'>Time is up! This marks the end of the test.</div>")
     } else {
         resultOverlay.append("<div class='incorrect'>Incorrect image, try again.</div>")
     }
@@ -335,6 +371,18 @@ function hideResult(result) {
     if (result === "fail") {
         toggleScroll();
     }
+}
+
+
+function showEndOverlay(){
+    let endOverlay = $('#end-overlay');
+
+    endOverlay.empty();
+    endOverlay.append("<div class='endOfTest'>Time is up! This marks the end of the test.</div>");
+    endOverlay.fadeIn();
+    
+    const body = document.body;
+    body.style.overflow = 'hidden';
 }
 
 

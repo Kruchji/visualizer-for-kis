@@ -127,7 +127,8 @@ body {
 /* overlays */
 #loading-screen,
 #image-compare,
-#result-overlay {
+#result-overlay,
+#end-overlay {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -137,14 +138,22 @@ body {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 9999;
     color: rgba(13, 110, 253, 255);
     font-size: 2vw;
+}
+
+#image-compare{
+    z-index: 9999;
 }
 
 #loading-screen,
 #result-overlay {
     flex-direction: column;
+    z-index: 9999;
+}
+
+#end-overlay {
+    z-index: 10000;
 }
 
 #image-compare img {
@@ -156,9 +165,16 @@ body {
 
 .skipped,
 .correct,
-.incorrect {
+.incorrect,
+.endOfTest {
     font-weight: bold;
     font-size: 2vw;
+
+    /* disable selection */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE 10+ */
+    user-select: none; /* Standard syntax */
 }
 
 .correct {
@@ -171,6 +187,10 @@ body {
 
 .skipped {
     color: rgb(0, 154, 214);
+}
+
+.endOfTest {
+    color: white;
 }
 
 /* Image shake */
