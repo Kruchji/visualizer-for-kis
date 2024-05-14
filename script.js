@@ -220,6 +220,8 @@ function loadNextIteration() {
                 document.documentElement.scrollTop = 0;
                 toggleLoadingScreen(true);
 
+                displayTargetImage();
+
                 startScrollTracker();
             }
         });
