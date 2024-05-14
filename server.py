@@ -35,7 +35,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             for logRecord in logList:
                 toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(totalScroll)+";"+str(windowW)+";"+str(windowH)+";"+str(firstRowStart)+";"+str(secondRowStart)+";"+str(imageHeight)+";"+str(logRecord["missedTarget"])+"\n"
 
-            with open("scrollPositions.txt", 'a') as fh:
+            with open("CollectedData/scrollPositions.txt", 'a') as fh:
                 fh.write(toLogText)
             self.send_response(200)
 
@@ -53,7 +53,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             for logRecord in logList:
                 toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(logRecord["correct"])+";"+str(logRecord["image"])+"\n"
 
-            with open("submissions.txt", 'a') as fh:
+            with open("CollectedData/submissions.txt", 'a') as fh:
                 fh.write(toLogText)
             self.send_response(200)
         
@@ -62,7 +62,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
         elif self.path.startswith('/newUser'):        
             newUid = 0
             try:
-                with open("userData.json", "r") as fh:
+                with open("CollectedData/userData.json", "r") as fh:
                     logs = json.load(fh)
                     newUid = max(map(int, logs.keys())) + 1
             except json.JSONDecodeError:  # file empty
@@ -71,7 +71,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             logs[str(newUid)] = {"targets" : {}}
             logsStr = json.dumps(logs, indent=4)
             
-            with open("userData.json", "w") as outfile:
+            with open("CollectedData/userData.json", "w") as outfile:
                 outfile.write(logsStr)
             self.send_response(200) 
             self.send_header('Content-Type', 'text/html')
@@ -113,7 +113,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             ordering = jsonPayload["ordering"]
             
                     
-            with open("userData.json", "r") as fh:
+            with open("CollectedData/userData.json", "r") as fh:
                 logs = json.load(fh)
                 userLogs = logs.get(uid,{})
 
@@ -136,7 +136,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             logs[uid] = userLogs
             logsStr = json.dumps(logs, indent=4)
             
-            with open("userData.json", "w") as outfile:
+            with open("CollectedData/userData.json", "w") as outfile:
                 outfile.write(logsStr)
             self.send_response(200) 
 
