@@ -28,6 +28,8 @@ targetRow = targePosition // 4
 def normaliseHeight(height, total):
     return (100 - 100*(height / total))
 
+plt.figure(figsize=(10, 7))
+
 timestamps = []
 valuesTop = []
 valuesBottom = []
@@ -57,6 +59,9 @@ with open('../CollectedData/scrollPositions.txt', 'r') as file:
 minTime = min(timestamps)
 normalisedTime = [((ts - minTime) / 1000) for ts in timestamps]
 
+firstIncorrect = True
+firstCorrect = True
+
 with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove submission parameters
     reader = csv.reader(file, delimiter=';')
     for row in reader:
@@ -77,23 +82,31 @@ with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove s
                 clickedImageLocation = subFirstRow + clickedImageRow * (subSecondRow - subFirstRow)
 
             if subCorrect == 0:
-                plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*(clickedImageLocation / subTotalScroll), color='red', zorder=3)
+                if firstIncorrect:
+                    plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*(clickedImageLocation / subTotalScroll), color='red', zorder=3, label='Wrong guess')
+                    firstIncorrect = False
+                else:
+                    plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*(clickedImageLocation / subTotalScroll), color='red', zorder=3)
                 plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*((clickedImageLocation + subImageHeight) / subTotalScroll), color='red', zorder=3)
                 plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [100 - 100*(clickedImageLocation / subTotalScroll), 100 - 100*((clickedImageLocation + subImageHeight) / subTotalScroll)], color='red', zorder=3)
             elif subCorrect == 1:
-                plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*(clickedImageLocation / subTotalScroll), color='green', zorder=3)
+                if firstCorrect:
+                    plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*(clickedImageLocation / subTotalScroll), color='green', zorder=3, label='Correct guess')
+                    firstCorrect = False
+                else:
+                    plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*(clickedImageLocation / subTotalScroll), color='green', zorder=3)
                 plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*((clickedImageLocation + subImageHeight) / subTotalScroll), color='green', zorder=3)
                 plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [100 - 100*(clickedImageLocation / subTotalScroll), 100 - 100*((clickedImageLocation + subImageHeight) / subTotalScroll)], color='green', zorder=3)
             elif subCorrect == 2:
-                plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*(subScroll / subTotalScroll), color='blue', zorder=3)
+                plt.scatter((subTimestamp - minTime) / 1000, 100 - 100*(subScroll / subTotalScroll), color='blue', zorder=3, label='Skip')
 
 plt.plot(normalisedTime, valuesTop, color='dodgerblue', zorder=2)
 plt.plot(normalisedTime, valuesBottom, color='dodgerblue', zorder=2)
-plt.fill_between(normalisedTime, valuesTop, valuesBottom, color='skyblue', alpha=0.3, zorder=2)
+plt.fill_between(normalisedTime, valuesTop, valuesBottom, color='skyblue', alpha=0.3, zorder=2, label='Window scroll')
 
 plt.plot(normalisedTime, targetTopLocations, color='lawngreen', zorder=1)
 plt.plot(normalisedTime, targetBottomLocations, color='lawngreen', zorder=1)
-plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color='palegreen', alpha=0.3, zorder=1)
+plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color='palegreen', alpha=0.3, zorder=1, label='Target image')
 
 plt.ylim(-2, 102)
 plt.xlabel('Seconds')
@@ -102,6 +115,7 @@ plt.title('Scroll over time, ordering: ' + json_data[str(user)]["orderings"][str
 plt.legend()    # TODO: add legend
 
 plt.grid(True)
+
 plt.show()
 
 plt.savefig("graph.png")
