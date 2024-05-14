@@ -76,8 +76,10 @@ function storeScrollbarPos(uid, iteration) {
         "uid": uid,
         "iteration": iteration,
         "log": logData,
+        "totalScroll": document.documentElement.scrollHeight,
         "windowW": window.innerWidth,
-        "windowH": window.innerHeight - (document.getElementsByClassName("navbar")[0].clientHeight + 16), // account for navbar and its padding
+        "windowH": window.innerHeight, // account for navbar and its padding
+        "navbarH": (document.getElementsByClassName("navbar")[0].clientHeight + 16),
         "firstRowStart": firstRowImage.offsetTop,
         "secondRowStart": secondRowImage.offsetTop,
         "imageHeight": firstRowImage.offsetHeight

@@ -29,10 +29,11 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             firstRowStart = logJSON["firstRowStart"]
             imageHeight = logJSON["imageHeight"]
             secondRowStart = logJSON["secondRowStart"]
+            totalScroll = logJSON["totalScroll"]
 
             toLogText = ""
             for logRecord in logList:
-                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(windowW)+";"+str(windowH)+";"+str(firstRowStart)+";"+str(secondRowStart)+";"+str(imageHeight)+";"+str(logRecord["missedTarget"])+"\n"
+                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(totalScroll)+";"+str(windowW)+";"+str(windowH)+";"+str(firstRowStart)+";"+str(secondRowStart)+";"+str(imageHeight)+";"+str(logRecord["missedTarget"])+"\n"
 
             with open("scrollPositions.txt", 'a') as fh:
                 fh.write(toLogText)
