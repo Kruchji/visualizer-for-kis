@@ -48,11 +48,14 @@ function formatTime(millisecondsDiff){
     return formattedMinutes + ':' + formattedSeconds;
 }
 
+let gameEnded = false;
+
 function endTesting(){
     clearInterval(clockInterval);
     stopScrollTracker();
     $('#end-overlay').css('background-color', 'black');
     showEndOverlay();
+    gameEnded = true;
 }
 
 
@@ -202,10 +205,13 @@ function loadNextIteration() {
 
     }).then(result => storeImageConfig(UserID, currentIteration, result["target"], result["allImages"], result["dataset"], result["ordering"])).then(result => {
         return $('#imageGrid').waitForImages(function () {
-            // actions after images load
-            toggleLoadingScreen(true);
+             // actions after images load
 
-            startScrollTracker();
+            if (!gameEnded){
+                toggleLoadingScreen(true);
+
+                startScrollTracker();
+            }
         });
 
     });
