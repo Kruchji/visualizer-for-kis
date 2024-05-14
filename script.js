@@ -60,12 +60,20 @@ function endTesting(){
 
 
 let targetMissed = 0;
+let targetWasOnScreen = false;
 
 function storeScrollbarPos(uid, iteration) {
     if (targetMissed === 0){
         const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
-        const bottomOfTargetPos = $('div.image-container').find('img[src="' + imageToFindSrc + '"]')[0].getBoundingClientRect().bottom;
+        const targetPos = $('div.image-container').find('img[src="' + imageToFindSrc + '"]')[0].getBoundingClientRect();
+        const bottomOfTargetPos = targetPos.bottom;
+        const topOfTargetPos = targetPos.top;
+
         if (bottomOfTargetPos < 0){
+            targetMissed = 1;
+        } else if (topOfTargetPos < window.innerHeight){    // on screen
+            targetWasOnScreen = true;
+        } else if (targetWasOnScreen && topOfTargetPos >= window.innerHeight){  // already was on screen but then user scrolled up again
             targetMissed = 1;
         }
     }
@@ -166,6 +174,7 @@ function loadNextIteration() {
     currentIteration += 1;
 
     targetMissed = 0;
+    targetWasOnScreen = false;
 
     // empty everything that will be reloaded
     $('#cursorCheckbox').prop('checked', false);
