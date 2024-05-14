@@ -89,8 +89,8 @@ function storeScrollbarPos(uid, iteration) {
         "log": logData,
         "totalScroll": document.documentElement.scrollHeight,
         "windowW": window.innerWidth,
-        "windowH": window.innerHeight, // account for navbar and its padding
-        "navbarH": (document.getElementsByClassName("navbar")[0].clientHeight + 16),
+        "windowH": window.innerHeight,
+        "navbarH": document.getElementsByClassName("navbar")[0].clientHeight,
         "firstRowStart": firstRowImage.offsetTop,
         "secondRowStart": secondRowImage.offsetTop,
         "imageHeight": firstRowImage.offsetHeight
@@ -155,7 +155,7 @@ function getImageList() {
         });
 }
 
-const SCROLL_LOG_INTERVAL = 1000;   // every second
+const SCROLL_LOG_INTERVAL = 300;   // how often to log
 let trackerIntervalID;
 
 function startScrollTracker() {
@@ -217,6 +217,7 @@ function loadNextIteration() {
              // actions after images load
 
             if (!gameEnded){
+                document.documentElement.scrollTop = 0;
                 toggleLoadingScreen(true);
 
                 startScrollTracker();
@@ -405,7 +406,12 @@ function showEndOverlay(){
 
 
 function storeSubmissionAttempt(uid, iteration, image, correct) {
-    let logData = [{ "timestamp": Date.now(), "scrollPos": document.documentElement.scrollTop, "correct": correct, "image": image }]
+
+    let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
+    let secondRowImage = $('#imageGrid > div:nth-child(5)')[0];
+
+    let logData = [{ "timestamp": Date.now(), "scrollPos": document.documentElement.scrollTop,"totalScroll": document.documentElement.scrollHeight,"navbarH": document.getElementsByClassName("navbar")[0].clientHeight,"windowH": window.innerHeight,
+    "firstRowStart": firstRowImage.offsetTop, "secondRowStart": secondRowImage.offsetTop, "imageHeight": firstRowImage.offsetHeight, "correct": correct, "image": image }]
     let payload = {
         "uid": uid,
         "iteration": iteration,

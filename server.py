@@ -29,11 +29,12 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             firstRowStart = logJSON["firstRowStart"]
             imageHeight = logJSON["imageHeight"]
             secondRowStart = logJSON["secondRowStart"]
+            navbarH = logJSON["navbarH"]
             totalScroll = logJSON["totalScroll"]
 
             toLogText = ""
             for logRecord in logList:
-                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(totalScroll)+";"+str(windowW)+";"+str(windowH)+";"+str(firstRowStart)+";"+str(secondRowStart)+";"+str(imageHeight)+";"+str(logRecord["missedTarget"])+"\n"
+                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(totalScroll)+";"+str(windowW)+";"+str(windowH)+";"+str(navbarH)+";"+str(firstRowStart)+";"+str(secondRowStart)+";"+str(imageHeight)+";"+str(logRecord["missedTarget"])+"\n"
 
             with open("CollectedData/scrollPositions.txt", 'a') as fh:
                 fh.write(toLogText)
@@ -51,7 +52,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
             toLogText = ""
             for logRecord in logList:
-                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(logRecord["correct"])+";"+str(logRecord["image"])+"\n"
+                toLogText += str(uid)+";"+str(iteration)+";"+str(logRecord["timestamp"])+";"+str(logRecord["scrollPos"])+";"+str(logRecord["totalScroll"])+";"+str(logRecord["navbarH"])+";"+str(logRecord["windowH"])+";"+str(logRecord["firstRowStart"])+";"+str(logRecord["secondRowStart"])+";"+str(logRecord["imageHeight"])+";"+str(logRecord["correct"])+";"+str(logRecord["image"])+"\n"
 
             with open("CollectedData/submissions.txt", 'a') as fh:
                 fh.write(toLogText)
