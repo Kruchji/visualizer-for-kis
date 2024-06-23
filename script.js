@@ -5,6 +5,7 @@ $(document).ready(function () {
     imageCompare.click(function () {
         imageCompare.fadeOut("fast", function () { imageCompare.empty(); });
         toggleScroll();
+        storeSubmissionAttempt(UserID, currentIteration, "CLOSE", 3);
     });
     imageCompare.fadeOut();
 
@@ -396,7 +397,7 @@ function toggleTargetImage() {
     toggleScroll();
 }
 
-function toggleTargetButton(){
+function toggleTargetButton(){  // TODO: log opening this overlay
     toggleTargetImage();
     if (!scrollTrackerRunning) {startScrollTracker();} // start tracker on close
 }

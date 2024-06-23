@@ -2,6 +2,7 @@
 
 import csv, sys, json
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 # returns reverse percentage of current height (scroll)
 def normaliseHeight(currHeight, totalHeight):
@@ -12,7 +13,7 @@ if len(sys.argv) >= 3:
     user = int(sys.argv[1])  # First argument
     iteration = int(sys.argv[2])  # Second argument
 else:
-    print("Please provide at least two arguments.")
+    print("Please provide at least two arguments. (user, iteration, to_file)")
     exit()
 
 # load runs data
@@ -32,12 +33,16 @@ targetRow = targePosition // 4      # 4 images per row
 # plot window size
 plt.figure(figsize=(10, 7))
 
+fig, ax = plt.subplots()
+
 # get scroll position data
 timestamps = []
 valuesTop = []
 valuesBottom = []
 targetTopLocations = []
 targetBottomLocations = []
+
+previousCompare = {"x" : 0, "y" : 0, "height" : 0}
 
 with open('../CollectedData/scrollPositions.txt', 'r') as file:
     reader = csv.reader(file, delimiter=';')
@@ -84,9 +89,10 @@ with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove s
             subCorrect = int(row[10])
             subClickedImage = row[11]
 
-            # get position of clicked image
-            clickedImageRow = next((index for index, item in enumerate(allImages) if item['image'] == subClickedImage), None) // 4
-            clickedImageLocation = subFirstRow + clickedImageRow * (subSecondRow - subFirstRow)
+            if subCorrect < 3:
+                # get position of clicked image
+                clickedImageRow = next((index for index, item in enumerate(allImages) if item['image'] == subClickedImage), None) // 4
+                clickedImageLocation = subFirstRow + clickedImageRow * (subSecondRow - subFirstRow)
 
             # display dot based on submission type, time and image position
             # incorrect
@@ -113,7 +119,7 @@ with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove s
                 plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='green', zorder=3)
                 plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='green', zorder=3)
 
-            # skip
+            # compare
             elif subCorrect == 2:
                 # for label display
                 if firstCompare:
@@ -124,6 +130,15 @@ with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove s
 
                 plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='blue', zorder=3)
                 plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='blue', zorder=3)
+
+                previousCompare['x'] = (subTimestamp - minTime) / 1000
+                previousCompare['y'] = normaliseHeight(clickedImageLocation, subTotalScroll)
+                previousCompare['height'] = normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll) - previousCompare['y']
+            
+            elif subCorrect == 3:
+                rectWidth = ((subTimestamp - minTime) / 1000) - previousCompare['x']
+                rectangle = patches.Rectangle((previousCompare['x'], previousCompare['y']), rectWidth, previousCompare['height'], linewidth=1, edgecolor='darkgray', facecolor='lightgray')
+                ax.add_patch(rectangle)
 
 # draw viewport locations
 plt.plot(normalisedTime, valuesTop, color='dodgerblue', zorder=2)
@@ -147,5 +162,7 @@ plt.legend()
 plt.grid(True)  # background grid
 
 # show plot (or save to file)
-# plt.show()
-plt.savefig("graph.png")
+if len(sys.argv) >= 4 and int(sys.argv[3]) == 1:
+    plt.savefig("graph.png")
+else:
+    plt.show()
