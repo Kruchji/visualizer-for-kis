@@ -396,6 +396,11 @@ function toggleTargetImage() {
     toggleScroll();
 }
 
+function toggleTargetButton(){
+    toggleTargetImage();
+    if (!scrollTrackerRunning) {startScrollTracker();} // start tracker on close
+}
+
 
 //=============== Image compare overlay ===============//
 
