@@ -142,6 +142,8 @@ function loadNextIteration() {
     // load everything
     getImageList().then(response => {
 
+        if (response['folder'] == "END") return Promise.reject('END_OF_TEST');
+
         const imageFilenames = response['dataSet'];
 
         const selectedOrdering = Math.floor(Math.random() * 2);     // now 0 or 1
@@ -182,6 +184,10 @@ function loadNextIteration() {
             }
         });
 
+    }).catch(error => {
+        if (error === 'END_OF_TEST') {
+            endTesting();
+        }
     });
 }
 

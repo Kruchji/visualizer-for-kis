@@ -51,13 +51,24 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
         ############### Get images in a folder ###############
         elif self.path.startswith('/getImages'):    
             imageSets = [folder for folder in os.listdir("./Data/")]
+            imageSets.sort(key=int)
 
             # choose dataset randomly
-            chosenFolder = random.choice(imageSets)
+            # load currently saved data
+            with open("CollectedData/userData.json", "r") as JSONfile:
+                logs = json.load(JSONfile)
+                userLogs = logs.get(uid,{})
+                dataSets = userLogs.get("dataSets",{})
+
             images = []
-            for file_name in os.listdir("./Data/" + chosenFolder + "/"):
-                if file_name.endswith('.jpg'):
-                    images.append(file_name)
+            if(len(dataSets) < len(imageSets)):
+                chosenFolder = imageSets[len(dataSets)]
+
+                for file_name in os.listdir("./Data/" + chosenFolder + "/"):
+                    if file_name.endswith('.jpg'):
+                        images.append(file_name)
+            else: # end of test - out of dataSets
+                chosenFolder = "END"
 
             # send dataset and list of contents back to JS
             self.send_response(200) 
