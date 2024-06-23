@@ -327,8 +327,6 @@ function showResult(result) {
 
     if (result === "correct") {
         resultOverlay.append("<div class='correct'>Correct image! Moving to another example...</div>")
-    } else if (result === "skip") {
-        resultOverlay.append("<div class='skipped'>Example skipped! Moving to another example...</div>")
     } else if (result === "endOfTest") {
         resultOverlay.append("<div class='endOfTest'>Time is up! This marks the end of the test.</div>")
     } else {
@@ -405,6 +403,10 @@ function handleCompareClick(event) {
 
     compareOverlay.fadeIn();
     toggleScroll();
+
+    const clonedImageSrc = clonedImage.attr('src');
+    storeSubmissionAttempt(UserID, currentIteration, clonedImageSrc.substring(clonedImageSrc.lastIndexOf('/') + 1), 2);    // track compare usage
+    // TODO: track end of compare as well?
 }
 
 
@@ -427,21 +429,6 @@ function toggleSolutionDisplay() {
 
 
     desiredImage.toggleClass('shining');
-}
-
-
-//=============== Skip button ===============//
-
-function skipCurrentIteration() {
-    storeSubmissionAttempt(UserID, currentIteration, "SKIP", 2);
-    stopScrollTracker();
-    showResult("skip");
-
-    setTimeout(function () {
-        hideResult("skip");
-        toggleLoadingScreen(false);
-        loadNextIteration();
-    }, 2000);
 }
 
 

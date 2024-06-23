@@ -67,6 +67,7 @@ normalisedTime = [((ts - minTime) / 1000) for ts in timestamps]
 # to prevent multiple labels
 firstIncorrect = True
 firstCorrect = True
+firstCompare = True
 
 with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove submission parameters
     reader = csv.reader(file, delimiter=';')
@@ -83,10 +84,9 @@ with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove s
             subCorrect = int(row[10])
             subClickedImage = row[11]
 
-            if subClickedImage != "SKIP":
-                # get position of clicked image
-                clickedImageRow = next((index for index, item in enumerate(allImages) if item['image'] == subClickedImage), None) // 4
-                clickedImageLocation = subFirstRow + clickedImageRow * (subSecondRow - subFirstRow)
+            # get position of clicked image
+            clickedImageRow = next((index for index, item in enumerate(allImages) if item['image'] == subClickedImage), None) // 4
+            clickedImageLocation = subFirstRow + clickedImageRow * (subSecondRow - subFirstRow)
 
             # display dot based on submission type, time and image position
             # incorrect
@@ -115,7 +115,15 @@ with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove s
 
             # skip
             elif subCorrect == 2:
-                plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(subScroll, subTotalScroll), color='blue', zorder=3, label='Skip')
+                # for label display
+                if firstCompare:
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='blue', zorder=3, label='Compare use')
+                    firstCompare = False
+                else:
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='blue', zorder=3)
+
+                plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='blue', zorder=3)
+                plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='blue', zorder=3)
 
 # draw viewport locations
 plt.plot(normalisedTime, valuesTop, color='dodgerblue', zorder=2)
@@ -139,5 +147,5 @@ plt.legend()
 plt.grid(True)  # background grid
 
 # show plot (or save to file)
-plt.show()
-# plt.savefig("graph.png")
+# plt.show()
+plt.savefig("graph.png")
