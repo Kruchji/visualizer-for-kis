@@ -92,6 +92,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             target = jsonPayload["target"]
             dataSet = jsonPayload["dataSet"]
             ordering = jsonPayload["ordering"]
+            perRow = jsonPayload["perRow"]
             
             # load currently saved data
             with open("CollectedData/userData.json", "r") as JSONfile:
@@ -114,6 +115,10 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             orderings = userLogs.get("orderings",{})
             orderings[iteration] = ordering
             userLogs["orderings"] = orderings
+
+            imagesPerRow = userLogs.get("imagesPerRow",{})
+            imagesPerRow[iteration] = perRow
+            userLogs["imagesPerRow"] = imagesPerRow
             
             # save new data in JSON file
             logs[uid] = userLogs

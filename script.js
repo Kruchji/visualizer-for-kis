@@ -149,6 +149,7 @@ function loadNextIteration() {
         const selectedOrdering = Math.floor(Math.random() * 2);     // now 0 or 1
         const orderingName = orderImages(imageFilenames, selectedOrdering);
 
+        const selectedNumPerRow = 4 + 4*Math.floor(Math.random() * 2);
 
         const imageGrid = $('#imageGrid');
         imageFilenames.forEach(function (filename) {
@@ -170,9 +171,9 @@ function loadNextIteration() {
 
         targetImageDiv.append($('<img>', { src: 'Data/' + response['folder'] + '/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
 
-        return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering": orderingName }
+        return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering": orderingName, "perRow": selectedNumPerRow }
 
-    }).then(result => storeImageConfig(UserID, currentIteration, result["target"], result["allImages"], result["dataset"], result["ordering"])).then(result => {
+    }).then(result => storeImageConfig(UserID, currentIteration, result["target"], result["allImages"], result["dataset"], result["ordering"], result["perRow"])).then(result => {
         return $('#imageGrid').waitForImages(function () {      // wait for images to load before starting tracker
             // actions after images load
 
@@ -193,7 +194,7 @@ function loadNextIteration() {
 
 // load a list of images in a dataset from server
 function getImageList() {
-    return fetch("getImages",
+    return fetch("getImages?uid=" + UserID + "&iteration=" + currentIteration,
         {
             method: "POST"
         }).then(response => {
@@ -212,12 +213,13 @@ function getImageList() {
 
 //=============== Store current image grid info ===============//
 
-function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderingName) {
+function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderingName, numPerRow) {
     let payload = {
         "positions": JSON.stringify(allImages.map(image => ({ "image": image }))),
         "target": target,
         "dataSet": dataSetNum,
-        "ordering": orderingName
+        "ordering": orderingName,
+        "perRow": numPerRow
     };
 
     return fetch("imageConfig?uid=" + uid + "&iteration=" + iteration,
