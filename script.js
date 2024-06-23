@@ -13,7 +13,10 @@ $(document).ready(function () {
 
     // setup target image overlay
     let targetImageDiv = $('#targetImageDiv');
-    targetImageDiv.click(function () { toggleTargetImage(); });
+    targetImageDiv.click(function () { 
+        toggleTargetImage(); 
+        if (!scrollTrackerRunning) {startScrollTracker();} // start tracker on close
+    });
 
     // setup end overlay
     $('#end-overlay').fadeOut();
@@ -61,17 +64,22 @@ function toggleScroll() {
 //=============== Scroll tracking ===============//
 
 const SCROLL_LOG_INTERVAL = 300;   // how often to log
+let scrollTrackerRunning = false;
 let trackerIntervalID;
 
 function startScrollTracker() {
     trackerIntervalID = setInterval(() => {
         storeScrollbarPos(UserID, currentIteration)
     }, SCROLL_LOG_INTERVAL);
+
+    scrollTrackerRunning = true;
 }
 
 
 function stopScrollTracker() {
     clearInterval(trackerIntervalID);
+
+    scrollTrackerRunning = false;
 }
 
 let targetMissed = 0;
@@ -170,8 +178,6 @@ function loadNextIteration() {
                 toggleLoadingScreen(true);      // true = also toggle scroll
 
                 toggleTargetImage();
-
-                startScrollTracker();
             }
         });
 

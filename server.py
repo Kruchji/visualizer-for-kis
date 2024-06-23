@@ -136,7 +136,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             decodedData = self.rfile.read(contentLength).decode()
             logJSON = json.loads(decodedData)
 
-            # correctness values: 0 = incorrect, 1 = correct, 2 = skip
+            # correctness values: 0 = incorrect, 1 = correct, 2 = compare
 
             # convert to csv
             toLogText = str(uid)+";"+str(iteration)+";"+str(logJSON["timestamp"])+";"+str(logJSON["scrollPos"])+";"+str(logJSON["totalScroll"])+";"+str(logJSON["navbarH"])+";"+str(logJSON["windowH"])+";"+str(logJSON["firstRowStart"])+";"+str(logJSON["secondRowStart"])+";"+str(logJSON["imageHeight"])+";"+str(logJSON["correct"])+";"+str(logJSON["image"])+"\n"
