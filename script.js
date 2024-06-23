@@ -347,48 +347,13 @@ function hideResult(result) {
         toggleScroll();
     }
 }
-
-
-//=============== Time left display ===============//
-
-const TEST_TIME = 30; // in minutes
-const testEnd = Date.now() + TEST_TIME * 60 * 1000;     // calculate end time
-
-// Update time left display every second
-const clockInterval = setInterval(() => {
-    const timeLeftDisplay = document.getElementById('timeLeft');
-
-    let timeLeft = testEnd - Date.now();
-
-    if (timeLeft > 0) {
-        timeLeftDisplay.textContent = formatTime(timeLeft);
-    } else {
-        endTesting();
-    }
-
-}, 1000); // Updates every second
-
-
-function formatTime(millisecondsDiff) {
-    let milliseconds = Math.abs(millisecondsDiff);
-
-    let minutes = Math.floor(milliseconds / 60000); // 1 minute = 60000 milliseconds
-    let seconds = Math.floor((milliseconds % 60000) / 1000);
-
-    // Add leading zeros
-    let formattedMinutes = ('0' + minutes).slice(-2);
-    let formattedSeconds = ('0' + seconds).slice(-2);
-
-    return formattedMinutes + ':' + formattedSeconds;   // formatted time - 00:00
-}
-
+// TODO: add updating of progress display
 
 //=============== End of test (overlay) ===============//
 
 let gameEnded = false;
 
-function endTesting() {
-    clearInterval(clockInterval);
+function endTesting() {         // TODO: call after last test
     stopScrollTracker();
     $('#end-overlay').css('background-color', 'black');
     showEndOverlay();
@@ -399,7 +364,7 @@ function showEndOverlay() {
     let endOverlay = $('#end-overlay');
 
     endOverlay.empty();
-    endOverlay.append("<div class='endOfTest'>Time is up! This marks the end of the test.</div>");
+    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test.</div>");
     endOverlay.fadeIn();
 
     const body = document.body;
