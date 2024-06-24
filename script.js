@@ -103,7 +103,7 @@ function storeScrollbarPos(uid, iteration) {
     }
 
     let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
-    let secondRowImage = $('#imageGrid > div:nth-child(5)')[0];
+    let secondRowImage = $('#imageGrid > div:nth-child(' + (selectedNumPerRow + 1) + ')')[0];
 
     let payload = {
         "timestamp": Date.now(),
@@ -132,6 +132,7 @@ const boardsConfig = [{"ord" : "r", "size" : 4},{"ord" : "r", "size" : 8},{"ord"
 
 
 //=============== Load new iteration of images ===============//
+let selectedNumPerRow = 4;
 
 function loadNextIteration() {
     currentIteration += 1;
@@ -152,10 +153,11 @@ function loadNextIteration() {
         const imageFilenames = response['dataSet'];
 
         const currBoardConfig = (UserID + currentIteration) % boardsConfig.length;    // each user starts shifted by 1 than previous
-        console.log(currBoardConfig);
 
         const orderingName = orderImages(imageFilenames, boardsConfig[currBoardConfig]["ord"]);
-        const selectedNumPerRow = boardsConfig[currBoardConfig]["size"];
+
+        selectedNumPerRow = boardsConfig[currBoardConfig]["size"];
+        $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
         
         const imageGrid = $('#imageGrid');
         imageFilenames.forEach(function (filename) {
@@ -308,7 +310,7 @@ function handleSubmitClick(event) {
 function storeSubmissionAttempt(uid, iteration, image, correct) {
 
     let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
-    let secondRowImage = $('#imageGrid > div:nth-child(5)')[0];
+    let secondRowImage = $('#imageGrid > div:nth-child(' + (selectedNumPerRow + 1) + ')')[0];
 
     let payload = {
         "timestamp": Date.now(),

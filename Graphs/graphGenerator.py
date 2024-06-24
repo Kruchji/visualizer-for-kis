@@ -28,7 +28,8 @@ except KeyError:
     exit()
 allImages = json_data[str(user)]["imagePos"][str(iteration)]
 targePosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
-targetRow = targePosition // 4      # 4 images per row
+imagesPerRow = int(json_data[str(user)]["imagesPerRow"][str(iteration)])
+targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
 
 # plot window size
 plt.figure(figsize=(10, 7))
@@ -91,7 +92,7 @@ with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove s
 
             if subCorrect < 3:
                 # get position of clicked image
-                clickedImageRow = next((index for index, item in enumerate(allImages) if item['image'] == subClickedImage), None) // 4
+                clickedImageRow = next((index for index, item in enumerate(allImages) if item['image'] == subClickedImage), None) // imagesPerRow
                 clickedImageLocation = subFirstRow + clickedImageRow * (subSecondRow - subFirstRow)
 
             # display dot based on submission type, time and image position
@@ -156,7 +157,7 @@ plt.ylim(-2, 102)
 # plot labels
 plt.xlabel('Seconds')
 plt.ylabel('Percentage not scrolled')
-plt.title('Scroll over time, ordering: ' + json_data[str(user)]["orderings"][str(iteration)] + ", dataset: " + json_data[str(user)]["dataSets"][str(iteration)])
+plt.title('Scroll over time, ordering: ' + json_data[str(user)]["orderings"][str(iteration)] + ", images/row: " + str(json_data[str(user)]["imagesPerRow"][str(iteration)]) + ", dataset: " + json_data[str(user)]["dataSets"][str(iteration)])
 plt.legend()
 
 plt.grid(True)  # background grid
