@@ -126,6 +126,11 @@ function storeScrollbarPos(uid, iteration) {
 }
 
 
+//=============== Board configs ===============//
+
+const boardsConfig = [{"ord" : "r", "size" : 4},{"ord" : "r", "size" : 8},{"ord" : "ss", "size" : 8}];
+
+
 //=============== Load new iteration of images ===============//
 
 function loadNextIteration() {
@@ -141,16 +146,17 @@ function loadNextIteration() {
 
     // load everything
     getImageList().then(response => {
-
+        
         if (response['folder'] == "END") return Promise.reject('END_OF_TEST');
 
         const imageFilenames = response['dataSet'];
 
-        const selectedOrdering = Math.floor(Math.random() * 2);     // now 0 or 1
-        const orderingName = orderImages(imageFilenames, selectedOrdering);
+        const currBoardConfig = (UserID + currentIteration) % boardsConfig.length;    // each user starts shifted by 1 than previous
+        console.log(currBoardConfig);
 
-        const selectedNumPerRow = 4 + 4*Math.floor(Math.random() * 2);
-
+        const orderingName = orderImages(imageFilenames, boardsConfig[currBoardConfig]["ord"]);
+        const selectedNumPerRow = boardsConfig[currBoardConfig]["size"];
+        
         const imageGrid = $('#imageGrid');
         imageFilenames.forEach(function (filename) {
             imageGrid.append(
@@ -237,9 +243,9 @@ function orderImages(imageArray, ordering) {
     let orderingName = "default";
 
     switch (ordering) {
-        case 0:
+        case "ss":
             break;                      // ordering in alphabetical order (folder order)
-        case 1:
+        case "r":
             shuffleArray(imageArray);   // random ordering
             orderingName = "random";
             break;
