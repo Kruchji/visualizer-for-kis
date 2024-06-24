@@ -154,6 +154,9 @@ function loadNextIteration() {
 
         const imageFilenames = response['dataSet'];
 
+        // const imageToFind = imageFilenames[Math.floor(Math.random() * imageFilenames.length)];       // pick target at random
+        const imageToFind = imageFilenames[0];          // always same target image for each dataset
+
         const currBoardConfig = (UserID + currentIteration) % boardsConfig.length;    // each user starts shifted by 1 than previous
 
         const orderingName = orderImages(imageFilenames, boardsConfig[currBoardConfig]["ord"], clipFeatures);
@@ -175,7 +178,6 @@ function loadNextIteration() {
 
         });
 
-        const imageToFind = imageFilenames[Math.floor(Math.random() * imageFilenames.length)];
         const targetImageDiv = $('#targetImageDiv');
         targetImageDiv.hide();
 
@@ -292,7 +294,7 @@ function selfSort(imageArray, clipFeatures) {
 
 // find sum of an array
 function computeSum(arr) {
-    return arr.reduce((acc, val) => acc + val, 0);  // adds up all values in an array
+    return arr.reduce((acc, val) => acc + parseFloat(val), 0);  // adds up all values in an array
 }
 
 
