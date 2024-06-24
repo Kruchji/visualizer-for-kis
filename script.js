@@ -14,9 +14,9 @@ $(document).ready(function () {
 
     // setup target image overlay
     let targetImageDiv = $('#targetImageDiv');
-    targetImageDiv.click(function () { 
-        toggleTargetImage(); 
-        if (!scrollTrackerRunning) {startScrollTracker();} // start tracker on close
+    targetImageDiv.click(function () {
+        toggleTargetImage();
+        if (!scrollTrackerRunning) { startScrollTracker(); } // start tracker on close
     });
 
     // setup end overlay
@@ -128,7 +128,7 @@ function storeScrollbarPos(uid, iteration) {
 
 //=============== Board configs ===============//
 
-const boardsConfig = [{"ord" : "r", "size" : 4},{"ord" : "r", "size" : 8},{"ord" : "ss", "size" : 8}];
+const boardsConfig = [{ "ord": "ss", "size": 4 }, { "ord": "ss", "size": 8 }, { "ord": "ss", "size": 8 }];
 
 
 //=============== Load new iteration of images ===============//
@@ -147,18 +147,20 @@ function loadNextIteration() {
 
     // load everything
     getImageList().then(response => {
-        
+
         if (response['folder'] == "END") return Promise.reject('END_OF_TEST');
+
+        const clipFeatures = response['clip'];
 
         const imageFilenames = response['dataSet'];
 
         const currBoardConfig = (UserID + currentIteration) % boardsConfig.length;    // each user starts shifted by 1 than previous
 
-        const orderingName = orderImages(imageFilenames, boardsConfig[currBoardConfig]["ord"]);
+        const orderingName = orderImages(imageFilenames, boardsConfig[currBoardConfig]["ord"], clipFeatures);
 
         selectedNumPerRow = boardsConfig[currBoardConfig]["size"];
         $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
-        
+
         const imageGrid = $('#imageGrid');
         imageFilenames.forEach(function (filename) {
             imageGrid.append(
@@ -213,7 +215,8 @@ function getImageList() {
         }).then(data => {
             const dataSet = data.images;
             const folder = data.folder;
-            return { "dataSet": dataSet, "folder": folder };
+            const clipFeatures = data.clip;
+            return { "dataSet": dataSet, "folder": folder, "clip": clipFeatures };
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
@@ -241,18 +244,20 @@ function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderin
 
 //=============== Ordering implementations ===============//
 
-function orderImages(imageArray, ordering) {
+function orderImages(imageArray, ordering, clip) {
     let orderingName = "default";
 
     switch (ordering) {
         case "ss":
-            break;                      // ordering in alphabetical order (folder order)
+            imageArray = selfSort(imageArray, clip);       // self sorting array
+            orderingName = "self-sorting";
+            break;
         case "r":
             shuffleArray(imageArray);   // random ordering
             orderingName = "random";
             break;
         default:
-            break;
+            break;      // default order on invalid value
     }
 
     return orderingName;
@@ -268,6 +273,26 @@ function shuffleArray(array) {
         // Swap elements array[i] and array[randomIndex]
         [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
     }
+}
+
+// self-sorting array algorithm
+function selfSort(imageArray, clipFeatures) {
+
+    // mock implementation with sum of clip features
+    
+    const sortedArray = imageArray.sort((a, b) => {
+        const sumA = computeSum(clipFeatures[a]);
+        const sumB = computeSum(clipFeatures[b]);
+        return sumA - sumB;
+    });
+
+    
+    return sortedArray;
+}
+
+// find sum of an array
+function computeSum(arr) {
+    return arr.reduce((acc, val) => acc + val, 0);  // adds up all values in an array
 }
 
 
@@ -320,7 +345,7 @@ function storeSubmissionAttempt(uid, iteration, image, correct) {
         "windowH": window.innerHeight,
         "firstRowStart": firstRowImage.offsetTop,
         "secondRowStart": secondRowImage.offsetTop,
-        "imageHeight": firstRowImage.offsetHeight, 
+        "imageHeight": firstRowImage.offsetHeight,
         "correct": correct,
         "image": image
     };
@@ -413,9 +438,9 @@ function toggleTargetImage() {
     toggleScroll();
 }
 
-function toggleTargetButton(){  // TODO: log opening this overlay
+function toggleTargetButton() {  // TODO: log opening this overlay
     toggleTargetImage();
-    if (!scrollTrackerRunning) {startScrollTracker();} // start tracker on close
+    if (!scrollTrackerRunning) { startScrollTracker(); } // start tracker on close
 }
 
 

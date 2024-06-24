@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json, http.server, os, random
+import json, http.server, os, random, csv
 from urllib.parse import urlparse, parse_qs
 
 class TrackingServer (http.server.SimpleHTTPRequestHandler):
@@ -61,12 +61,22 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                 dataSets = userLogs.get("dataSets",{})
 
             images = []
+            clipFeatures = {}
             if(len(dataSets) < len(imageSets)):
                 chosenFolder = imageSets[len(dataSets)]
 
                 for file_name in os.listdir("./Data/" + chosenFolder + "/"):
                     if file_name.endswith('.jpg'):
                         images.append(file_name)
+                
+                # store clip data
+                with open("./Data/" + chosenFolder + "/CLIPFeatures.csv", "r") as clipFile:
+                    reader = csv.reader(clipFile, delimiter=';')
+                    rowID = 0
+                    for row in reader:
+                        clipFeatures[images[rowID]] = row
+                        rowID += 1
+
             else: # end of test - out of dataSets
                 chosenFolder = "END"
 
@@ -75,7 +85,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
 
-            response = {'images': images, 'folder' : chosenFolder}
+            response = {'images': images, 'folder' : chosenFolder, 'clip' : clipFeatures}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
