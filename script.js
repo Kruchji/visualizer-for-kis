@@ -403,7 +403,7 @@ function handleSubmitClick(event) {
             hideResult("correct");
             toggleLoadingScreen(false);
             loadNextIteration();
-        }, 2000);
+        }, 1000);
     } else {
         storeSubmissionAttempt(UserID, currentIteration, imageName, 0);
         shakeImage(clickedImage);
