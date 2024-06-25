@@ -102,7 +102,7 @@ def get_positions_in_radius_wrapped(pos, extended_grid, r, nc):
     
     return chosen_positions
 
-
+# Fast Linear Assignment Sorting
 def sort_with_flas(X, filepaths, nc, n_images_per_site, radius_factor=0.9, wrap=False, return_time=False):
     
     np.random.seed(7)   # for reproducible sortings
