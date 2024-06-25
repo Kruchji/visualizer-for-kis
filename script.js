@@ -66,7 +66,7 @@ function createNewUser() {
 }
 
 // alternative: load old user
-function loadOldUser(oldUserID) {       // TODO: handle user missing - offer a button to create new user
+function loadOldUser(oldUserID) {
     UserID = oldUserID;
 
     return fetch("oldUser",
@@ -164,11 +164,6 @@ function storeScrollbarPos(uid, iteration) {
 }
 
 
-//=============== Board configs ===============//
-
-const boardsConfig = [{ "ord": "ss", "size": 4 }, { "ord": "ss", "size": 8 }, { "ord": "ss", "size": 8 }];
-
-
 //=============== Load new iteration of images ===============//
 let selectedNumPerRow = 4;
 
@@ -193,14 +188,13 @@ function loadNextIteration() {
 
         const imageFilenames = response['dataSet'];
 
-        // const imageToFind = imageFilenames[Math.floor(Math.random() * imageFilenames.length)];       // pick target at random
-        const imageToFind = imageFilenames[0];          // always same target image for each dataset
+        const imageToFind = response['target'];          // always same target image for each dataset
 
-        const currBoardConfig = (UserID + currentIteration) % boardsConfig.length;    // each user starts shifted by 1 than previous
+        const currBoardConfig = (UserID + currentIteration) % response['boardsConfig'].length;    // each user starts shifted by 1 than previous
 
-        const orderingName = orderImages(imageFilenames, boardsConfig[currBoardConfig]["ord"], clipFeatures);
+        const orderingName = orderImages(imageFilenames, response['boardsConfig'][currBoardConfig]["ord"], clipFeatures);
 
-        selectedNumPerRow = boardsConfig[currBoardConfig]["size"];
+        selectedNumPerRow = response['boardsConfig'][currBoardConfig]["size"];
 
         setupCurrentIteration(imageFilenames, imageToFind, response['folder']);
 
@@ -274,7 +268,7 @@ function getImageList() {
             const dataSet = data.images;
             const folder = data.folder;
             const clipFeatures = data.clip;
-            return { "dataSet": dataSet, "folder": folder, "clip": clipFeatures };
+            return { "dataSet": dataSet, "folder": folder, "clip": clipFeatures, 'boardsConfig' : data.boardsConfig, 'target' : data.target};
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
@@ -362,17 +356,11 @@ function shuffleArray(array) {
 
 // self-sorting array algorithm
 function selfSort(imageArray, clipFeatures) {
+    return imageArray;  // already comes sorted from python server - no change needed
+}
 
-    // mock implementation with sum of clip features
-
-    const sortedArray = imageArray.sort((a, b) => {
-        const sumA = computeSum(clipFeatures[a]);
-        const sumB = computeSum(clipFeatures[b]);
-        return sumA - sumB;
-    });
-
-
-    return sortedArray;
+function euclideanDistance(a, b) {
+    return Math.sqrt(a.reduce((sum, value, index) => sum + Math.pow(value - b[index], 2), 0));
 }
 
 // find sum of an array
