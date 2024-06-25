@@ -3,6 +3,25 @@
 import json, http.server, os, random, csv
 from urllib.parse import urlparse, parse_qs
 
+def createNewUser():
+    newUid = 0
+    try:
+        with open("CollectedData/userData.json", "r") as fh:
+            logs = json.load(fh)
+            newUid = max(map(int, logs.keys())) + 1     # gets last known user and increments its ID
+    except json.JSONDecodeError:  # file empty
+        logs = {}
+
+    # store new user to .json
+    logs[str(newUid)] = {"lastCompleted" : -2}
+    logsStr = json.dumps(logs, indent=4)
+    
+    with open("CollectedData/userData.json", "w") as JSONfile:
+        JSONfile.write(logsStr)
+
+    return newUid
+
+
 class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
@@ -22,31 +41,62 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
         ############### Create a new user ###############
         if self.path.startswith('/newUser'):        
-            newUid = 0
-            try:
-                with open("CollectedData/userData.json", "r") as fh:
-                    logs = json.load(fh)
-                    newUid = max(map(int, logs.keys())) + 1     # gets last known user and increments its ID
-            except json.JSONDecodeError:  # file empty
-                logs = {}
-
-            # store new user to .json
-            logs[str(newUid)] = {}
-            logsStr = json.dumps(logs, indent=4)
-            
-            with open("CollectedData/userData.json", "w") as JSONfile:
-                JSONfile.write(logsStr)
+            newUid = createNewUser()
 
             # send new user ID to JS
             self.send_response(200) 
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
 
-            response = {'new_id': newUid}
+            response = {'new_id': newUid, 'numOfSets': len([folder for folder in os.listdir("./Data/")])}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
         
+
+        ############### Load existing user ###############
+        if self.path.startswith('/oldUser'):    
+            # load received JSON data
+            contentLength = int(self.headers.get('content-length'))
+            decodedData = self.rfile.read(contentLength).decode()
+            jsonPayload = json.loads(decodedData)
+
+            oldUser = jsonPayload["oldUserID"]
+            loadFailed = 0
+            try:
+                with open("CollectedData/userData.json", "r") as JSONfile:
+                    logs = json.load(JSONfile)
+                    userLogs = logs[str(oldUser)]
+            except Exception as e:  # file empty
+                loadFailed = 1
+                userLogs = {}
+            
+            lastCompletedIter = userLogs.get("lastCompleted", -1)
+            userLogs["lastCompleted"] = lastCompletedIter
+            currIter = str(lastCompletedIter + 1)
+
+            reloads = userLogs.get("reloads",{})
+            reloads[currIter] = reloads.get(str(currIter), 0) + 1
+            userLogs["reloads"] = reloads
+
+            if (loadFailed == 0):
+                # update user data in json
+                logs[str(oldUser)] = userLogs
+                logsStr = json.dumps(logs, indent=4)
+                
+                with open("CollectedData/userData.json", "w") as JSONfile:
+                    JSONfile.write(logsStr)
+
+            # send new user ID to JS
+            self.send_response(200) 
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+
+            
+            response = {'loadFailed': loadFailed, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'numOfSets': len([folder for folder in os.listdir("./Data/")])}
+            self.wfile.write(json.dumps(response).encode('utf-8'))
+
+            return
 
         ############### Get images in a folder ###############
         elif self.path.startswith('/getImages'):    
@@ -79,6 +129,19 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
             else: # end of test - out of dataSets
                 chosenFolder = "END"
+
+            lastCompletedIter = userLogs.get("lastCompleted", -2)
+            userLogs["lastCompleted"] = lastCompletedIter + 1
+
+            reloads = userLogs.get("reloads",{})
+            reloads[lastCompletedIter + 2] = 0
+            userLogs["reloads"] = reloads
+
+            logs[uid] = userLogs
+            logsStr = json.dumps(logs, indent=4)
+            
+            with open("CollectedData/userData.json", "w") as JSONfile:
+                JSONfile.write(logsStr)
 
             # send dataset and list of contents back to JS
             self.send_response(200) 

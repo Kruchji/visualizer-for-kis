@@ -22,8 +22,22 @@ $(document).ready(function () {
     // setup end overlay
     $('#end-overlay').fadeOut();
 
+
     // load everything
-    createNewUser().then(result => { loadNextIteration(); });
+    let lastUser = localStorage.getItem('LastUserID');
+    if (!lastUser) {
+        createNewUser().then(result => { loadNextIteration(); });
+    } else {
+        // load existing user (and his progress)
+        loadOldUser(lastUser).then(result => {
+            if (result['loadFailed'] == 1) {
+                createNewUser().then(result => { loadNextIteration(); });
+            } else {
+                loadOldIteration(result);
+            }
+        });
+    }
+
 });
 
 
@@ -31,6 +45,7 @@ $(document).ready(function () {
 
 let UserID = -1;
 let currentIteration = -1;
+let totalNumberOfSets = -1;
 
 function createNewUser() {
     return fetch("newUser",
@@ -43,6 +58,29 @@ function createNewUser() {
             throw new Error('Network response error.');
         }).then(data => {
             UserID = data.new_id;       // receive next user ID
+            totalNumberOfSets = data.numOfSets;
+            localStorage.setItem('LastUserID', UserID);
+        }).catch(error => {
+            console.error('There was a problem with a fetch operation:', error);
+        });
+}
+
+// alternative: load old user
+function loadOldUser(oldUserID) {       // TODO: handle user missing - offer a button to create new user
+    UserID = oldUserID;
+
+    return fetch("oldUser",
+        {
+            method: "POST",
+            body: JSON.stringify({ 'oldUserID': oldUserID })
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response error.');
+        }).then(data => {
+            totalNumberOfSets = data.numOfSets;
+            return data;
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
@@ -136,6 +174,7 @@ let selectedNumPerRow = 4;
 
 function loadNextIteration() {
     currentIteration += 1;
+    updateProgress();
 
     targetMissed = 0;
     targetWasOnScreen = false;
@@ -162,26 +201,8 @@ function loadNextIteration() {
         const orderingName = orderImages(imageFilenames, boardsConfig[currBoardConfig]["ord"], clipFeatures);
 
         selectedNumPerRow = boardsConfig[currBoardConfig]["size"];
-        $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
 
-        const imageGrid = $('#imageGrid');
-        imageFilenames.forEach(function (filename) {
-            imageGrid.append(
-                $('<div>', { class: 'image-container' }).append(
-                    $('<img>', { src: 'Data/' + response['folder'] + '/' + filename, class: 'image-item', draggable: 'false' }),
-                    $('<div>', { class: 'hover-buttons' }).append(
-                        $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick }),
-                        $('<button>', { class: 'btn btn-primary', text: 'Compare', click: handleCompareClick })
-                    )
-                )
-            );
-
-        });
-
-        const targetImageDiv = $('#targetImageDiv');
-        targetImageDiv.hide();
-
-        targetImageDiv.append($('<img>', { src: 'Data/' + response['folder'] + '/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
+        setupCurrentIteration(imageFilenames, imageToFind, response['folder']);
 
         return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering": orderingName, "perRow": selectedNumPerRow }
 
@@ -200,6 +221,41 @@ function loadNextIteration() {
     }).catch(error => {
         if (error === 'END_OF_TEST') {
             endTesting();
+        }
+    });
+}
+
+// load already ongoing iteration
+function loadOldIteration(currIterData) {
+    currentIteration = parseInt(currIterData['currIter']);
+    updateProgress();
+
+    targetMissed = 0;
+    targetWasOnScreen = false;
+
+    // empty everything that will be reloaded
+    $('#cursorCheckbox').prop('checked', false);
+    $('#imageGrid').empty();
+    $('#targetImageDiv').empty();
+
+    // setup everything
+    if (currIterData['currDataFolder'] == "END") return endTesting();
+
+    const imageFilenames = currIterData['currImages'];
+    const imageToFind = currIterData['currTarget'];
+    selectedNumPerRow = parseInt(currIterData['currBoardSize']);
+
+    setupCurrentIteration(imageFilenames, imageToFind, currIterData['currDataFolder']);
+
+
+    return $('#imageGrid').waitForImages(function () {      // wait for images to load before starting tracker
+        // actions after images load
+
+        if (!gameEnded) {
+            document.documentElement.scrollTop = 0;
+            toggleLoadingScreen(true);      // true = also toggle scroll
+
+            toggleTargetImage();
         }
     });
 }
@@ -223,6 +279,33 @@ function getImageList() {
             console.error('There was a problem with a fetch operation:', error);
         });
 }
+
+
+// setup current board with supplied data
+function setupCurrentIteration(imageFilenames, imageToFind, dataFolder) {
+    $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
+
+    const imageGrid = $('#imageGrid');
+    imageFilenames.forEach(function (filename) {
+        imageGrid.append(
+            $('<div>', { class: 'image-container' }).append(
+                $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false' }),
+                $('<div>', { class: 'hover-buttons' }).append(
+                    $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick }),
+                    $('<button>', { class: 'btn btn-primary', text: 'Compare', click: handleCompareClick })
+                )
+            )
+        );
+
+    });
+
+    const targetImageDiv = $('#targetImageDiv');
+    targetImageDiv.hide();
+
+    targetImageDiv.append($('<img>', { src: 'Data/' + dataFolder + '/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
+}
+
+
 
 //=============== Store current image grid info ===============//
 
@@ -281,14 +364,14 @@ function shuffleArray(array) {
 function selfSort(imageArray, clipFeatures) {
 
     // mock implementation with sum of clip features
-    
+
     const sortedArray = imageArray.sort((a, b) => {
         const sumA = computeSum(clipFeatures[a]);
         const sumB = computeSum(clipFeatures[b]);
         return sumA - sumB;
     });
 
-    
+
     return sortedArray;
 }
 
@@ -395,13 +478,21 @@ function hideResult(result) {
         toggleScroll();
     }
 }
-// TODO: add updating of progress display
+
+//=============== Progress display ===============//¨
+
+function updateProgress() {
+    const progressDisplay = document.getElementById('progress');
+
+    const currDisplayIter = currentIteration + 1;
+    progressDisplay.textContent = currDisplayIter + "/" + totalNumberOfSets;
+}
 
 //=============== End of test (overlay) ===============//
 
 let gameEnded = false;
 
-function endTesting() {         // TODO: call after last test
+function endTesting() {
     stopScrollTracker();
     $('#end-overlay').css('background-color', 'black');
     showEndOverlay();
@@ -412,11 +503,39 @@ function showEndOverlay() {
     let endOverlay = $('#end-overlay');
 
     endOverlay.empty();
-    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test.</div>");
+    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test.</div><br>");
+    endOverlay.append('<button type="button" class="btn btn-primary end-btn" onclick="startWithNewUser()">Go again (new user)</button>')
     endOverlay.fadeIn();
 
     const body = document.body;
     body.style.overflow = 'hidden';
+}
+
+function hideEndOverlay() {
+    let endOverlay = $('#end-overlay');
+    endOverlay.fadeOut();
+    endOverlay.empty();
+}
+
+
+//=============== Start over (new user) ===============//
+
+function startWithNewUser() {
+    stopScrollTracker();
+    const loadingScreen = $('#loading-screen');
+    loadingScreen.fadeIn();
+    hideEndOverlay();
+    hideResult("setup");
+    const targetImageDiv = $('#targetImageDiv');
+    targetImageDiv.fadeOut();
+    const compareOverlay = $('#image-compare');
+    compareOverlay.fadeOut();
+    document.body.style.overflow = 'hidden';
+
+    currentIteration = -1;
+    gameEnded = false;
+
+    createNewUser().then(result => { loadNextIteration(); });
 }
 
 
@@ -461,7 +580,6 @@ function handleCompareClick(event) {
 
     const clonedImageSrc = clonedImage.attr('src');
     storeSubmissionAttempt(UserID, currentIteration, clonedImageSrc.substring(clonedImageSrc.lastIndexOf('/') + 1), 2);    // track compare usage
-    // TODO: track end of compare as well?
 }
 
 
