@@ -411,7 +411,7 @@ function handleSubmitClick(event) {
         showResult("fail");
         setTimeout(function () {
             hideResult("fail");
-        }, 2000);
+        }, 1500);
     }
 
 }
