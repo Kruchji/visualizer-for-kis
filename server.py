@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json, http.server, os, random, csv, lap, time
+import json, http.server, os, csv, lap, time
 from urllib.parse import urlparse, parse_qs
 
 # For sorting
