@@ -46,6 +46,8 @@ targetBottomLocations = []
 previousCompare = {"x" : 0, "y" : 0, "height" : 0}
 
 with open('../CollectedData/scrollPositions.txt', 'r') as file:
+    
+
     reader = csv.reader(file, delimiter=';')
     for row in reader:
         if (int(row[0]) == user and int(row[1]) == iteration):
@@ -66,9 +68,26 @@ with open('../CollectedData/scrollPositions.txt', 'r') as file:
             targetTopLocations.append(normaliseHeight(FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
             targetBottomLocations.append(normaliseHeight(imageHeight + FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
 
+            
+
 # get time to start from 0
 minTime = min(timestamps)
 normalisedTime = [((ts - minTime) / 1000) for ts in timestamps]
+
+# draw red line to mark reloads
+lastTimestamp = normalisedTime[0]
+firstLoadLine = True
+for normTimestamp in normalisedTime:
+    if (normTimestamp - lastTimestamp > 1.5):
+        if(firstLoadLine):
+            plt.axvline(x=lastTimestamp, color='red', linestyle='--', label='Unload/load')
+            firstLoadLine = False
+        else:
+            plt.axvline(x=lastTimestamp, color='red', linestyle='--')
+        plt.axvline(x=normTimestamp, color='red', linestyle='--')
+
+    lastTimestamp = normTimestamp
+
 
 # to prevent multiple labels
 firstIncorrect = True
