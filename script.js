@@ -188,11 +188,15 @@ function loadNextIteration() {
 
         const imageFilenames = response['dataSet'];
 
+        const ssImageFilenames = response['ssDataSet'];
+
         const imageToFind = response['target'];          // always same target image for each dataset
 
         const currBoardConfig = (UserID + currentIteration) % response['boardsConfig'].length;    // each user starts shifted by 1 than previous
 
-        const orderingName = orderImages(imageFilenames, response['boardsConfig'][currBoardConfig]["ord"], clipFeatures);
+        console.log(imageFilenames);
+        const orderingName = orderImages(imageFilenames, response['boardsConfig'][currBoardConfig]["ord"], clipFeatures, ssImageFilenames);
+        console.log(imageFilenames);
 
         selectedNumPerRow = response['boardsConfig'][currBoardConfig]["size"];
 
@@ -268,7 +272,8 @@ function getImageList() {
             const dataSet = data.images;
             const folder = data.folder;
             const clipFeatures = data.clip;
-            return { "dataSet": dataSet, "folder": folder, "clip": clipFeatures, 'boardsConfig' : data.boardsConfig, 'target' : data.target};
+            const ssDataSet = data.ss_images;
+            return { "dataSet": dataSet, "folder": folder, "clip": clipFeatures, 'boardsConfig' : data.boardsConfig, 'target' : data.target, "ssDataSet" : ssDataSet};
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
@@ -323,12 +328,12 @@ function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderin
 
 //=============== Ordering implementations ===============//
 
-function orderImages(imageArray, ordering, clip) {
+function orderImages(imageArray, ordering, clip, ssImageArray) {
     let orderingName = "default";
 
     switch (ordering) {
         case "ss":
-            imageArray = selfSort(imageArray, clip);       // self sorting array
+            selfSort(imageArray, clip, ssImageArray);       // self sorting array
             orderingName = "self-sorting";
             break;
         case "r":
@@ -355,8 +360,9 @@ function shuffleArray(array) {
 }
 
 // self-sorting array algorithm
-function selfSort(imageArray, clipFeatures) {
-    return imageArray;  // already comes sorted from python server - no change needed
+function selfSort(imageArray, clipFeatures, ssImageArray) {
+    imageArray.length = 0;
+    imageArray.push(...ssImageArray);     // already comes sorted from python server - no change needed
 }
 
 function euclideanDistance(a, b) {

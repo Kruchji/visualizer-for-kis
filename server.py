@@ -356,7 +356,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
 
-            response = {'images': sorted_images.tolist(), 'folder' : chosenFolder, 'clip' : clipFeatures, 'boardsConfig' : configData, 'target' : targetImage}
+            response = {'images': images, 'folder' : chosenFolder, 'clip' : clipFeatures, 'boardsConfig' : configData, 'target' : targetImage, 'ss_images' : sorted_images.tolist()}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
