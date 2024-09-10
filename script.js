@@ -194,9 +194,7 @@ function loadNextIteration() {
 
         const currBoardConfig = (UserID + currentIteration) % response['boardsConfig'].length;    // each user starts shifted by 1 than previous
 
-        console.log(imageFilenames);
         const orderingName = orderImages(imageFilenames, response['boardsConfig'][currBoardConfig]["ord"], clipFeatures, ssImageFilenames);
-        console.log(imageFilenames);
 
         selectedNumPerRow = response['boardsConfig'][currBoardConfig]["size"];
 
