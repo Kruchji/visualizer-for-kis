@@ -337,7 +337,9 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             targetImage = ""
             sorted_images = np.array(images)
             if (chosenFolder != "END"):
-                targetImage = images[0]     # same image for each dataset
+                # same image for each dataset
+                with open("./Data/" + chosenFolder + "/chosenTarget.txt", "r") as targetFile:
+                    targetImage = targetFile.readline()  
 
                 # Convert the map's arrays from strings to floats
                 float_map = {k: np.array(list(map(float, v))) for k, v in clipFeatures.items()}
