@@ -184,8 +184,6 @@ function loadNextIteration() {
 
         if (response['folder'] == "END") return Promise.reject('END_OF_TEST');
 
-        const clipFeatures = response['clip'];
-
         const imageFilenames = response['dataSet'];
 
         const ssImageFilenames = response['ssDataSet'];
@@ -194,9 +192,9 @@ function loadNextIteration() {
 
         const currBoardConfig = (UserID + currentIteration) % response['boardsConfig'].length;    // each user starts shifted by 1 than previous
 
-        const orderingName = orderImages(imageFilenames, response['boardsConfig'][currBoardConfig]["ord"], clipFeatures, ssImageFilenames);
-
         selectedNumPerRow = response['boardsConfig'][currBoardConfig]["size"];
+
+        const orderingName = orderImages(imageFilenames, response['boardsConfig'][currBoardConfig]["ord"], ssImageFilenames, selectedNumPerRow);
 
         setupCurrentIteration(imageFilenames, imageToFind, response['folder']);
 
@@ -269,9 +267,8 @@ function getImageList() {
         }).then(data => {
             const dataSet = data.images;
             const folder = data.folder;
-            const clipFeatures = data.clip;
             const ssDataSet = data.ss_images;
-            return { "dataSet": dataSet, "folder": folder, "clip": clipFeatures, 'boardsConfig' : data.boardsConfig, 'target' : data.target, "ssDataSet" : ssDataSet};
+            return { "dataSet": dataSet, "folder": folder, 'boardsConfig' : data.boardsConfig, 'target' : data.target, "ssDataSet" : ssDataSet};
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
@@ -326,13 +323,17 @@ function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderin
 
 //=============== Ordering implementations ===============//
 
-function orderImages(imageArray, ordering, clip, ssImageArray) {
+function orderImages(imageArray, ordering, ssImageArray, imagesPerRow) {
     let orderingName = "default";
 
     switch (ordering) {
         case "ss":
-            selfSort(imageArray, clip, ssImageArray);       // self sorting array
+            selfSort(imageArray, ssImageArray);       // self sorting array
             orderingName = "self-sorting";
+            break;
+        case "mc":
+            middleSort(imageArray, imagesPerRow);   // default with middle column filled first
+            orderingName = "middle-column";
             break;
         case "r":
             shuffleArray(imageArray);   // random ordering
@@ -358,9 +359,44 @@ function shuffleArray(array) {
 }
 
 // self-sorting array algorithm
-function selfSort(imageArray, clipFeatures, ssImageArray) {
+function selfSort(imageArray, ssImageArray) {
     imageArray.length = 0;
     imageArray.push(...ssImageArray);     // already comes sorted from python server - no change needed
+}
+
+// middle-column first sorting algorithm
+function middleSort(imageArray, imagesPerRow){
+
+    const numRows = Math.ceil(imageArray.length / imagesPerRow);
+        
+    const sortedArray = new Array(imageArray.length).fill(undefined);   // empty array
+    
+    // calculate the middle columns indices
+    const middleLeft = Math.floor(imagesPerRow / 2) - Math.floor(imagesPerRow / 4);
+    const middleRight = Math.ceil(imagesPerRow / 2) + Math.max((Math.floor(imagesPerRow / 4) - 1), 0);
+    
+    // extract items for middle columns
+    let currentImageIndex = 0;
+    for (let row = 0; row < numRows; row++) {
+        const middleLeftIndex = row * imagesPerRow + middleLeft;
+        const middleRightIndex = row * imagesPerRow + middleRight;
+
+        for (let i = middleLeftIndex; i <= middleRightIndex; i++) {
+            sortedArray[i] = imageArray[currentImageIndex];
+            currentImageIndex++;
+        }
+    }
+    
+    // fill remaining spots with the rest of the items
+    const emptyIndices = sortedArray.map((item, index) => item === undefined ? index : null).filter(index => index !== null);
+    for (const index of emptyIndices) {
+        sortedArray[index] = imageArray[currentImageIndex];
+        currentImageIndex++;
+    }
+    
+    // replace array
+    imageArray.length = 0;
+    imageArray.push(...sortedArray);
 }
 
 function euclideanDistance(a, b) {
