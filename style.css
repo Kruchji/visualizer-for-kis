@@ -88,7 +88,8 @@ body {
     margin: 5px;
 }
 
-.end-btn {
+.end-btn,
+.start-btn {
     margin-left: 40px;
 }
 
@@ -121,7 +122,8 @@ body {
 #loading-screen,
 #image-compare,
 #result-overlay,
-#end-overlay {
+#end-overlay,
+#start-overlay {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -135,6 +137,16 @@ body {
     font-size: 2vw;
 }
 
+#start-overlay {
+    flex-direction: column;
+}
+
+h1 {
+    font-size: 3vw;
+    margin-bottom: 5vw;
+    color: #ff9600;
+}
+
 /* separated because of different layout */
 #image-compare {
     z-index: 9999;
@@ -146,7 +158,8 @@ body {
     z-index: 9999;
 }
 
-#end-overlay {
+#end-overlay,
+#start-overlay {
     z-index: 10000;
     /* needs to cover up even other overlays */
 }
@@ -163,7 +176,8 @@ body {
 .skipped,
 .correct,
 .incorrect,
-.endOfTest {
+.endOfTest,
+.startOfTest {
     font-weight: bold;
     font-size: 2vw;
 

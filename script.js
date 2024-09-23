@@ -22,6 +22,14 @@ $(document).ready(function () {
     // setup end overlay
     $('#end-overlay').fadeOut();
 
+    // start by showing overlay with info
+    showStartOverlay();
+
+});
+
+function firstRunLoad(){
+    // hide instruction overlay
+    hideStartOverlay();
 
     // load everything
     let lastUser = localStorage.getItem('LastUserID');
@@ -37,8 +45,7 @@ $(document).ready(function () {
             }
         });
     }
-
-});
+}
 
 
 //=============== New user creation (first iteration) ===============//
@@ -514,6 +521,22 @@ function updateProgress() {
 
     const currDisplayIter = currentIteration + 1;
     progressDisplay.textContent = currDisplayIter + "/" + totalNumberOfSets;
+}
+
+//=============== Start of test (overlay) ===============//
+
+function showStartOverlay() {
+    let startOverlay = $('#start-overlay');
+    startOverlay.fadeIn();
+
+    const body = document.body;
+    body.style.overflow = 'hidden';
+}
+
+function hideStartOverlay() {
+    let startOverlay = $('#start-overlay');
+    startOverlay.fadeOut();
+    startOverlay.empty();
 }
 
 //=============== End of test (overlay) ===============//
