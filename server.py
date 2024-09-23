@@ -169,7 +169,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
                 # Collect all float arrays into a single NumPy array
                 X = np.array(list(float_map.values()))
-                # Assuming you need a 2D array (for example purposes)
+                # Assuming we need a 2D array
                 X = X.reshape(len(images), -1).astype(np.float32)
 
                 imagesOnRow = configData[(int(uid) + int(iteration)) % len(configData)]['size']

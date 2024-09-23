@@ -103,10 +103,9 @@ def sort_with_flas(X, filepaths, nc, n_images_per_site, radius_factor=0.9, wrap=
     np.random.seed(7)   # for reproducible sortings
     
     # setup of required variables
-    N = np.prod(X.shape[:-1])
-    X = X.reshape((n_images_per_site, len(X) // n_images_per_site, -1))
+    N = np.prod(X.shape[:-1])       # number of images (in X)
+    X = X.reshape((len(X) // n_images_per_site, n_images_per_site, -1))
     filepaths = np.array(filepaths)
-   
     grid_shape = X.shape[:-1]
     H, W = grid_shape
     
