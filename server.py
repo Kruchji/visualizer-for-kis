@@ -110,7 +110,6 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             imageSets = [folder for folder in os.listdir("./Data/")]
             imageSets.sort(key=int)
 
-            # choose dataset randomly
             # load currently saved data
             with open("CollectedData/userData.json", "r") as JSONfile:
                 logs = json.load(JSONfile)

@@ -65,6 +65,8 @@ with open('../CollectedData/scrollPositions.txt', 'r') as file:
             FirstRowHeight = float(row[8])
             SecondRowHeight = float(row[9])
             imageHeight = float(row[10])
+
+            # get difference between rows to calculate position of target
             targetTopLocations.append(normaliseHeight(FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
             targetBottomLocations.append(normaliseHeight(imageHeight + FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
 
