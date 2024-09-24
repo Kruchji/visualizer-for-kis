@@ -22,7 +22,7 @@ Possible ordering values:
 - `ss` : self-sorting
 - `r` : random
 
-Datasets are shifted for each user to test all datasets for each configuration equally.
+Configurations are shifted for each user to test all datasets for each configuration equally.
 
 ### Datasets
 
