@@ -24,6 +24,24 @@ Running the application requires Python 3.10 with pip. Dependencies are included
 
 ### Frontend
 
+The frontend webpage consists mainly of three files: `script.js`, `index.html` and `style.css`.
+
+`index.html` provides only a simple page with a navigation bar and an image grid `div` and a few other `div` elements for overlays. It also includes the provided jQuery and Bootstrap libraries.
+
+`style.css` mostly sets basic styling for text elements and overlays. Of note is the grid display style of the image grid. It allows us to very simple change the number of columns as we need.
+
+`script.js` includes all the frontend logic and data collection. Right after `index.html` is loaded, it sets up overlays for comparison, results, target image, start and end (and any corresponding buttons). `showStartOverlay()` displays the intro info text and a start button.
+
+When this button is pressed, `firstRunLoad()` is called, which decides if a new user should be created or old one loaded (if there is user ID in local storage). Functions `createNewUser()` and `loadOldUser(oldUserID)` take care of this by sending requests to the backend (the second one with the user ID). From this we get a user ID and the total number of datasets (used by `updateProgress()` to show user progress).
+
+If user already existed, `loadOldIteration(currIterData)` just sets up the board (`setupCurrentIteration`) and waits for images to load. Otherwise, `loadNextIteration()` is called instead. It requests `getImages` from backend and receives image list, dataset, board's config, image target and self-sorted image list. It also calls `orderImages` which orders image array accordingly (or replaces with self-sorted one instead) and sets correct ordering name. After this the current board is set up and is sent using `storeImageConfig` to backend (to save it to user configuration). All of these requests are done using fetch, as is the last one to wait for the images to load before showing the target image.
+
+When target image overlay is closed, scrolling tracker is enabled with `startScrollTracker()` which starts an interval calling `storeScrollbarPos(uid, iteration)`. This function gets all necessary data from the browser window and sends it to the backend (see section `Collected data` to get a list of all collected data). It also checks if target has already been seen and missed.
+
+On compare button press, `handleCompareClick(event)` is called, and on submit button press, `handleSubmitClick(event)` is called. Compare stores interaction on open and close. Submit evaluates its correctness and stores a corresponding submission attempt. On correct guess, it loads the next iteration (`loadNextIteration()`). When last dataset is completed, backend sends "END" as dataset folder. In this case, `endTesting()` is called which displays the end overlay.
+
+The restart with new user button is handled by `startWithNewUser()`. It resets everything back to the starting state and calls `createNewUser()` and `loadNextIteration()`.
+
 ### Backend (server)
 
 The backend server is handled by `server.py`. It uses Python's built-in http.server to handle all (POST) requests incoming from frontend on port `8001`. It also imports `selfSort.py` to calculate self-sorted ordering faster than if it was calculated later using JavaScript.
