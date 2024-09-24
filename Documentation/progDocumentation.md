@@ -66,7 +66,7 @@ The code `selfSort.py` was edited slightly to allow for non-square (rectangular)
 
 To have comparable data between users, the a specific target is used for each dataset, so that all users are attempting to find the same image. To generate these targets, you can use the provided script `targetsGenerator.py` which will create `chosenTarget.txt` for each dataset. You can also provide it yourself; the file only includes filename of one of the images in the dataset.
 
-The script `targetsGenerator.py` doesn't pick the target completely at random. It uses this formula to get weights: $\frac{1}{(imageIndex + 1)^0.4}$ where imageIndex is the number of image in the dataset. This kind of target generation prioritizes images that are near the top in default ordering (which should speed up search).
+The script `targetsGenerator.py` doesn't pick the target completely at random. It uses this formula to get weights: $\frac{1}{(imageIndex + 1)^{0.4}}$ where imageIndex is the number of image in the dataset. This kind of target generation prioritizes images that are near the top in default ordering (which should speed up search).
 
 ### Configuration
 
