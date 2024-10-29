@@ -60,6 +60,7 @@ function firstRunLoad() {
 let UserID = -1;
 let currentIteration = -1;
 let totalNumberOfSets = -1;
+let adminEnabled = false;
 
 function createNewUser() {
     return fetch("newUser",
@@ -102,11 +103,12 @@ function loadOldUser(oldUserID) {
 }
 
 // Enable admin features if requested
-function setupAdminMode(adminEnabled) {
-    if (adminEnabled != true) {
+function setupAdminMode(adminMode) {
+    if (adminMode != true) {
         $('.navbar-nav .nav-item:first').remove();
     } else {
         console.log("Admin mode enabled!");
+        adminEnabled = adminMode;
     }
 }
 
@@ -307,6 +309,7 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder) {
     imageFilenames.forEach(function (filename) {
         imageGrid.append(
             $('<div>', { class: 'image-container' }).append(
+                adminEnabled ? $('<div>', { class: 'adminOverlayText', text: parseInt(filename.split("_")[0], 10) }) : null, // add overlay text if in admin mode
                 $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false' }),
                 $('<div>', { class: 'hover-buttons' }).append(
                     $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick }),
@@ -314,7 +317,6 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder) {
                 )
             )
         );
-
     });
 
     const targetImageDiv = $('#targetImageDiv');
