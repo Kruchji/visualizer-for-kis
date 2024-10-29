@@ -27,20 +27,27 @@ $(document).ready(function () {
 
 });
 
-function firstRunLoad(){
+function firstRunLoad() {
     // hide instruction overlay
     hideStartOverlay();
 
     // load everything
     let lastUser = localStorage.getItem('LastUserID');
     if (!lastUser) {
-        createNewUser().then(result => { loadNextIteration(); });
+        createNewUser().then(result => {
+            setupAdminMode(result.adminMode);
+            loadNextIteration();
+        });
     } else {
         // load existing user (and his progress)
         loadOldUser(lastUser).then(result => {
             if (result['loadFailed'] == 1) {
-                createNewUser().then(result => { loadNextIteration(); });
+                createNewUser().then(result => {
+                    setupAdminMode(result.adminMode);
+                    loadNextIteration();
+                });
             } else {
+                setupAdminMode(result.adminMode);
                 loadOldIteration(result);
             }
         });
@@ -67,6 +74,7 @@ function createNewUser() {
             UserID = data.new_id;       // receive next user ID
             totalNumberOfSets = data.numOfSets;
             localStorage.setItem('LastUserID', UserID);
+            return data;
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
@@ -91,6 +99,15 @@ function loadOldUser(oldUserID) {
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
+}
+
+// Enable admin features if requested
+function setupAdminMode(adminEnabled) {
+    if (adminEnabled != true) {
+        $('.navbar-nav .nav-item:first').remove();
+    } else {
+        console.log("Admin mode enabled!");
+    }
 }
 
 
@@ -275,7 +292,7 @@ function getImageList() {
             const dataSet = data.images;
             const folder = data.folder;
             const ssDataSet = data.ss_images;
-            return { "dataSet": dataSet, "folder": folder, 'boardsConfig' : data.boardsConfig, 'target' : data.target, "ssDataSet" : ssDataSet};
+            return { "dataSet": dataSet, "folder": folder, 'boardsConfig': data.boardsConfig, 'target': data.target, "ssDataSet": ssDataSet };
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
@@ -372,16 +389,16 @@ function selfSort(imageArray, ssImageArray) {
 }
 
 // middle-column first sorting algorithm
-function middleSort(imageArray, imagesPerRow){
+function middleSort(imageArray, imagesPerRow) {
 
     const numRows = Math.ceil(imageArray.length / imagesPerRow);
-        
+
     const sortedArray = new Array(imageArray.length).fill(undefined);   // empty array
-    
+
     // calculate the middle columns indices
     const middleLeft = Math.floor(imagesPerRow / 2) - Math.floor(imagesPerRow / 4);
     const middleRight = Math.ceil(imagesPerRow / 2) + Math.max((Math.floor(imagesPerRow / 4) - 1), 0);
-    
+
     // extract items for middle columns
     let currentImageIndex = 0;
     for (let row = 0; row < numRows; row++) {
@@ -393,14 +410,14 @@ function middleSort(imageArray, imagesPerRow){
             currentImageIndex++;
         }
     }
-    
+
     // fill remaining spots with the rest of the items
     const emptyIndices = sortedArray.map((item, index) => item === undefined ? index : null).filter(index => index !== null);
     for (const index of emptyIndices) {
         sortedArray[index] = imageArray[currentImageIndex];
         currentImageIndex++;
     }
-    
+
     // replace array
     imageArray.length = 0;
     imageArray.push(...sortedArray);

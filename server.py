@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 
-import json, http.server, os, csv
+import json, http.server, os, csv, sys
 import numpy as np
 from urllib.parse import urlparse, parse_qs
 
 # self-sorting
 import selfSort
 
+# Handle admin argument
+adminMode = False
+if len(sys.argv) >= 2:
+    if sys.argv[1] == "--admin":
+        adminMode = True
+        print("Admin mode enabled!")
 
 ################## Server ##################
 
@@ -55,7 +61,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
 
-            response = {'new_id': newUid, 'numOfSets': len([folder for folder in os.listdir("./Data/")])}
+            response = {'new_id': newUid, 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
@@ -100,7 +106,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
             
-            response = {'loadFailed': loadFailed, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'numOfSets': len([folder for folder in os.listdir("./Data/")])}
+            response = {'loadFailed': loadFailed, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
