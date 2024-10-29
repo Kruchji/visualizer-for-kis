@@ -44,6 +44,7 @@ targetTopLocations = []
 targetBottomLocations = []
 
 previousCompare = {"x" : 0, "y" : 0, "height" : 0}
+previousTargetOverlay = {"x" : 0}
 
 with open('../CollectedData/scrollPositions.txt', 'r') as file:
     
@@ -95,6 +96,8 @@ for normTimestamp in normalisedTime:
 firstIncorrect = True
 firstCorrect = True
 firstCompare = True
+firstSkip = True
+firstTargetOverlay = True
 
 with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove submission parameters
     reader = csv.reader(file, delimiter=';')
@@ -157,9 +160,42 @@ with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove s
                 previousCompare['y'] = normaliseHeight(clickedImageLocation, subTotalScroll)
                 previousCompare['height'] = normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll) - previousCompare['y']
             
+            # compare end
             elif subCorrect == 3:
                 rectWidth = ((subTimestamp - minTime) / 1000) - previousCompare['x']
                 rectangle = patches.Rectangle((previousCompare['x'], previousCompare['y']), rectWidth, previousCompare['height'], linewidth=1, edgecolor='darkgray', facecolor='lightgray')
+                ax.add_patch(rectangle)
+
+            # skip
+            elif subCorrect == 4:
+                # for label display
+                if firstSkip:
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='hotpink', zorder=3, label='Skip')
+                    firstSkip = False
+                else:
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='hotpink', zorder=3)
+
+                plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(subTotalScroll, subTotalScroll), color='hotpink', zorder=3)
+                plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(0, subTotalScroll), normaliseHeight(subTotalScroll, subTotalScroll)], color='hotpink', zorder=3)
+
+            # target overlay
+            elif subCorrect == 5:
+                # for label display
+                if firstTargetOverlay:
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='cyan', zorder=3, label='Target overlay')
+                    firstTargetOverlay = False
+                else:
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='cyan', zorder=3)
+
+                plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(subTotalScroll, subTotalScroll), color='cyan', zorder=3)
+                plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(0, subTotalScroll), normaliseHeight(subTotalScroll, subTotalScroll)], color='cyan', zorder=3)
+
+                previousTargetOverlay['x'] = (subTimestamp - minTime) / 1000
+            
+            # target overlay end
+            elif subCorrect == 6:
+                rectWidth = ((subTimestamp - minTime) / 1000) - previousTargetOverlay['x']
+                rectangle = patches.Rectangle((previousTargetOverlay['x'], normaliseHeight(0, subTotalScroll)), rectWidth, normaliseHeight(subTotalScroll, subTotalScroll) - normaliseHeight(0, subTotalScroll), linewidth=1, edgecolor='darkturquoise', facecolor='lightgray')
                 ax.add_patch(rectangle)
 
 # draw viewport locations
