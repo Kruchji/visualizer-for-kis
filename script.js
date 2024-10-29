@@ -5,7 +5,7 @@ $(document).ready(function () {
     imageCompare.click(function () {
         imageCompare.fadeOut("fast", function () { imageCompare.empty(); });
         toggleScroll();
-        storeSubmissionAttempt(UserID, currentIteration, "CLOSE", 3);
+        storeSubmissionAttempt(UserID, currentIteration, "COM_CLOSE", 3);
     });
     imageCompare.fadeOut();
 
@@ -19,7 +19,7 @@ $(document).ready(function () {
         if (!scrollTrackerRunning) {
             startScrollTracker();   // start tracker on close
             startSkipTimer();
-        } 
+        }
     });
 
     // setup end overlay
@@ -153,7 +153,7 @@ function stopScrollTracker() {
 
 let targetMissed = 0;
 let targetWasOnScreen = false;
-let scrollPayloads = {'multipleScrollData': []};
+let scrollPayloads = { 'multipleScrollData': [] };
 
 function storeScrollbarPos(uid, iteration) {
     if (targetMissed === 0) {
@@ -680,11 +680,20 @@ function toggleLoadingScreen(boolScroll) {
 
 function toggleTargetImage() {
     const targetImageDiv = $('#targetImageDiv');
+
+    if (scrollTrackerRunning) { // skip first close
+        if (targetImageDiv.is(':visible')) {
+            storeSubmissionAttempt(UserID, currentIteration, "TAR_CLOSE", 6);
+        } else {
+            storeSubmissionAttempt(UserID, currentIteration, "TAR_OPEN", 5);
+        }
+    }
+
     targetImageDiv.fadeToggle();
     toggleScroll();
 }
 
-function toggleTargetButton() {  // TODO: log opening this overlay
+function toggleTargetButton() {
     toggleTargetImage();
     if (!scrollTrackerRunning) { startScrollTracker(); } // start tracker on close
 }
@@ -750,6 +759,7 @@ function skipCurrentIteration() {
     storeSubmissionAttempt(UserID, currentIteration, "SKIP", 4);
     stopScrollTracker();
     showResult("skip");
+    hideSkipButton();
 
     setTimeout(function () {
         hideResult("skip");
