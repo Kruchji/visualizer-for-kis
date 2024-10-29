@@ -222,7 +222,7 @@ function loadNextIteration() {
 
         const orderingName = orderImages(imageFilenames, response['boardsConfig'][currBoardConfig]["ord"], ssImageFilenames, selectedNumPerRow);
 
-        setupCurrentIteration(imageFilenames, imageToFind, response['folder']);
+        setupCurrentIteration(imageFilenames, imageToFind, response['folder'], orderingName);
 
         return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering": orderingName, "perRow": selectedNumPerRow }
 
@@ -264,8 +264,9 @@ function loadOldIteration(currIterData) {
     const imageFilenames = currIterData['currImages'];
     const imageToFind = currIterData['currTarget'];
     selectedNumPerRow = parseInt(currIterData['currBoardSize']);
+    const orderingName = currIterData['currOrdering'];
 
-    setupCurrentIteration(imageFilenames, imageToFind, currIterData['currDataFolder']);
+    setupCurrentIteration(imageFilenames, imageToFind, currIterData['currDataFolder'], orderingName);
 
 
     return $('#imageGrid').waitForImages(function () {      // wait for images to load before starting tracker
@@ -302,7 +303,13 @@ function getImageList() {
 
 
 // setup current board with supplied data
-function setupCurrentIteration(imageFilenames, imageToFind, dataFolder) {
+function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, orderingName) {
+    if (orderingName === "side-panel") {
+        displaySidePanel();
+    } else {
+        hideSidePanel();
+    }
+
     $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
 
     const imageGrid = $('#imageGrid');
@@ -351,6 +358,7 @@ function storeImageConfig(uid, iteration, target, allImages, dataSetNum, orderin
 
 function orderImages(imageArray, ordering, ssImageArray, imagesPerRow) {
     let orderingName = "default";
+    hideSidePanel();
 
     switch (ordering) {
         case "ss":
@@ -364,6 +372,9 @@ function orderImages(imageArray, ordering, ssImageArray, imagesPerRow) {
         case "r":
             shuffleArray(imageArray);   // random ordering
             orderingName = "random";
+            break;
+        case "sp":
+            orderingName = "side-panel";
             break;
         default:
             break;      // default order on invalid value
@@ -432,6 +443,22 @@ function euclideanDistance(a, b) {
 // find sum of an array
 function computeSum(arr) {
     return arr.reduce((acc, val) => acc + parseFloat(val), 0);  // adds up all values in an array
+}
+
+function displaySidePanel() {
+    const sidePanel = $('#sidePanel');
+    sidePanel.show();
+
+    const imageGrid = $('#imageGrid');
+    imageGrid.css('margin-left', '20%');
+}
+
+function hideSidePanel() {
+    const sidePanel = $('#sidePanel');
+    sidePanel.hide();
+
+    const imageGrid = $('#imageGrid');
+    imageGrid.css('margin-left', '0%');
 }
 
 
