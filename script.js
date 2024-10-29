@@ -228,7 +228,15 @@ function loadNextIteration() {
 
         selectedNumPerRow = response['boardsConfig'][currBoardConfig]["size"];
 
-        const orderingName = orderImages(imageFilenames, response['boardsConfig'][currBoardConfig]["ord"], ssImageFilenames, selectedNumPerRow);
+        let boardOrdering = response['boardsConfig'][currBoardConfig]["ord"];
+
+        // if 16 images => attention check => force board config
+        if (imageFilenames.length <= 16) {
+            selectedNumPerRow = 4;      // force 4 per row
+            boardOrdering = "sp";       // force side panel ordering
+        }
+
+        const orderingName = orderImages(imageFilenames, boardOrdering, ssImageFilenames, selectedNumPerRow);
 
         setupCurrentIteration(imageFilenames, imageToFind, response['folder'], orderingName);
 
