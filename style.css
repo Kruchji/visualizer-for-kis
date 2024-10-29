@@ -31,6 +31,10 @@ body {
     /* align checkmark with text */
 }
 
+#skipButton {
+    display: none;
+}
+
 
 /*=============== Image grid ===============*/
 

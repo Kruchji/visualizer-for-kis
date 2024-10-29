@@ -16,7 +16,10 @@ $(document).ready(function () {
     let targetImageDiv = $('#targetImageDiv');
     targetImageDiv.click(function () {
         toggleTargetImage();
-        if (!scrollTrackerRunning) { startScrollTracker(); } // start tracker on close
+        if (!scrollTrackerRunning) {
+            startScrollTracker();   // start tracker on close
+            startSkipTimer();
+        } 
     });
 
     // setup end overlay
@@ -501,6 +504,7 @@ function handleSubmitClick(event) {
         stopScrollTracker();
         sendScrollData(UserID, currentIteration);   // send any remaining scroll data
         showResult("correct");
+        hideSkipButton();       // hide skip button if it was visible
 
         setTimeout(function () {
             hideResult("correct");
@@ -563,6 +567,8 @@ function showResult(result) {
 
     if (result === "correct") {
         resultOverlay.append("<div class='correct'>Correct image! Moving to another example...</div>")
+    } else if (result === "skip") {
+        resultOverlay.append("<div class='skipped'>Example skipped! Moving to another example...</div>")
     } else if (result === "endOfTest") {
         resultOverlay.append("<div class='endOfTest'>Time is up! This marks the end of the test.</div>")
     } else {
@@ -735,5 +741,48 @@ function toggleFullScreen() {
         if (document.exitFullscreen) {
             document.exitFullscreen();
         }
+    }
+}
+
+//=============== Skip button ===============//
+
+function skipCurrentIteration() {
+    storeSubmissionAttempt(UserID, currentIteration, "SKIP", 4);
+    stopScrollTracker();
+    showResult("skip");
+
+    setTimeout(function () {
+        hideResult("skip");
+        toggleLoadingScreen(false);
+        loadNextIteration();
+    }, 1000);
+}
+
+// toggle skip button visibility
+function hideSkipButton() {
+    $('#skipButton').hide();
+    stopSkipTimer();
+}
+
+function showSkipButton() {
+    $('#skipButton').show();
+}
+
+let skipTimerId;
+const SKIP_BUTTON_APPEAR_TIME = 60000;  // 1 minute
+
+function startSkipTimer() {
+    if (skipTimerId) {
+        clearTimeout(skipTimerId);
+    }
+
+    skipTimerId = setTimeout(function () {
+        showSkipButton();
+    }, SKIP_BUTTON_APPEAR_TIME);  // show after 1 minute
+}
+
+function stopSkipTimer() {
+    if (skipTimerId) {
+        clearTimeout(skipTimerId);
     }
 }
