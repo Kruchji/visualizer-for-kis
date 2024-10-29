@@ -247,8 +247,11 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             decodedData = self.rfile.read(contentLength).decode()
             logJSON = json.loads(decodedData)
 
+            scrollData = logJSON["multipleScrollData"]
+
             # convert to csv
-            toLogText = str(uid)+";"+str(iteration)+";"+str(logJSON["timestamp"])+";"+str(logJSON["scrollPos"])+";"+str(logJSON["totalScroll"])+";"+str(logJSON["windowW"])+";"+str(logJSON["windowH"])+";"+str(logJSON["navbarH"])+";"+str(logJSON["firstRowStart"])+";"+str(logJSON["secondRowStart"])+";"+str(logJSON["imageHeight"])+";"+str(logJSON["missedTarget"])+"\n"
+            for scrollLog in scrollData:
+                toLogText = str(uid)+";"+str(iteration)+";"+str(scrollLog["timestamp"])+";"+str(scrollLog["scrollPos"])+";"+str(scrollLog["totalScroll"])+";"+str(scrollLog["windowW"])+";"+str(scrollLog["windowH"])+";"+str(scrollLog["navbarH"])+";"+str(scrollLog["firstRowStart"])+";"+str(scrollLog["secondRowStart"])+";"+str(scrollLog["imageHeight"])+";"+str(scrollLog["missedTarget"])+"\n"
 
             # write csv data to disk
             with open("CollectedData/scrollPositions.txt", 'a') as csvFile:

@@ -128,7 +128,8 @@ function toggleScroll() {
 
 //=============== Scroll tracking ===============//
 
-const SCROLL_LOG_INTERVAL = 300;   // how often to log
+const SCROLL_LOG_INTERVAL = 50;   // how often to log
+const SCROLL_BATCH_SIZE = 10;     // how many logs to batch before sending
 let scrollTrackerRunning = false;
 let trackerIntervalID;
 
@@ -149,6 +150,7 @@ function stopScrollTracker() {
 
 let targetMissed = 0;
 let targetWasOnScreen = false;
+let scrollPayloads = {'multipleScrollData': []};
 
 function storeScrollbarPos(uid, iteration) {
     if (targetMissed === 0) {
@@ -182,11 +184,17 @@ function storeScrollbarPos(uid, iteration) {
         "missedTarget": targetMissed
     };
 
-    fetch("scrollPositions?uid=" + uid + "&iteration=" + iteration,
-        {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
+    scrollPayloads['multipleScrollData'].push(payload);
+
+    if (scrollPayloads['multipleScrollData'].length >= SCROLL_BATCH_SIZE) {
+        fetch("scrollPositions?uid=" + uid + "&iteration=" + iteration,
+            {
+                method: "POST",
+                body: JSON.stringify(scrollPayloads)
+            });
+
+        scrollPayloads['multipleScrollData'] = [];
+    }
 }
 
 
