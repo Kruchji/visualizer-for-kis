@@ -187,16 +187,21 @@ function storeScrollbarPos(uid, iteration) {
     scrollPayloads['multipleScrollData'].push(payload);
 
     if (scrollPayloads['multipleScrollData'].length >= SCROLL_BATCH_SIZE) {
-        fetch("scrollPositions?uid=" + uid + "&iteration=" + iteration,
-            {
-                method: "POST",
-                body: JSON.stringify(scrollPayloads)
-            });
-
-        scrollPayloads['multipleScrollData'] = [];
+        sendScrollData(uid, iteration);
     }
 }
 
+function sendScrollData(uid, iteration) {
+    if (scrollPayloads['multipleScrollData'].length === 0) return;
+
+    fetch("scrollPositions?uid=" + uid + "&iteration=" + iteration,
+        {
+            method: "POST",
+            body: JSON.stringify(scrollPayloads)
+        });
+
+    scrollPayloads['multipleScrollData'] = [];
+}
 
 //=============== Load new iteration of images ===============//
 let selectedNumPerRow = 4;
@@ -494,6 +499,7 @@ function handleSubmitClick(event) {
     if (imageName === targetImageName) {
         storeSubmissionAttempt(UserID, currentIteration, imageName, 1);
         stopScrollTracker();
+        sendScrollData(UserID, currentIteration);   // send any remaining scroll data
         showResult("correct");
 
         setTimeout(function () {
