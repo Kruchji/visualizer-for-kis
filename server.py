@@ -286,4 +286,10 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    http.server.test(TrackingServer, http.server.HTTPServer, port=8001)
+    # http.server.test(TrackingServer, http.server.HTTPServer, port=8001)   # for local testing (prints to console)
+
+    server_address = ('', 8001)  # Bind to all available IP addresses on the host
+    httpd = http.server.HTTPServer(server_address, TrackingServer)
+    
+    print("Server running on port 8001, accessible to local network.")
+    httpd.serve_forever()
