@@ -147,7 +147,7 @@ body {
 
 h1 {
     font-size: 3vw;
-    margin-bottom: 5vw;
+    margin-bottom: 4vw;
     color: #ff9600;
 }
 
@@ -183,13 +183,29 @@ h1 {
 .endOfTest,
 .startOfTest {
     font-weight: bold;
-    font-size: 2vw;
 
     /* disable selection (different browsers) */
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.skipped,
+.correct,
+.incorrect,
+.endOfTest {
+    font-size: 2vw;
+}
+
+.startOfTest {
+    font-size: 1vw;
+    max-width: 60%;
+}
+
+.highlightText {
+    color: #ff9600;
+    display: inline;
 }
 
 .correct {

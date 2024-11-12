@@ -26,9 +26,51 @@
 
     <!-- Start of test overlay -->
     <div id="start-overlay">
-        <h1>Ordering visualizer</h1>
-        <div class='startOfTest'>Task: Find the target image in a provided array of images.<br><br>All data is collected anonymously.</div><br>
-        <button type="button" class="btn btn-primary start-btn" onclick="firstRunLoad()">Begin the test</button>
+        <h1>Image Finding Test</h1>
+        <div class='startOfTest'>
+            <p>
+            <div class="highlightText">Welcome!</div> In this test, your task is to find a specific target image from a
+            series of image sets. Please read the instructions below on how to navigate and complete this test.</p>
+            <h2>
+                <div class="highlightText">Instructions:</div>
+            </h2>
+            <ol>
+                <li>
+                    <div class="highlightText">Target Image:</div> The target image is displayed before each set of
+                    images is shown. You can also view the target image anytime by clicking the <div
+                        class="highlightText">Toggle Target Image</div> button located at the top left of the screen.
+                </li>
+                <li>
+                    <div class="highlightText">Comparing Images:</div> If you want to directly compare an image in the
+                    set to the target image, click the blue <div class="highlightText">Compare</div> button on that
+                    image.
+                </li>
+                <li>
+                    <div class="highlightText">Submitting an Image:</div> After locating the image corresponding to the
+                    target image, click the green <div class="highlightText">Submit</div> button on the image to make
+                    your selection. If your choice is incorrect, you'll have a chance to try again!
+                </li>
+                <li>
+                    <div class="highlightText">Progress:</div> You can track your progress on the bar at the top of the
+                    screen, which includes all control buttons and shows your position within the test.
+                </li>
+                <li>
+                    <div class="highlightText">Skipping an Image Set:</div> If you get stuck finding the image, you may
+                    use a <div class="highlightText">Skip</div> button that will appear in the top right after 60
+                    seconds to allow you to move forward.
+                </li>
+            </ol>
+            <h2>
+                <div class="highlightText">Additional Information:</div>
+            </h2>
+            <ul>
+                <li>Note that each image set may take a few seconds to load.</li>
+                <li>
+                    <div class="highlightText">Data collection:</div> Your scroll position and button clicks will be
+                    tracked, but all data is collected anonymously.
+                </li>
+            </ul>
+        </div> <button type="button" class="btn btn-primary start-btn" onclick="firstRunLoad()">Begin the Test</button>
     </div>
 
     <!-- End of test overlay -->
@@ -61,15 +103,16 @@
                 </span>
             </div>
             <div class="nav-item" id="newUserButton">
-                <button type="button" class="btn btn-primary" onclick="startWithNewUser()">Start over (new user)</button>
+                <button type="button" class="btn btn-primary" onclick="startWithNewUser()">Start over (new
+                    user)</button>
             </div>
             <div class="nav-item">
                 <button type="button" class="btn btn-secondary ml-2" onclick="toggleFullScreen()">Use Full-Screen
                     Mode</button>
             </div>
             <div class="nav-item" id="skipButton">
-                <button type="button" class="btn btn-secondary ml-2 shining" onclick="skipCurrentIteration()">Skip this
-                    ordering</button>
+                <button type="button" class="btn btn-secondary ml-2 shining" onclick="skipCurrentIteration()">Skip these
+                    images</button>
             </div>
 
         </div>
