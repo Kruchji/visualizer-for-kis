@@ -108,7 +108,8 @@ function loadOldUser(oldUserID) {
 // Enable admin features if requested
 function setupAdminMode(adminMode) {
     if (adminMode != true) {
-        $('.navbar-nav .nav-item:first').remove();
+        $('#solutionButton').remove();
+        $('#newUserButton').remove();
     } else {
         console.log("Admin mode enabled!");
         adminEnabled = adminMode;
@@ -629,7 +630,9 @@ function showEndOverlay() {
 
     endOverlay.empty();
     endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test.</div><br>");
-    endOverlay.append('<button type="button" class="btn btn-primary end-btn" onclick="startWithNewUser()">Go again (new user)</button>')
+    if (adminEnabled) {    // hide new user button for standard users
+        endOverlay.append('<button type="button" class="btn btn-primary end-btn" onclick="startWithNewUser()">Go again (new user)</button>');
+    }
     endOverlay.fadeIn();
 
     const body = document.body;
