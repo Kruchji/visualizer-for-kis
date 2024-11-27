@@ -511,6 +511,7 @@ function handleSubmitClick(event) {
 
     if (imageName === targetImageName) {
         storeSubmissionAttempt(UserID, currentIteration, imageName, 1);
+        storeScrollbarPos(false);   // store last scroll position
         stopScrollTracker();
         sendScrollData(UserID, currentIteration);   // send any remaining scroll data
         showResult("correct");
