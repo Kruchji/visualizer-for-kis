@@ -132,17 +132,18 @@ function toggleScroll() {
 
 //=============== Scroll tracking ===============//
 
-const SCROLL_LOG_INTERVAL = 50;   // how often to log
+const SCROLL_LOG_INTERVAL = 250;   // how often to log
 const SCROLL_BATCH_SIZE = 10;     // how many logs to batch before sending
 let scrollTrackerRunning = false;
 let trackerIntervalID;
 
 function startScrollTracker() {
     trackerIntervalID = setInterval(() => {
-        storeScrollbarPos(UserID, currentIteration)
+        sendScrollData(UserID, currentIteration);
     }, SCROLL_LOG_INTERVAL);
 
     scrollTrackerRunning = true;
+    storeScrollbarPos();    // store initial position (start time as well)
 }
 
 
@@ -156,7 +157,13 @@ let targetMissed = 0;
 let targetWasOnScreen = false;
 let scrollPayloads = { 'multipleScrollData': [] };
 
-function storeScrollbarPos(uid, iteration) {
+// store scroll position every time user scrolls
+window.addEventListener('scroll', () => {
+    if (!scrollTrackerRunning) return;  // only track if tracker is running
+    storeScrollbarPos();
+});
+
+function storeScrollbarPos() {
     if (targetMissed === 0) {
         const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
         const targetPos = $('div.image-container').find('img[src="' + imageToFindSrc + '"]')[0].getBoundingClientRect();    // position relative to viewport
@@ -189,10 +196,6 @@ function storeScrollbarPos(uid, iteration) {
     };
 
     scrollPayloads['multipleScrollData'].push(payload);
-
-    if (scrollPayloads['multipleScrollData'].length >= SCROLL_BATCH_SIZE) {
-        sendScrollData(uid, iteration);
-    }
 }
 
 function sendScrollData(uid, iteration) {
