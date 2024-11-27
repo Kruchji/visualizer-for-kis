@@ -770,6 +770,7 @@ function toggleFullScreen() {
 
 function skipCurrentIteration() {
     storeSubmissionAttempt(UserID, currentIteration, "SKIP", 4);
+    storeScrollbarPos(false);   // store last scroll position
     stopScrollTracker();
     showResult("skip");
     hideSkipButton();
