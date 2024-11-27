@@ -293,4 +293,9 @@ if __name__ == '__main__':
     httpd = http.server.HTTPServer(server_address, TrackingServer)
     
     print("Server running on port 8001, accessible to local network.")
-    httpd.serve_forever()
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nShutting down the server...")
+        httpd.server_close()  # Close the server socket
+        print("Server stopped.")
