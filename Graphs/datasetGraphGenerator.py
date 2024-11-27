@@ -80,6 +80,8 @@ for user in validUsers:
     previousCompare = {"x" : 0, "y" : 0, "height" : 0}
     previousTargetOverlay = {"x" : 0}
 
+    afterLoadIndices = []
+
     with open('../CollectedData/scrollPositions.txt', 'r') as file:
         
 
@@ -105,6 +107,9 @@ for user in validUsers:
                 targetTopLocations.append(normaliseHeight(FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
                 targetBottomLocations.append(normaliseHeight(imageHeight + FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
 
+                afterLoad = int(row[12])
+                if afterLoad == 1:
+                    afterLoadIndices.append(len(timestamps) - 1)
                 
 
     # get time to start from 0
@@ -113,17 +118,17 @@ for user in validUsers:
 
     
     # draw red line to mark reloads
-    lastTimestamp = normalisedTime[0]
-    for normTimestamp in normalisedTime:
-        if (normTimestamp - lastTimestamp > 1.5):
-            if(firstLoadLine):
-                plt.axvline(x=lastTimestamp, color='red', linestyle='--', label='Unload/load', alpha=(1/len(validUsers)))
-                firstLoadLine = False
-            else:
-                plt.axvline(x=lastTimestamp, color='red', linestyle='--', alpha=(1/len(validUsers)))
-            plt.axvline(x=normTimestamp, color='red', linestyle='--', alpha=(1/len(validUsers)))
+    for afterLoadIndex in afterLoadIndices[1:]:
+        lastTimestamp = normalisedTime[afterLoadIndex - 1]
+        currentTimestamp = normalisedTime[afterLoadIndex]
 
-        lastTimestamp = normTimestamp
+        if(firstLoadLine):
+            plt.axvline(x=lastTimestamp, color='red', linestyle='--', label='Unload/load', alpha=(1/len(validUsers)))
+            firstLoadLine = False
+        else:
+            plt.axvline(x=lastTimestamp, color='red', linestyle='--', alpha=(1/len(validUsers)))
+        plt.axvline(x=currentTimestamp, color='red', linestyle='--', alpha=(1/len(validUsers)))
+
 
 
     with open('../CollectedData/submissions.txt', 'r') as file:

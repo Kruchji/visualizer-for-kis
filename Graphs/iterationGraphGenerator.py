@@ -46,6 +46,8 @@ targetBottomLocations = []
 previousCompare = {"x" : 0, "y" : 0, "height" : 0}
 previousTargetOverlay = {"x" : 0}
 
+afterLoadIndices = []
+
 with open('../CollectedData/scrollPositions.txt', 'r') as file:
     
 
@@ -71,6 +73,9 @@ with open('../CollectedData/scrollPositions.txt', 'r') as file:
             targetTopLocations.append(normaliseHeight(FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
             targetBottomLocations.append(normaliseHeight(imageHeight + FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
 
+            afterLoad = int(row[12])
+            if afterLoad == 1:
+                afterLoadIndices.append(len(timestamps) - 1)
             
 
 # get time to start from 0
@@ -78,18 +83,17 @@ minTime = min(timestamps)
 normalisedTime = [((ts - minTime) / 1000) for ts in timestamps]
 
 # draw red line to mark reloads
-lastTimestamp = normalisedTime[0]
 firstLoadLine = True
-for normTimestamp in normalisedTime:
-    if (normTimestamp - lastTimestamp > 1.5):
-        if(firstLoadLine):
-            plt.axvline(x=lastTimestamp, color='red', linestyle='--', label='Unload/load')
-            firstLoadLine = False
-        else:
-            plt.axvline(x=lastTimestamp, color='red', linestyle='--')
-        plt.axvline(x=normTimestamp, color='red', linestyle='--')
-
-    lastTimestamp = normTimestamp
+for afterLoadIndex in afterLoadIndices[1:]:
+    lastTimestamp = normalisedTime[afterLoadIndex - 1]
+    currentTimestamp = normalisedTime[afterLoadIndex]
+    
+    if(firstLoadLine):
+        plt.axvline(x=lastTimestamp, color='red', linestyle='--', label='Unload/load')
+        firstLoadLine = False
+    else:
+        plt.axvline(x=lastTimestamp, color='red', linestyle='--')
+    plt.axvline(x=currentTimestamp, color='red', linestyle='--')
 
 
 # to prevent multiple labels

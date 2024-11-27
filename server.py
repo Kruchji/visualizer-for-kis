@@ -252,7 +252,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             # convert to csv
             toLogText = ""
             for scrollLog in scrollData:
-                toLogText += str(uid)+";"+str(iteration)+";"+str(scrollLog["timestamp"])+";"+str(scrollLog["scrollPos"])+";"+str(scrollLog["totalScroll"])+";"+str(scrollLog["windowW"])+";"+str(scrollLog["windowH"])+";"+str(scrollLog["navbarH"])+";"+str(scrollLog["firstRowStart"])+";"+str(scrollLog["secondRowStart"])+";"+str(scrollLog["imageHeight"])+";"+str(scrollLog["missedTarget"])+"\n"
+                toLogText += str(uid)+";"+str(iteration)+";"+str(scrollLog["timestamp"])+";"+str(scrollLog["scrollPos"])+";"+str(scrollLog["totalScroll"])+";"+str(scrollLog["windowW"])+";"+str(scrollLog["windowH"])+";"+str(scrollLog["navbarH"])+";"+str(scrollLog["firstRowStart"])+";"+str(scrollLog["secondRowStart"])+";"+str(scrollLog["imageHeight"])+";"+str(scrollLog["missedTarget"])+";"+str(scrollLog["afterLoad"])+"\n"
 
             # write csv data to disk
             with open("CollectedData/scrollPositions.txt", 'a') as csvFile:

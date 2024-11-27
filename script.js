@@ -143,7 +143,7 @@ function startScrollTracker() {
     }, SCROLL_LOG_INTERVAL);
 
     scrollTrackerRunning = true;
-    storeScrollbarPos();    // store initial position (start time as well)
+    storeScrollbarPos(true);    // store initial position (start time as well)
 }
 
 
@@ -160,10 +160,10 @@ let scrollPayloads = { 'multipleScrollData': [] };
 // store scroll position every time user scrolls
 window.addEventListener('scroll', () => {
     if (!scrollTrackerRunning) return;  // only track if tracker is running
-    storeScrollbarPos();
+    storeScrollbarPos(false);
 });
 
-function storeScrollbarPos() {
+function storeScrollbarPos(afterLoadIndicator) {
     if (targetMissed === 0) {
         const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
         const targetPos = $('div.image-container').find('img[src="' + imageToFindSrc + '"]')[0].getBoundingClientRect();    // position relative to viewport
@@ -179,6 +179,11 @@ function storeScrollbarPos() {
         }
     }
 
+    let afterLoad = 0;
+    if (afterLoadIndicator) {
+        afterLoad = 1;
+    }
+
     let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
     let secondRowImage = $('#imageGrid > div:nth-child(' + (selectedNumPerRow + 1) + ')')[0];
 
@@ -192,7 +197,8 @@ function storeScrollbarPos() {
         "firstRowStart": firstRowImage.offsetTop,
         "secondRowStart": secondRowImage.offsetTop,
         "imageHeight": firstRowImage.offsetHeight,
-        "missedTarget": targetMissed
+        "missedTarget": targetMissed,
+        "afterLoad": afterLoad
     };
 
     scrollPayloads['multipleScrollData'].push(payload);
