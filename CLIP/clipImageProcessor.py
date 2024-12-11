@@ -7,9 +7,10 @@ import torch
 from PIL import Image
 import os
 import numpy as np
+from sklearn.cluster import KMeans
 #from torchvision.transforms import Compose
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu' # Use GPU if available (else CPU)
+device = 'cuda' if torch.cuda.is_available() else 'cpu'  # Use GPU if available (else CPU)
 
 model, _, preprocess = open_clip.create_model_and_transforms(
     'ViT-SO400M-14-SigLIP-384',
@@ -38,23 +39,27 @@ embeddings = []
 for img_path in image_paths:
     embeddings.append(get_image_embedding(img_path))
 
-# Pairwise cosine similarities
+# Convert embeddings to numpy array
 embeddings = np.array(embeddings)
-num_images = len(embeddings)
-similarities = np.zeros((num_images, num_images))
 
-for i in range(num_images):
-    for j in range(i + 1, num_images):
-        # Cosine similarity: (A . B) / (||A|| * ||B||)
-        similarity = np.dot(embeddings[i], embeddings[j]) / (
-            np.linalg.norm(embeddings[i]) * np.linalg.norm(embeddings[j])
-        )
-        similarities[i, j] = similarity
-        similarities[j, i] = similarity
+# Use KMeans to find 30 representative images
+num_representatives = 30
+kmeans = KMeans(n_clusters=num_representatives, random_state=42).fit(embeddings)
+representative_indices = kmeans.cluster_centers_.argsort(axis=0)[:num_representatives]
 
-# Find the two most similar images
-most_similar_pair = np.unravel_index(np.argmax(similarities, axis=None), similarities.shape)
-most_similar_images = (image_paths[most_similar_pair[0]], image_paths[most_similar_pair[1]])
+# Find 200 most similar images for each representative image
+num_similar_images = 200
+representative_images = []
+for idx in representative_indices:
+    # Cosine similarity: (A . B) / (||A|| * ||B||)
+    similarities = np.dot(embeddings, embeddings[idx]) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(embeddings[idx]))
+    most_similar_indices = np.argsort(similarities)[-num_similar_images:]
+    representative_images.append([image_paths[i] for i in most_similar_indices])
 
-print("The two most similar images are:")
-print(most_similar_images)
+# Print the representative images and their most similar images
+for i, rep_images in enumerate(representative_images):
+    print(f"Representative image {i + 1}: {rep_images[0]}")
+    print("Most similar images:")
+    for img in rep_images:
+        print(img)
+    print()
