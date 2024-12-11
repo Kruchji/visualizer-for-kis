@@ -8,6 +8,7 @@ from PIL import Image
 import os
 import numpy as np
 from sklearn.cluster import KMeans
+import shutil
 #from torchvision.transforms import Compose
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'  # Use GPU if available (else CPU)
@@ -63,3 +64,31 @@ for i, rep_images in enumerate(representative_images):
     for img in rep_images:
         print(img)
     print()
+
+# Create Data folder if it doesn't exist
+data_folder = 'Data'
+if not os.path.exists(data_folder):
+    os.makedirs(data_folder)
+
+# Save images and CLIP features
+for i, rep_images in enumerate(representative_images):
+    folder_path = os.path.join(data_folder, f'{i+1}')
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
+    clip_features = []
+    for j, img_path in enumerate(rep_images):
+        original_name = os.path.basename(img_path)
+        new_name = f'{j:04d}_{original_name}'
+        new_path = os.path.join(folder_path, new_name)
+        shutil.copy(img_path, new_path)
+        
+        # Get the embedding for the image
+        embedding = get_image_embedding(img_path)
+        clip_features.append(';'.join(map(str, embedding)))
+    
+    # Save CLIP features to CSV
+    csv_path = os.path.join(folder_path, 'CLIPFeatures.csv')
+    with open(csv_path, 'w') as f:
+        for feature in clip_features:
+            f.write(feature + '\n')
