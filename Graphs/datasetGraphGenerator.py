@@ -21,8 +21,7 @@ folder_names = [name for name in os.listdir("../CollectedData") if os.path.isdir
 all_users = [str(str_name) for str_name in [int(name) for name in folder_names if name.isdigit()]]
 
 # plot window size
-plt.figure(figsize=(10, 7))
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10, 7))
 
 validUsers = []
 

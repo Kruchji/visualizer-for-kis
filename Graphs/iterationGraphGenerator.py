@@ -36,9 +36,7 @@ imagesPerRow = int(json_data[str(user)]["imagesPerRow"][str(iteration)])
 targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
 
 # plot window size
-plt.figure(figsize=(10, 7))
-
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10, 7))
 
 # get scroll position data
 timestamps = []
