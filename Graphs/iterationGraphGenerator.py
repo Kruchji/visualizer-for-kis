@@ -17,8 +17,12 @@ else:
     exit()
 
 # load runs data
-with open('../CollectedData/userData.json', "r") as json_file:
-    json_data = json.load(json_file)
+try:
+    with open(f'../CollectedData/{user:04}/userData.json', "r") as json_file:
+        json_data = json.load(json_file)
+except FileNotFoundError:
+    print("User not found!")
+    exit()
 
 # get data about target image
 try:
@@ -48,7 +52,7 @@ previousTargetOverlay = {"x" : 0}
 
 afterLoadIndices = []
 
-with open('../CollectedData/scrollPositions.txt', 'r') as file:
+with open(f'../CollectedData/{user:04}/scrollPositions.txt', 'r') as file:
     
 
     reader = csv.reader(file, delimiter=';')
@@ -103,7 +107,7 @@ firstCompare = True
 firstSkip = True
 firstTargetOverlay = True
 
-with open('../CollectedData/submissions.txt', 'r') as file:     # TODO: remove submission parameters
+with open(f'../CollectedData/{user:04}/submissions.txt', 'r') as file:     # TODO: remove submission parameters
     reader = csv.reader(file, delimiter=';')
     for row in reader:
         if (int(row[0]) == user and int(row[1]) == iteration):
@@ -225,6 +229,6 @@ plt.grid(True)  # background grid
 
 # show plot (or save to file)
 if len(sys.argv) >= 4 and int(sys.argv[3]) == 1:
-    plt.savefig("graph.png")
+    plt.savefig("graph.png", dpi=400)
 else:
     plt.show()

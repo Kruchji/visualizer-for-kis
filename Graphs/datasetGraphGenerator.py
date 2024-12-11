@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import csv, sys, json
+import csv, sys, json, os
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
@@ -16,9 +16,9 @@ else:
     print("Please provide at least two arguments. (dataset, ordering, to_file)")
     exit()
 
-# load user data
-with open('../CollectedData/userData.json', "r") as json_file:
-    all_user_data = json.load(json_file)
+# get all user IDs
+folder_names = [name for name in os.listdir("../CollectedData") if os.path.isdir(os.path.join("../CollectedData", name))]
+all_users = [str(str_name) for str_name in [int(name) for name in folder_names if name.isdigit()]]
 
 # plot window size
 plt.figure(figsize=(10, 7))
@@ -27,9 +27,12 @@ fig, ax = plt.subplots()
 validUsers = []
 
 # iterate over all users, pick the ones that have the requested dataset and ordering
-for user in all_user_data:
-    user_data_sets = all_user_data[user]["dataSets"]
-    user_orderings = all_user_data[user]["orderings"]
+for user in all_users:
+    with open(f'../CollectedData/{int(user):04}/userData.json', "r") as json_file:
+        user_data = json.load(json_file)
+
+    user_data_sets = user_data[user]["dataSets"]
+    user_orderings = user_data[user]["orderings"]
 
     # check if this user has the requested dataset and ordering
     iteration_num = None
@@ -48,6 +51,7 @@ for user in all_user_data:
 
     validUsers.append(user)
 
+print("Users displayed on this graph: ", validUsers)
 
 # to prevent multiple labels
 firstIncorrect = True
@@ -63,10 +67,13 @@ for user in validUsers:
     ### Valid user data ###
     currentUser += 1
 
+    with open(f'../CollectedData/{int(user):04}/userData.json', "r") as json_file:
+        user_data = json.load(json_file)
+
     # get data about target image
-    currentTarget = all_user_data[user]["targets"][iteration_num]
-    allImages = all_user_data[user]["imagePos"][iteration_num]
-    imagesPerRow = all_user_data[user]["imagesPerRow"][iteration_num]
+    currentTarget = user_data[user]["targets"][iteration_num]
+    allImages = user_data[user]["imagePos"][iteration_num]
+    imagesPerRow = user_data[user]["imagesPerRow"][iteration_num]
     targePosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
     targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
 
@@ -82,7 +89,7 @@ for user in validUsers:
 
     afterLoadIndices = []
 
-    with open('../CollectedData/scrollPositions.txt', 'r') as file:
+    with open(f'../CollectedData/{int(user):04}/scrollPositions.txt', 'r') as file:
         
 
         reader = csv.reader(file, delimiter=';')
@@ -131,7 +138,7 @@ for user in validUsers:
 
 
 
-    with open('../CollectedData/submissions.txt', 'r') as file:
+    with open(f'../CollectedData/{int(user):04}/submissions.txt', 'r') as file:
         reader = csv.reader(file, delimiter=';')
         for row in reader:
             if (int(row[0]) == int(user) and int(row[1]) == int(iteration_num)):
@@ -260,6 +267,6 @@ plt.grid(True)  # background grid
 
 # show plot (or save to file)
 if len(sys.argv) >= 4 and int(sys.argv[3]) == 1:
-    plt.savefig("multiGraph.png")
+    plt.savefig("multiGraph.png", dpi=400)
 else:
     plt.show()

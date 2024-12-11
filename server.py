@@ -16,21 +16,33 @@ if len(sys.argv) >= 2:
 
 ################## Server ##################
 
+def getHighestUserID():
+    folder_names = [name for name in os.listdir("CollectedData") if os.path.isdir(os.path.join("CollectedData", name))]
+    numeric_folders = [int(name) for name in folder_names if name.isdigit()]
+    return max(numeric_folders, default=0)
+
 def createNewUser():
-    newUid = 0
-    try:
-        with open("CollectedData/userData.json", "r") as fh:
-            logs = json.load(fh)
-            newUid = max(map(int, logs.keys())) + 1     # gets last known user and increments its ID
-    except json.JSONDecodeError:  # file empty
-        logs = {}
+    # get last user ID
+    maxUserID = getHighestUserID()
+
+    # get new user ID
+    newUid = maxUserID + 1
+
+    logs = {}
 
     # store new user to .json
     logs[str(newUid)] = {"lastCompleted" : -2}
     logsStr = json.dumps(logs, indent=4)
     
-    with open("CollectedData/userData.json", "w") as JSONfile:
+    os.makedirs(f"CollectedData/{newUid:04}", exist_ok=True)
+    with open(f"CollectedData/{newUid:04}/userData.json", "w") as JSONfile:
         JSONfile.write(logsStr)
+
+    # Also create empty scrollPositions.txt and submissions.txt
+    with open(f"CollectedData/{newUid:04}/scrollPositions.txt", "w") as scrollFile:
+        pass
+    with open(f"CollectedData/{newUid:04}/submissions.txt", "w") as submissionFile:
+        pass
 
     return newUid
 
@@ -77,7 +89,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             oldUser = jsonPayload["oldUserID"]
             loadFailed = 0
             try:
-                with open("CollectedData/userData.json", "r") as JSONfile:
+                with open(f"CollectedData/{int(oldUser):04}/userData.json", "r") as JSONfile:
                     logs = json.load(JSONfile)
                     userLogs = logs[str(oldUser)]
             except Exception as e:  # file empty
@@ -97,7 +109,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                 logs[str(oldUser)] = userLogs
                 logsStr = json.dumps(logs, indent=4)
                 
-                with open("CollectedData/userData.json", "w") as JSONfile:
+                with open(f"CollectedData/{int(oldUser):04}/userData.json", "w") as JSONfile:
                     JSONfile.write(logsStr)
 
             # send new user ID to JS
@@ -117,7 +129,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             imageSets.sort(key=int)
 
             # load currently saved data
-            with open("CollectedData/userData.json", "r") as JSONfile:
+            with open(f"CollectedData/{int(uid):04}/userData.json", "r") as JSONfile:
                 logs = json.load(JSONfile)
                 userLogs = logs.get(uid,{})
                 dataSets = userLogs.get("dataSets",{})
@@ -152,7 +164,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             logs[uid] = userLogs
             logsStr = json.dumps(logs, indent=4)
             
-            with open("CollectedData/userData.json", "w") as JSONfile:
+            with open(f"CollectedData/{int(uid):04}/userData.json", "w") as JSONfile:
                 JSONfile.write(logsStr)
 
             # load board config from config file
@@ -206,7 +218,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             perRow = jsonPayload["perRow"]
             
             # load currently saved data
-            with open("CollectedData/userData.json", "r") as JSONfile:
+            with open(f"CollectedData/{int(uid):04}/userData.json", "r") as JSONfile:
                 logs = json.load(JSONfile)
                 userLogs = logs.get(uid,{})
 
@@ -235,7 +247,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             logs[uid] = userLogs
             logsStr = json.dumps(logs, indent=4)
             
-            with open("CollectedData/userData.json", "w") as JSONfile:
+            with open(f"CollectedData/{int(uid):04}/userData.json", "w") as JSONfile:
                 JSONfile.write(logsStr)
             self.send_response(200) 
 
@@ -255,7 +267,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                 toLogText += str(uid)+";"+str(iteration)+";"+str(scrollLog["timestamp"])+";"+str(scrollLog["scrollPos"])+";"+str(scrollLog["totalScroll"])+";"+str(scrollLog["windowW"])+";"+str(scrollLog["windowH"])+";"+str(scrollLog["navbarH"])+";"+str(scrollLog["firstRowStart"])+";"+str(scrollLog["secondRowStart"])+";"+str(scrollLog["imageHeight"])+";"+str(scrollLog["missedTarget"])+";"+str(scrollLog["afterLoad"])+"\n"
 
             # write csv data to disk
-            with open("CollectedData/scrollPositions.txt", 'a') as csvFile:
+            with open(f"CollectedData/{int(uid):04}/scrollPositions.txt", 'a') as csvFile:
                 csvFile.write(toLogText)
             self.send_response(200)
 
@@ -273,7 +285,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             toLogText = str(uid)+";"+str(iteration)+";"+str(logJSON["timestamp"])+";"+str(logJSON["scrollPos"])+";"+str(logJSON["totalScroll"])+";"+str(logJSON["navbarH"])+";"+str(logJSON["windowH"])+";"+str(logJSON["firstRowStart"])+";"+str(logJSON["secondRowStart"])+";"+str(logJSON["imageHeight"])+";"+str(logJSON["correct"])+";"+str(logJSON["image"])+"\n"
 
             # write csv data to disk
-            with open("CollectedData/submissions.txt", 'a') as csvFile:
+            with open(f"CollectedData/{int(uid):04}/submissions.txt", 'a') as csvFile:
                 csvFile.write(toLogText)
             self.send_response(200)
 
