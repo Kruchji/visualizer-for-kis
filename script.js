@@ -405,6 +405,10 @@ function orderImages(imageArray, ordering, ssImageArray, imagesPerRow) {
         case "sp":
             orderingName = "side-panel";
             break;
+        case "lab":
+            selfSort(imageArray, ssImageArray);       // self sorting array (using LAB colors)
+            orderingName = "LAB-self-sorting";
+            break;
         default:
             break;      // default order on invalid value
     }

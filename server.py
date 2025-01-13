@@ -134,6 +134,20 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                 userLogs = logs.get(uid,{})
                 dataSets = userLogs.get("dataSets",{})
 
+            # load board config from config file
+            configData = []
+            with open("config.txt", "r") as configFile:
+                reader = csv.reader(configFile, delimiter=';')
+                for row in reader:
+                    configData.append({"ord": row[1], "size": int(row[0])})
+
+            # Get sorting method
+            sortingMethod = configData[(int(uid) + int(iteration)) % len(configData)]["ord"]
+            if sortingMethod == "ss":
+                featuresFileName = "CLIPFeatures.csv"
+            elif sortingMethod == "lab":
+                featuresFileName = "LABFeatures.csv"
+
             images = []
             clipFeatures = {}
             if(len(dataSets) < len(imageSets)):
@@ -143,13 +157,14 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                     if file_name.endswith('.jpg'):
                         images.append(file_name)
                 
-                # store clip data
-                with open("./Data/" + chosenFolder + "/CLIPFeatures.csv", "r") as clipFile:
-                    reader = csv.reader(clipFile, delimiter=';')
-                    rowID = 0
-                    for row in reader:
-                        clipFeatures[images[rowID]] = row
-                        rowID += 1
+                if sortingMethod == "ss" or sortingMethod == "lab":
+                    # store features data
+                    with open("./Data/" + chosenFolder + "/" + featuresFileName, "r") as featuresFile:
+                        reader = csv.reader(featuresFile, delimiter=';')
+                        rowID = 0
+                        for row in reader:
+                            clipFeatures[images[rowID]] = row
+                            rowID += 1
 
             else: # end of test - out of dataSets
                 chosenFolder = "END"
@@ -167,12 +182,6 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             with open(f"CollectedData/{int(uid):04}/userData.json", "w") as JSONfile:
                 JSONfile.write(logsStr)
 
-            # load board config from config file
-            configData = []
-            with open("config.txt", "r") as configFile:
-                reader = csv.reader(configFile, delimiter=';')
-                for row in reader:
-                    configData.append({"ord": row[1], "size": int(row[0])})
 
             targetImage = ""
             sorted_images = np.array(images)
@@ -181,17 +190,19 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                 with open("./Data/" + chosenFolder + "/chosenTarget.txt", "r") as targetFile:
                     targetImage = targetFile.readline()  
 
-                # Convert the map's arrays from strings to floats
-                float_map = {k: np.array(list(map(float, v))) for k, v in clipFeatures.items()}
+                if sortingMethod == "ss" or sortingMethod == "lab":
+                    # Convert the map's arrays from strings to floats
+                    float_map = {k: np.array(list(map(float, v))) for k, v in clipFeatures.items()}
 
-                # Collect all float arrays into a single NumPy array
-                X = np.array(list(float_map.values()))
-                # Assuming we need a 2D array
-                X = X.reshape(len(images), -1).astype(np.float32)
+                    # Collect all float arrays into a single NumPy array
+                    X = np.array(list(float_map.values()))
+                    # We need a 2D array
+                    X = X.reshape(len(images), -1).astype(np.float32)
 
-                imagesOnRow = configData[(int(uid) + int(iteration)) % len(configData)]['size']
+                    imagesOnRow = configData[(int(uid) + int(iteration)) % len(configData)]['size']
 
-                _, sorted_images = selfSort.sort_with_flas(X.copy(), images, nc=49, n_images_per_site=imagesOnRow, radius_factor=0.7, wrap=False)
+                    print(f"Sorting images using {sortingMethod} method.")
+                    _, sorted_images = selfSort.sort_with_flas(X.copy(), images, nc=49, n_images_per_site=imagesOnRow, radius_factor=0.7, wrap=False)
 
             # send dataset and list of contents back to JS
             self.send_response(200) 
