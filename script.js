@@ -409,6 +409,10 @@ function orderImages(imageArray, ordering, ssImageArray, imagesPerRow) {
             selfSort(imageArray, ssImageArray);       // self sorting array (using LAB colors)
             orderingName = "LAB-self-sorting";
             break;
+        case "group":
+            groupSort(imageArray, imagesPerRow);   // group sorting
+            orderingName = "group-video";
+            break;
         default:
             break;      // default order on invalid value
     }
@@ -432,6 +436,50 @@ function shuffleArray(array) {
 function selfSort(imageArray, ssImageArray) {
     imageArray.length = 0;
     imageArray.push(...ssImageArray);     // already comes sorted from python server - no change needed
+}
+
+// group sorting algorithm - each image filename can be split using '_', the last part is used for grouping (video id). Pads with empty images to fill in row (each group starts on a new row then). Groups are then ordered by the lowest first part of filename in that group (lower number = first)
+function groupSort(imageArray, imagesPerRow) {
+
+    // Step 1: Create a map of groups, where the key is the group id and value is an array of image objects with rank and name
+    let groupMap = {};
+
+    imageArray.forEach(imageName => {
+        const parts = imageName.split('_');
+        const rank = parseInt(parts[0], 10); // Rank is the first part
+        const vidTime = parseInt(parts[1], 10);
+        const groupId = parts[2];            // Group ID is the third part (here with .jpg -> fine to use)
+
+        // Create an entry for the group if it doesn't exist yet
+        if (!groupMap[groupId]) {
+            groupMap[groupId] = [];
+        }
+
+        // Add the image to the group array
+        groupMap[groupId].push({ name: imageName, rank: rank, vidTime: vidTime });
+    });
+
+    // Step 2: Sort each group by video time, then sort the groups by the lowest rank in each group
+    const sortedGroups = Object.keys(groupMap)
+        .map(groupId => {
+            // Sort images inside the group by video time
+            groupMap[groupId].sort((a, b) => a.vidTime - b.vidTime);
+
+            // Return the group with its images
+            return {
+                groupId: groupId,
+                images: groupMap[groupId],
+                lowestRank: Math.min(...groupMap[groupId].map(image => image.rank))  // Get the lowest rank in the group
+            };
+        })
+        .sort((a, b) => a.lowestRank - b.lowestRank);  // Sort groups by the lowest rank in each group
+
+    // Step 3: Flatten the sorted groups into a single array of image names
+    const sortedImageArray = sortedGroups.flatMap(group => group.images.map(image => image.name));
+
+    // replace array
+    imageArray.length = 0;
+    imageArray.push(...sortedImageArray);
 }
 
 // middle-column first sorting algorithm
