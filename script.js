@@ -347,10 +347,9 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
         imageGrid.append(
             $('<div>', { class: 'image-container' }).append(
                 adminEnabled ? $('<div>', { class: 'adminOverlayText', text: parseInt(filename.split("_")[0], 10) }) : null, // add overlay text if in admin mode
-                $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false' }),
+                $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false', click: handleCompareClick }),
                 $('<div>', { class: 'hover-buttons' }).append(
-                    $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick }),
-                    $('<button>', { class: 'btn btn-primary', text: 'Compare', click: handleCompareClick })
+                    $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick })
                 )
             )
         );
