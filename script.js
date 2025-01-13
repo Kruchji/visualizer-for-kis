@@ -344,15 +344,19 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
 
     const imageGrid = $('#imageGrid');
     imageFilenames.forEach(function (filename) {
-        imageGrid.append(
-            $('<div>', { class: 'image-container' }).append(
-                adminEnabled ? $('<div>', { class: 'adminOverlayText', text: parseInt(filename.split("_")[0], 10) }) : null, // add overlay text if in admin mode
-                $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false', click: handleCompareClick }),
-                $('<div>', { class: 'hover-buttons' }).append(
-                    $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick })
+        if (filename === "empty") {     // empty image
+            imageGrid.append($('<div>', { class: 'image-container empty' }));
+        } else {
+            imageGrid.append(
+                $('<div>', { class: 'image-container' }).append(
+                    adminEnabled ? $('<div>', { class: 'adminOverlayText', text: parseInt(filename.split("_")[0], 10) }) : null, // add overlay text if in admin mode
+                    $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false', click: handleCompareClick }),
+                    $('<div>', { class: 'hover-buttons' }).append(
+                        $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick })
+                    )
                 )
-            )
-        );
+            );
+        }
     });
 
     const targetImageDiv = $('#targetImageDiv');
@@ -465,11 +469,24 @@ function groupSort(imageArray, imagesPerRow) {
             // Sort images inside the group by video time
             groupMap[groupId].sort((a, b) => a.vidTime - b.vidTime);
 
-            // Return the group with its images
+            // Find the lowest rank in the group
+            const lowestRank = Math.min(...groupMap[groupId].map(image => image.rank));
+
+            // Add "empty" images to fill the last row if necessary
+            const totalImages = groupMap[groupId].length;
+            const remainder = totalImages % imagesPerRow;
+            if (remainder !== 0) {
+                const emptyImagesNeeded = imagesPerRow - remainder;
+                // Add "empty" images at the end of the group
+                for (let i = 0; i < emptyImagesNeeded; i++) {
+                    groupMap[groupId].push({ name: "empty", rank: Infinity, vidTime: Infinity });
+                }
+            }
+
             return {
                 groupId: groupId,
                 images: groupMap[groupId],
-                lowestRank: Math.min(...groupMap[groupId].map(image => image.rank))  // Get the lowest rank in the group
+                lowestRank: lowestRank  // Store the lowest rank for sorting groups
             };
         })
         .sort((a, b) => a.lowestRank - b.lowestRank);  // Sort groups by the lowest rank in each group
