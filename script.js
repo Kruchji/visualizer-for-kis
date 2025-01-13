@@ -479,7 +479,7 @@ function displaySidePanel() {
     sidePanel.show();
 
     const imageGrid = $('#imageGrid');
-    imageGrid.css('margin-left', '20%');
+    imageGrid.css('margin-left', '15%');
 }
 
 function hideSidePanel() {
