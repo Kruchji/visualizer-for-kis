@@ -15,11 +15,7 @@ $(document).ready(function () {
     // setup target image overlay
     let targetImageDiv = $('#targetImageDiv');
     targetImageDiv.click(function () {
-        toggleTargetImage();
-        if (!scrollTrackerRunning) {
-            startScrollTracker();   // start tracker on close
-            startSkipTimer();
-        }
+        toggleTargetAndStartTracker();
     });
 
     // setup end overlay
@@ -707,9 +703,29 @@ function toggleTargetImage() {
 }
 
 function toggleTargetButton() {
-    toggleTargetImage();
-    if (!scrollTrackerRunning) { startScrollTracker(); } // start tracker on close
+    toggleTargetAndStartTracker();
 }
+
+function toggleTargetAndStartTracker() {
+    toggleTargetImage();
+    if (!scrollTrackerRunning) {
+        startScrollTracker();   // start tracker on close
+        startSkipTimer();
+    }
+}
+
+// Spacebar to toggle target image
+document.addEventListener('keydown', function (event) {
+    if (event.key === ' ') {
+        // Prevent the default spacebar action (scrolling)
+        event.preventDefault();
+
+        // Active only when button can be pressed as well (not on loading screen)
+        if (scrollTrackerRunning) {
+            toggleTargetImage();
+        }
+    }
+});
 
 
 //=============== Image compare overlay ===============//
