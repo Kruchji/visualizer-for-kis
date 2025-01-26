@@ -1,0 +1,10 @@
+app:
+  ingress:
+    internal:
+      enabled: true
+
+  port: 80
+  health: /
+
+  extraEnv:
+    BACKEND_SERVICE_NAME:

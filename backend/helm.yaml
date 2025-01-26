@@ -1,0 +1,9 @@
+app:
+  ingress:
+    enabled: false
+
+  port: 8000
+  health: /health
+
+  extraEnv:
+    DATABASE_URL:
