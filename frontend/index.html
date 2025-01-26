@@ -70,7 +70,7 @@
                     tracked, but all data is collected anonymously.
                 </li>
             </ul>
-        </div> <button id="thisButton" type="button" class="btn btn-primary start-btn">Begin the Test</button>
+        </div> <button id="start-btn" type="button" class="btn btn-primary start-btn">Begin the Test</button>
     </div>
 
     <!-- End of test overlay -->
@@ -88,13 +88,12 @@
         <div class="navbar-nav">
             <div class="nav-item" id="solutionButton">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="cursorCheckbox"
-                        onclick="toggleSolutionDisplay()">
+                    <input id="solution-button" class="form-check-input" type="checkbox" id="cursorCheckbox">
                     <label class="form-check-label" for="cursorCheckbox">Show solution</label>
                 </div>
             </div>
             <div class="nav-item">
-                <button type="button" class="btn btn-primary" onclick="toggleTargetButton()">Toggle Target
+                <button id="target-button" type="button" class="btn btn-primary">Toggle Target
                     Image</button>
             </div>
             <div class="nav-item">
@@ -103,15 +102,15 @@
                 </span>
             </div>
             <div class="nav-item" id="newUserButton">
-                <button type="button" class="btn btn-primary" onclick="startWithNewUser()">Start over (new
+                <button id="new-user-button" type="button" class="btn btn-primary">Start over (new
                     user)</button>
             </div>
             <div class="nav-item">
-                <button type="button" class="btn btn-secondary ml-2" onclick="toggleFullScreen()">Use Full-Screen
+                <button id="full-screen-button" type="button" class="btn btn-secondary ml-2">Use Full-Screen
                     Mode</button>
             </div>
             <div class="nav-item" id="skipButton">
-                <button type="button" class="btn btn-secondary ml-2 shining" onclick="skipCurrentIteration()">Image not in list</button>
+                <button id="current-iteration-button" type="button" class="btn btn-secondary ml-2 shining">Image not in list</button>
             </div>
 
         </div>

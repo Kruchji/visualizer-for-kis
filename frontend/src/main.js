@@ -31,10 +31,36 @@ $(document).ready(function () {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const button = document.querySelector(".start-btn");
-    button.addEventListener("click", () => {
+    const start_button = document.querySelector("#start-btn");
+    start_button.addEventListener("click", () => {
         firstRunLoad();
     });
+
+    const toggle_button = document.querySelector("#solution-button");
+    toggle_button.addEventListener("click", () => {
+        toggleSolutionDisplay();
+    });
+
+    const target_button = document.querySelector("#target-button");
+    target_button.addEventListener("click", () => {
+        toggleTargetButton();
+    });
+
+    const new_user_button = document.querySelector("#new-user-button");
+    new_user_button.addEventListener("click", () => {
+        startWithNewUser();
+    });
+
+    const full_screen_button = document.querySelector("#full-screen-button");
+    full_screen_button.addEventListener("click", () => {
+        toggleFullScreen();
+    });
+
+    const current_iteration_button = document.querySelector("#current-iteration-button");
+    current_iteration_button.addEventListener("click", () => {
+        skipCurrentIteration();
+    });
+
 });
 
 function firstRunLoad() {
