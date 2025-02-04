@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, shutil
+import os, shutil, math
 import numpy as np
 from sklearn.cluster import KMeans
 from scipy.cluster.hierarchy import linkage, fcluster
@@ -37,7 +37,7 @@ embeddings = np.array(embeddings)
 Z = linkage(embeddings, method='ward')
 
 # Cut the dendrogram to get only 'num_representatives' clusters
-num_representatives = 30
+num_representatives = 35
 labels = fcluster(Z, num_representatives, criterion='maxclust')
 
 # For each cluster, compute the centroid (mean of points in the cluster)
@@ -61,8 +61,9 @@ for repres_emb in representative_embeddings:
     picked_embeddings.append([embeddings[i] for i in most_similar_indices])
 
 # Print the representative images and their most similar images
+attentionChecks = 0 # Skip folder number to make space for attention check folders
 for i, rep_images in enumerate(picked_images):
-    os.makedirs(f"new_datasets/{(i + 1):02}", exist_ok=True)
+    os.makedirs(f"new_datasets/{(i + 1 + attentionChecks):02}", exist_ok=True)
     print(f"Representative image {i + 1}: {rep_images[0]}")
     print("Copying most similar images")
     for j in range(len(rep_images)):
@@ -73,9 +74,12 @@ for i, rep_images in enumerate(picked_images):
         new_image_name = f"{j:04}_{old_image_name_parts[1]}_{old_image_name_parts[2]}"
 
         # Save images to new_datasets folder to folder with i + 1 name (padded to 2 digits)
-        shutil.copy(img, f"new_datasets/{(i + 1):02}/{new_image_name}")
+        shutil.copy(img, f"new_datasets/{(i + 1 + attentionChecks):02}/{new_image_name}")
 
     # Also save the embeddings to a CSV file - CLIPFeatures.csv
-    np.savetxt(f"new_datasets/{(i + 1):02}/CLIPFeatures.csv", np.array(picked_embeddings[i]), delimiter=';', fmt='%.8e')
+    np.savetxt(f"new_datasets/{(i + 1 + attentionChecks):02}/CLIPFeatures.csv", np.array(picked_embeddings[i]), delimiter=';', fmt='%.8e')
         
     print()
+
+    if ((i + 1) % (math.ceil(num_representatives / 3)) == 0):  # Make space always for 2 attention checks
+        attentionChecks += 1
