@@ -62,7 +62,18 @@ let totalNumberOfSets = -1;
 let adminEnabled = false;
 
 function createNewUser() {
-    return fetch("newUser",
+
+    // Try to get Prolific PID from URL
+    const params = new URLSearchParams(window.location.search);
+    const prolificPID = params.get('PROLIFIC_PID');
+
+    let prolificQuery = "";
+    if (prolificPID) {
+        prolificQuery = "?PROLIFIC_PID=" + prolificPID;
+    }
+
+    // create new user
+    return fetch("newUser" + prolificQuery,
         {
             method: "POST"
         }).then(response => {

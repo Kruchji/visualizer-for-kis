@@ -48,7 +48,7 @@ def getHighestUserID():
     numeric_folders = [int(name) for name in folder_names if name.isdigit()]
     return max(numeric_folders, default=-1)
 
-def createNewUser():
+def createNewUser(prolificPID):
     # get last user ID
     maxUserID = getHighestUserID()
 
@@ -58,7 +58,7 @@ def createNewUser():
     logs = {}
 
     # store new user to .json
-    logs[str(newUid)] = {"lastCompleted" : -2}
+    logs[str(newUid)] = {"lastCompleted" : -2, "PROLIFIC_PID" : prolificPID, "reloads" : {}}  # -2 to indicate that the user is new
     logsStr = json.dumps(logs, indent=4)
     
     os.makedirs(f"CollectedData/{newUid:04}", exist_ok=True)
@@ -92,8 +92,9 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
 
         ############### Create a new user ###############
-        if self.path.startswith('/newUser'):        
-            newUid = createNewUser()
+        if self.path.startswith('/newUser'):
+            prolificPID = query_params.get("PROLIFIC_PID", [""])[0]
+            newUid = createNewUser(prolificPID)
 
             # send new user ID to JS
             self.send_response(200) 
