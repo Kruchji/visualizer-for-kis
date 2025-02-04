@@ -8,8 +8,8 @@ from scipy.spatial.distance import cdist
 import csv
 
 
-# Get folders inside extracted_images/mvk_2
-folders = [f.path for f in os.scandir('extracted_images/mvk_2') if f.is_dir()]
+# Get folders inside extracted_images/mvk_1 and extracted_images/mvk_2
+folders = [f.path for f in os.scandir('extracted_images/mvk_1') if f.is_dir()] + [f.path for f in os.scandir('extracted_images/mvk_2') if f.is_dir()]
 
 image_paths = []
 embeddings = []
