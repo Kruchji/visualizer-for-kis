@@ -56,7 +56,7 @@ picked_embeddings = []
 for repres_emb in representative_embeddings:
     # Cosine similarity: (A . B) / (||A|| * ||B||)
     similarities = np.dot(embeddings, repres_emb) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(repres_emb))
-    most_similar_indices = np.argsort(similarities)[-num_similar_images:]
+    most_similar_indices = np.argsort(similarities)[-num_similar_images:][::-1]     # Reverse the order to get the most similar images (descending order)
     picked_images.append([image_paths[i] for i in most_similar_indices])
     picked_embeddings.append([embeddings[i] for i in most_similar_indices])
 
