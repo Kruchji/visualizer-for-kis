@@ -74,7 +74,7 @@ body {
 
 .row-separator {
     grid-column: span 8; /* Full row width */
-    border-bottom: 3px solid red; /* Line style */
+    border-bottom: 3px solid #7f6161; /* Line style */
     margin: 10px 0;
   }
 
