@@ -342,11 +342,18 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
 
     $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
 
+    let lastEmpty = false;
     const imageGrid = $('#imageGrid');
     imageFilenames.forEach(function (filename) {
         if (filename === "empty") {     // empty image
-            imageGrid.append($('<div>', { class: 'image-container empty' }));
+            imageGrid.append($('<div>', { class: 'empty' }));
+            lastEmpty = true;
         } else {
+            if (lastEmpty) {    // add separator between videos
+                imageGrid.append($('<div>', { class: 'row-separator' }));
+                lastEmpty = false;
+            }
+
             imageGrid.append(
                 $('<div>', { class: 'image-container' }).append(
                     adminEnabled ? $('<div>', { class: 'adminOverlayText', text: parseInt(filename.split("_")[0], 10) }) : null, // add overlay text if in admin mode

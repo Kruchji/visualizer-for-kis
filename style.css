@@ -72,6 +72,12 @@ body {
     /* transition for shake */
 }
 
+.row-separator {
+    grid-column: span 8; /* Full row width */
+    border-bottom: 3px solid red; /* Line style */
+    margin: 10px 0;
+  }
+
 /* buttons when hovering over an image */
 .hover-buttons {
     white-space: nowrap;
