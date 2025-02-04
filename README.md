@@ -21,3 +21,5 @@ Possible ordering values:
 - `mc` : middle column first (otherwise same as `d`)
 - `ss` : self-sorting
 - `r` : random
+- `lab` : LAB color self-sorting
+- `group` : group by video
