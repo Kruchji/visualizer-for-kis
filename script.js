@@ -356,7 +356,7 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
 
             imageGrid.append(
                 $('<div>', { class: 'image-container' }).append(
-                    adminEnabled ? $('<div>', { class: 'adminOverlayText', text: parseInt(filename.split("_")[0], 10) }) : null, // add overlay text if in admin mode
+                    adminEnabled ? $('<div>', { class: 'adminOverlayText'}).html(parseInt(filename.split("_")[0], 10) + "<br>vID: " + filename.split("_")[2].slice(0, -4)) : null, // add overlay text if in admin mode (from video id remove .jpg)
                     $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false', click: handleCompareClick }),
                     $('<div>', { class: 'hover-buttons' }).append(
                         $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick })
