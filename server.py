@@ -3,6 +3,8 @@
 import json, http.server, os, csv, sys
 import numpy as np
 from urllib.parse import urlparse, parse_qs
+import itertools
+import random, math
 
 # self-sorting
 import selfSort
@@ -14,12 +16,37 @@ if len(sys.argv) >= 2:
         adminMode = True
         print("Admin mode enabled!")
 
+# Generate permutations of board config
+baseConfigData = []
+with open("config.txt", "r") as configFile:
+    reader = csv.reader(configFile, delimiter=';')
+    for row in reader:
+        baseConfigData.append({"ord": row[1], "size": int(row[0])})
+baseConfigLength = len(baseConfigData)
+
+numberOfDatasets = len([folder for folder in os.listdir("./Data/")])
+permsToGenerate = math.ceil((numberOfDatasets) / baseConfigLength)    # Generate enough permutations to cover all datasets
+
+configPermutations = list(itertools.permutations(baseConfigData))
+randomConfigPermutations = [random.choice(configPermutations) for _ in range(permsToGenerate)]
+
+with open(".configPermutations", "w") as outputFile:
+    writer = csv.writer(outputFile, delimiter=';')
+    for perm in randomConfigPermutations:
+        # Write each permutation as two columns (size, ord) like the original file
+        for item in perm:
+            writer.writerow([item["size"], item["ord"]])
+
+# loop over each permutation with different starting point for each user
+def getConfigIndex(user, iter, configLength):
+    return (int(user) + int(iter)) % configLength + (int(iter) // configLength) * configLength
+
 ################## Server ##################
 
 def getHighestUserID():
     folder_names = [name for name in os.listdir("CollectedData") if os.path.isdir(os.path.join("CollectedData", name))]
     numeric_folders = [int(name) for name in folder_names if name.isdigit()]
-    return max(numeric_folders, default=0)
+    return max(numeric_folders, default=-1)
 
 def createNewUser():
     # get last user ID
@@ -136,13 +163,13 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
             # load board config from config file
             configData = []
-            with open("config.txt", "r") as configFile:
+            with open(".configPermutations", "r") as configFile:
                 reader = csv.reader(configFile, delimiter=';')
                 for row in reader:
                     configData.append({"ord": row[1], "size": int(row[0])})
 
-            # Get sorting method
-            sortingMethod = configData[(int(uid) + int(iteration)) % len(configData)]["ord"]
+            # Get sorting method - pick loop over each permutation with different starting point for each user
+            sortingMethod = configData[getConfigIndex(uid, iteration, baseConfigLength)]['ord']
             if sortingMethod == "ss":
                 featuresFileName = "CLIPFeatures.csv"
             elif sortingMethod == "lab":
@@ -199,7 +226,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                     # We need a 2D array
                     X = X.reshape(len(images), -1).astype(np.float32)
 
-                    imagesOnRow = configData[(int(uid) + int(iteration)) % len(configData)]['size']
+                    imagesOnRow = configData[getConfigIndex(uid, iteration, baseConfigLength)]['size']
 
                     print(f"Sorting images using {sortingMethod} method.")
                     _, sorted_images = selfSort.sort_with_flas(X.copy(), images, nc=49, n_images_per_site=imagesOnRow, radius_factor=0.7, wrap=False)
@@ -209,7 +236,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
 
-            response = {'images': images, 'folder' : chosenFolder, 'boardsConfig' : configData, 'target' : targetImage, 'ss_images' : sorted_images.tolist()}
+            response = {'images': images, 'folder' : chosenFolder, 'boardsConfig' : configData, 'baseConfigLength' : baseConfigLength, 'target' : targetImage, 'ss_images' : sorted_images.tolist()}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
