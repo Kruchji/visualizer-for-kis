@@ -1,5 +1,6 @@
 :root {
     --overlay-background-color: rgba(0, 0, 0, 0.9);
+    --overlay-full-background-color: rgba(0, 0, 0, 1);
 }
 
 body {
@@ -73,10 +74,12 @@ body {
 }
 
 .row-separator {
-    grid-column: span 8; /* Full row width */
-    border-bottom: 3px solid #7f6161; /* Line style */
+    grid-column: span 8;
+    /* Full row width */
+    border-bottom: 3px solid #7f6161;
+    /* Line style */
     margin: 10px 0;
-  }
+}
 
 /* buttons when hovering over an image */
 .hover-buttons {
@@ -108,7 +111,7 @@ body {
 
 #targetImageDiv {
     z-index: 10;
-    background-color: var(--overlay-background-color);
+    background-color: var(--overlay-full-background-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -142,9 +145,19 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--overlay-background-color);
     color: rgba(13, 110, 253, 1);
     font-size: 2vw;
+}
+
+#loading-screen,
+#image-compare,
+#end-overlay,
+#start-overlay {
+    background-color: var(--overlay-full-background-color);
+}
+
+#result-overlay {
+    background-color: var(--overlay-background-color);
 }
 
 #start-overlay {
