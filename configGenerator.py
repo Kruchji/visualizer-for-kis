@@ -94,7 +94,7 @@ for i in range(len(stringLatinSquareConfigs)):
         latinSquareConfigs[i].append({"ord": ord, "size": int(size)})
 
 # Write the Latin square to a file
-with open(".configLatinSquare", "w") as outputFile:
+with open("CollectedData/.configLatinSquare", "w") as outputFile:
     writer = csv.writer(outputFile, delimiter=';')
     for squareRow in latinSquareConfigs:
         # Write full one user config per row

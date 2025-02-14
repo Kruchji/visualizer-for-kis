@@ -141,7 +141,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
             # load board config from config file
             configData = []
-            with open(".configLatinSquare", "r") as configFile:
+            with open("CollectedData/.configLatinSquare", "r") as configFile:
                 reader = csv.reader(configFile, delimiter=';')
                 readRows = 0
                 for row in reader:
