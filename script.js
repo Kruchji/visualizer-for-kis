@@ -718,13 +718,16 @@ function endTesting() {
     $('#end-overlay').css('background-color', 'black');
     showEndOverlay();
     gameEnded = true;
+
+    // If Prolific URL is set, redirect there after 5 seconds
+    redirectCompletionProlific();
 }
 
 function showEndOverlay() {
     let endOverlay = $('#end-overlay');
 
     endOverlay.empty();
-    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test.</div><br>");
+    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test. You'll be shortly redirected back to Prolific.</div><br>");
     if (adminEnabled) {    // hide new user button for standard users
         endOverlay.append('<button type="button" class="btn btn-primary end-btn" onclick="startWithNewUser()">Go again (new user)</button>');
     }
@@ -740,6 +743,17 @@ function hideEndOverlay() {
     endOverlay.empty();
 }
 
+function redirectCompletionProlific() {
+    const redirectProlificURL = null; //e.g. "https://app.prolific.co/submissions/complete?cc=";
+
+    if (redirectProlificURL) {
+        setTimeout(function () {
+            window.location.replace(redirectProlificURL);
+        }, 5000);
+    } else {
+        console.log("No Prolific redirect URL set.");
+    }
+}
 
 //=============== Start over (new user) ===============//
 
