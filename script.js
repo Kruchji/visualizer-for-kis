@@ -303,7 +303,7 @@ function loadOldIteration(currIterData) {
     $('#targetImageDiv').empty();
 
     // setup everything
-    if (currIterData['currDataFolder'] == "END") return endTesting();
+    if (currIterData['currDataFolder'] == "END") return endTesting(false);
 
     const imageFilenames = currIterData['currImages'];
     const imageToFind = currIterData['currTarget'];
@@ -713,14 +713,16 @@ function hideStartOverlay() {
 
 let gameEnded = false;
 
-function endTesting() {
+function endTesting(payProlific = true) {
     stopScrollTracker();
     $('#end-overlay').css('background-color', 'black');
     showEndOverlay();
     gameEnded = true;
 
-    // If Prolific URL is set, redirect there after 5 seconds
-    redirectCompletionProlific();
+    if (payProlific) {
+        // If Prolific URL is set, redirect there after 5 seconds
+        redirectCompletionProlific();
+    }
 }
 
 function showEndOverlay() {
