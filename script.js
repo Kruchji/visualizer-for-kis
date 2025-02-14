@@ -30,39 +30,6 @@ function firstRunLoad() {
     // hide instruction overlay
     hideStartOverlay();
 
-    // load everything
-    let lastUser = localStorage.getItem('LastUserID');
-    if (!lastUser) {
-        createNewUser().then(result => {
-            setupAdminMode(result.adminMode);
-            loadNextIteration();
-        });
-    } else {
-        // load existing user (and his progress)
-        loadOldUser(lastUser).then(result => {
-            if (result['loadFailed'] == 1) {
-                createNewUser().then(result => {
-                    setupAdminMode(result.adminMode);
-                    loadNextIteration();
-                });
-            } else {
-                setupAdminMode(result.adminMode);
-                loadOldIteration(result);
-            }
-        });
-    }
-}
-
-
-//=============== New user creation (first iteration) ===============//
-
-let UserID = -1;
-let currentIteration = -1;
-let totalNumberOfSets = -1;
-let adminEnabled = false;
-
-function createNewUser() {
-
     // Try to get Prolific PID from URL (if not found, use empty string)
     const params = new URLSearchParams(window.location.search);
     const prolificPID = params.get('PROLIFIC_PID');
@@ -77,6 +44,29 @@ function createNewUser() {
 
     let prolificQuery = `?PROLIFIC_PID=${encodeURIComponent(prolificPID)}&STUDY_ID=${encodeURIComponent(studyID)}&SESSION_ID=${encodeURIComponent(sessionID)}`;
 
+    // load existing user (and his progress)
+    loadOldUser(prolificQuery).then(result => {
+        if (result['loadFailed'] == 1) {
+            createNewUser(prolificQuery).then(result => {
+                setupAdminMode(result.adminMode);
+                loadNextIteration();
+            });
+        } else {
+            setupAdminMode(result.adminMode);
+            loadOldIteration(result);
+        }
+    });
+}
+
+
+//=============== New user creation (first iteration) ===============//
+
+let UserID = -1;
+let currentIteration = -1;
+let totalNumberOfSets = -1;
+let adminEnabled = false;
+
+function createNewUser(prolificQuery) {
     // create new user
     return fetch("newUser" + prolificQuery,
         {
@@ -97,13 +87,10 @@ function createNewUser() {
 }
 
 // alternative: load old user
-function loadOldUser(oldUserID) {
-    UserID = oldUserID;
-
-    return fetch("oldUser",
+function loadOldUser(prolificQuery) {
+    return fetch("oldUser" + prolificQuery,
         {
-            method: "POST",
-            body: JSON.stringify({ 'oldUserID': oldUserID })
+            method: "POST"
         }).then(response => {
             if (response.ok) {
                 return response.json();
@@ -291,6 +278,7 @@ function loadNextIteration() {
 
 // load already ongoing iteration
 function loadOldIteration(currIterData) {
+    UserID = parseInt(currIterData['userID']);
     currentIteration = parseInt(currIterData['currIter']);
     updateProgress();
 

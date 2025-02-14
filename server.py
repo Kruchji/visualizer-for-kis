@@ -44,6 +44,11 @@ def createNewUser(prolificPID, studyID, sessionID):
     with open(f"CollectedData/{newUid:04}/submissions.txt", "w") as submissionFile:
         pass
 
+    # Also add mapping PID to UID to a csv file (create if it does not exists)
+    with open("CollectedData/pid_uid_mapping.csv", "a") as mappingFile:
+        writer = csv.writer(mappingFile, delimiter=';')
+        writer.writerow([prolificPID, newUid])
+
     return newUid
 
 
@@ -86,13 +91,24 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
         ############### Load existing user ###############
         if self.path.startswith('/oldUser'):    
-            # load received JSON data
-            contentLength = int(self.headers.get('content-length'))
-            decodedData = self.rfile.read(contentLength).decode()
-            jsonPayload = json.loads(decodedData)
+            # Get Prolific PID
+            prolificPID = query_params.get("PROLIFIC_PID", [""])[0]
 
-            oldUser = jsonPayload["oldUserID"]
             loadFailed = 0
+
+            # Get user ID from mapping file
+            oldUser = "-1"
+            with open("CollectedData/pid_uid_mapping.csv", "r") as mappingFile:
+                reader = csv.reader(mappingFile, delimiter=';')
+                for row in reader:
+                    if row[0] == prolificPID:
+                        oldUser = row[1]
+                        break
+
+            if oldUser == "-1":
+                loadFailed = 1
+                userLogs = {}
+                
             try:
                 with open(f"CollectedData/{int(oldUser):04}/userData.json", "r") as JSONfile:
                     logs = json.load(JSONfile)
@@ -123,7 +139,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
             
-            response = {'loadFailed': loadFailed, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
+            response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
