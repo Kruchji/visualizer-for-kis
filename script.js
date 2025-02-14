@@ -63,14 +63,13 @@ let adminEnabled = false;
 
 function createNewUser() {
 
-    // Try to get Prolific PID from URL
+    // Try to get Prolific PID from URL (if not found, use empty string)
     const params = new URLSearchParams(window.location.search);
-    const prolificPID = params.get('PROLIFIC_PID');
+    const prolificPID = params.get('PROLIFIC_PID') || '';
+    const studyID = params.get('STUDY_ID') || '';
+    const sessionID = params.get('SESSION_ID') || '';
 
-    let prolificQuery = "";
-    if (prolificPID) {
-        prolificQuery = "?PROLIFIC_PID=" + prolificPID;
-    }
+    let prolificQuery = `?PROLIFIC_PID=${encodeURIComponent(prolificPID)}&STUDY_ID=${encodeURIComponent(studyID)}&SESSION_ID=${encodeURIComponent(sessionID)}`;
 
     // create new user
     return fetch("newUser" + prolificQuery,
