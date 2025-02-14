@@ -65,9 +65,15 @@ function createNewUser() {
 
     // Try to get Prolific PID from URL (if not found, use empty string)
     const params = new URLSearchParams(window.location.search);
-    const prolificPID = params.get('PROLIFIC_PID') || '';
+    const prolificPID = params.get('PROLIFIC_PID');
     const studyID = params.get('STUDY_ID') || '';
     const sessionID = params.get('SESSION_ID') || '';
+
+    // If PROLIFIC_PID is missing, redirect to inputPID.html
+    if (!prolificPID) {
+        window.location.replace('inputPID.html');
+        return;
+    }
 
     let prolificQuery = `?PROLIFIC_PID=${encodeURIComponent(prolificPID)}&STUDY_ID=${encodeURIComponent(studyID)}&SESSION_ID=${encodeURIComponent(sessionID)}`;
 
