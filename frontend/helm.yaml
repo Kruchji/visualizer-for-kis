@@ -1,7 +1,6 @@
 app:
   ingress:
-    internal:
-      enabled: true
+    enabled: true
 
   port: 80
   health: /

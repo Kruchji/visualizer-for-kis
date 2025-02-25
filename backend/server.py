@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+
 # self-sorting
 import selfSort
 
@@ -17,15 +18,16 @@ if len(sys.argv) >= 2:
     if sys.argv[1] == "--admin":
         adminMode = True
         print("Admin mode enabled!")
+       
 
 ################## Server ##################
 
 def getHighestUserID():
     folder_names = [name for name in os.listdir("CollectedData") if os.path.isdir(os.path.join("CollectedData", name))]
     numeric_folders = [int(name) for name in folder_names if name.isdigit()]
-    return max(numeric_folders, default=0)
+    return max(numeric_folders, default=-1)
 
-def createNewUser():
+def createNewUser(prolificPID, studyID, sessionID):
     # get last user ID
     maxUserID = getHighestUserID()
 
@@ -35,7 +37,7 @@ def createNewUser():
     logs = {}
 
     # store new user to .json
-    logs[str(newUid)] = {"lastCompleted" : -2}
+    logs[str(newUid)] = {"lastCompleted" : -2, "prolificPID" : prolificPID, "studyID" : studyID, "sessionID" : sessionID, "reloads" : {}}  # -2 to indicate that the user is new
     logsStr = json.dumps(logs, indent=4)
     
     os.makedirs(f"CollectedData/{newUid:04}", exist_ok=True)
@@ -47,6 +49,11 @@ def createNewUser():
         pass
     with open(f"CollectedData/{newUid:04}/submissions.txt", "w") as submissionFile:
         pass
+
+    # Also add mapping PID to UID to a csv file (create if it does not exists)
+    with open("CollectedData/pid_uid_mapping.csv", "a") as mappingFile:
+        writer = csv.writer(mappingFile, delimiter=';')
+        writer.writerow([prolificPID, newUid])
 
     return newUid
 
@@ -65,10 +72,15 @@ app.add_middleware(
 
 
 @app.post("/api/newUser")
-async def newUser():
-    newUid = createNewUser()
+async def newUser(req: Request):
+    params = await req.json()
+    # Get Prolific ID, Study ID, and Session ID
+    prolificPID = str(params['prolificPID'])
+    studyID = str(params['studyID'])
+    sessionID = str(params['sessionID'])
 
-    # send new user ID to JS
+
+    newUid = createNewUser(prolificPID, studyID, sessionID)
 
     response = {'new_id': newUid, 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
     response = json.dumps(response).encode('utf-8')
@@ -77,8 +89,8 @@ async def newUser():
 @app.post("/api/getImages")
 async def getImages(req: Request):
     params = await req.json()
-    uid = params['uid'] if 'uid' in params else None
-    iteration = params['iteration'] if 'iteration' in params else None
+    uid = str(params['uid']) if 'uid' in params else None
+    iteration = str(params['iteration']) if 'iteration' in params else None
     if uid == None or iteration == None:
         return
 
@@ -93,13 +105,20 @@ async def getImages(req: Request):
 
             # load board config from config file
     configData = []
-    with open("config.txt", "r") as configFile:
+    with open("CollectedData/.configLatinSquare", "r") as configFile:
         reader = csv.reader(configFile, delimiter=';')
+        readRows = 0
         for row in reader:
-            configData.append({"ord": row[1], "size": int(row[0])})
+            # Get current user config
+            if readRows == int(uid):
+                for item in row:
+                    splitItem = item.split(",")
+                    configData.append({"ord": splitItem[1], "size": int(splitItem[0])})
+                break
+            readRows += 1
 
-            # Get sorting method
-    sortingMethod = configData[(int(uid) + int(iteration)) % len(configData)]["ord"]
+    # Get sorting method - pick loop over each permutation with different starting point for each user
+    sortingMethod = configData[int(iteration)]['ord']
     if sortingMethod == "ss":
         featuresFileName = "CLIPFeatures.csv"
     elif sortingMethod == "lab":
@@ -156,7 +175,7 @@ async def getImages(req: Request):
                     # We need a 2D array
             X = X.reshape(len(images), -1).astype(np.float32)
 
-            imagesOnRow = configData[(int(uid) + int(iteration)) % len(configData)]['size']
+            imagesOnRow = configData[int(iteration)]['size']
 
             print(f"Sorting images using {sortingMethod} method.")
             _, sorted_images = selfSort.sort_with_flas(X.copy(), images, nc=49, n_images_per_site=imagesOnRow, radius_factor=0.7, wrap=False)
@@ -173,8 +192,8 @@ async def getImages(req: Request):
 @app.post("/api/scrollPositions")
 async def scrollPositions(req: Request):
     request = await req.json()
-    uid = request["uid"]
-    iteration = request["iteration"]
+    uid = str(request["uid"])
+    iteration = str(request["iteration"])
     logJSON = json.loads(request["log"])
     scrollData = logJSON["multipleScrollData"]
     toLogText = ""
@@ -191,7 +210,7 @@ async def scrollPositions(req: Request):
 @app.post("/api/submissions")
 async def submissions(req: Request):
     request = await req.json()
-    uid = request["uid"]
+    uid = str(request["uid"])
     iteration = request["iteration"]
     logJSON = request
     toLogText = str(uid)+";"+str(iteration)+";"+str(logJSON["timestamp"])+";"+str(logJSON["scrollPos"])+";"+str(logJSON["totalScroll"])+";"+str(logJSON["navbarH"])+";"+str(logJSON["windowH"])+";"+str(logJSON["firstRowStart"])+";"+str(logJSON["secondRowStart"])+";"+str(logJSON["imageHeight"])+";"+str(logJSON["correct"])+";"+str(logJSON["image"])+"\n"
@@ -207,9 +226,29 @@ async def submissions(req: Request):
 @app.post("/api/oldUser")
 async def oldUser(req: Request):
     request = await req.json()
-
-    oldUser = request["oldUserID"]
+    # Get Prolific PID
+    prolificPID = request["prolificPID"]
     loadFailed = 0
+
+                # Get user ID from mapping file
+    oldUser = "-1"
+
+    # Check if file exists, if not create it
+    if not os.path.exists("CollectedData/pid_uid_mapping.csv"):
+        with open("CollectedData/pid_uid_mapping.csv", "w") as f:
+            pass  # Creates an empty file
+    with open("CollectedData/pid_uid_mapping.csv", "r") as mappingFile:
+        reader = csv.reader(mappingFile, delimiter=';')
+        for row in reader:
+            if row[0] == prolificPID:
+                oldUser = row[1]
+                break
+
+    if oldUser == "-1":
+        loadFailed = 1
+        userLogs = {}
+
+
     try:
         with open(f"CollectedData/{int(oldUser):04}/userData.json", "r") as JSONfile:
             logs = json.load(JSONfile)
@@ -234,7 +273,7 @@ async def oldUser(req: Request):
         with open(f"CollectedData/{int(oldUser):04}/userData.json", "w") as JSONfile:
             JSONfile.write(logsStr)
 
-    response = {}
+    response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
     response = json.dumps(response).encode('utf-8')
     return response
 
@@ -245,8 +284,8 @@ async def imageConfig(req: Request):
 
     
     positions = json.loads(jsonPayload["positions"])
-    uid = jsonPayload["uid"]
-    iteration = jsonPayload["iteration"]
+    uid = str(jsonPayload["uid"])
+    iteration = str(jsonPayload["iteration"])
     target = jsonPayload["target"]
     dataSet = jsonPayload["dataSet"]
     ordering = jsonPayload["ordering"]
@@ -254,6 +293,7 @@ async def imageConfig(req: Request):
             
             # load currently saved data
     with open(f"CollectedData/{int(uid):04}/userData.json", "r") as JSONfile:
+        
         logs = json.load(JSONfile)
         userLogs = logs.get(uid,{})
 
@@ -281,7 +321,6 @@ async def imageConfig(req: Request):
     # save new data in JSON file
     logs[uid] = userLogs
     logsStr = json.dumps(logs, indent=4)
-            
     with open(f"CollectedData/{int(uid):04}/userData.json", "w") as JSONfile:
        
         JSONfile.write(logsStr)

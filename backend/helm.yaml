@@ -5,5 +5,11 @@ app:
   port: 8000
   health: /health
 
+  pvc:
+    enabled: true
+    storage: 2Gi
+    mountPath: "/app/CollectedData"
+
+
   extraEnv:
     DATABASE_URL:

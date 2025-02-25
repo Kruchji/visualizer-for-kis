@@ -1,11 +1,12 @@
 {
     "3": {
         "lastCompleted": -1,
+        "prolificPID": "pidss",
+        "studyID": "",
+        "sessionID": "",
         "reloads": {
-            "0": 0
-        }
-    },
-    "3": {
+            "0": 1
+        },
         "imagePos": {
             "0": [
                 {

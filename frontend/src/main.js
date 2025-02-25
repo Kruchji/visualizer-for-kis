@@ -1,9 +1,11 @@
 import $ from 'jquery';
+import 'jquery.waitforimages';
 
-const service_server = "http://localhost:8000"
+const service_server = "" 
 
 // start javascript after page loads
 $(document).ready(function () {
+    console.log("Test");
     // setup image compare overlay
     let imageCompare = $("#image-compare");
     imageCompare.click(function () {
@@ -63,22 +65,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-function firstRunLoad() {
+async function firstRunLoad() {
     // hide instruction overlay
     hideStartOverlay();
-    // load everything
-    let lastUser = localStorage.getItem('LastUserID');
-    lastUser = false;
-    if (!lastUser) {
-        createNewUser().then(result => {
-            setupAdminMode(result.adminMode);
-            loadNextIteration();
-        });
-    } else {
+  
+
+    const params = new URLSearchParams(window.location.search);
+    const prolificPID = params.get('PROLIFIC_PID');
+    const studyID = params.get('STUDY_ID') || '';
+    const sessionID = params.get('SESSION_ID') || '';
+    
+    // If PROLIFIC_PID is missing, redirect to inputPID.html
+    if (!prolificPID) {
+        window.location.replace('inputPID.html');
+        return;
+    }
+
+
+    
+    let request_body = JSON.stringify({ 'prolificPID': prolificPID, 'studyID': studyID, 'sessionID': sessionID });
         // load existing user (and his progress)
-        loadOldUser(lastUser).then(result => {
+        loadOldUser(request_body).then(result => {
             if (result['loadFailed'] == 1) {
-                createNewUser().then(result => {
+                createNewUser(request_body).then(result => {
                     setupAdminMode(result.adminMode);
                     loadNextIteration();
                 });
@@ -88,22 +97,22 @@ function firstRunLoad() {
             }
         });
     }
-}
+    
+    
+    //=============== New user creation (first iteration) ===============//
+    
+    let UserID = -1;
+    let currentIteration = -1;
+    let totalNumberOfSets = -1;
+    let adminEnabled = false;
 
-
-//=============== New user creation (first iteration) ===============//
-
-let UserID = -1;
-let currentIteration = -1;
-let totalNumberOfSets = -1;
-let adminEnabled = false;
-
-async function createNewUser() {
+async function createNewUser(request_body) {
     let response = await fetch(service_server + "/api/newUser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: request_body,
       });
 
       if (response.ok){
@@ -115,17 +124,14 @@ async function createNewUser() {
         return data;
       }
       else{
-        console.error('There was a problem with a fetch operation:', error);
+        console.error('There was a problem with a fetch operation:');
       }
 }
 
 
 //alternative load old user
-async function loadOldUser(oldUserID) {
-    UserID = oldUserID;
-
-    let request_body = JSON.stringify({ 'oldUserID': oldUserID });
-
+async function loadOldUser(request_body) {
+    
     let response = await fetch(service_server + "/api/" + "oldUser", {
         method: "POST",
         headers: {
@@ -142,7 +148,7 @@ async function loadOldUser(oldUserID) {
         return data;
       }
       else{
-        console.error('There was a problem with a fetch operation:', error);
+        console.error('There was a problem with a fetch operation:');
       }
 
 
@@ -304,11 +310,9 @@ function loadNextIteration() {
 
         const imageToFind = response['target'];          // always same target image for each dataset
 
-        const currBoardConfig = (UserID + currentIteration) % response['boardsConfig'].length;    // each user starts shifted by 1 than previous
+        selectedNumPerRow = response['boardsConfig'][currentIteration]["size"];
 
-        selectedNumPerRow = response['boardsConfig'][currBoardConfig]["size"];
-
-        let boardOrdering = response['boardsConfig'][currBoardConfig]["ord"];
+        let boardOrdering = response['boardsConfig'][currentIteration]["ord"];
 
         // if 16 images => attention check => force board config
         if (imageFilenames.length <= 16) {
@@ -317,12 +321,13 @@ function loadNextIteration() {
         }
 
         const orderingName = orderImages(imageFilenames, boardOrdering, ssImageFilenames, selectedNumPerRow);
+
         setupCurrentIteration(imageFilenames, imageToFind, response['folder'], orderingName);
         return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering": orderingName, "perRow": selectedNumPerRow }
 
     }).then(result => storeImageConfig(UserID, currentIteration, result["target"], result["allImages"], result["dataset"], result["ordering"], result["perRow"])).then(result => {
 
-        /*
+        
         return $('#imageGrid').waitForImages(function () {      // wait for images to load before starting tracker
             // actions after images load
             
@@ -332,12 +337,7 @@ function loadNextIteration() {
 
                 toggleTargetImage();
             }
-        }); */
-        document.documentElement.scrollTop = 0;
-        toggleLoadingScreen(true);      // true = also toggle scroll
-
-        toggleTargetImage();
-
+        }); 
     }).catch(error => {
         if (error === 'END_OF_TEST') {
             endTesting();
@@ -347,6 +347,7 @@ function loadNextIteration() {
 
 // load already ongoing iteration
 function loadOldIteration(currIterData) {
+    UserID = parseInt(currIterData['userID']);
     currentIteration = parseInt(currIterData['currIter']);
     updateProgress();
 
@@ -359,12 +360,13 @@ function loadOldIteration(currIterData) {
     $('#targetImageDiv').empty();
 
     // setup everything
-    if (currIterData['currDataFolder'] == "END") return endTesting();
+    if (currIterData['currDataFolder'] == "END") return endTesting(false);
 
     const imageFilenames = currIterData['currImages'];
     const imageToFind = currIterData['currTarget'];
     selectedNumPerRow = parseInt(currIterData['currBoardSize']);
     const orderingName = currIterData['currOrdering'];
+
     setupCurrentIteration(imageFilenames, imageToFind, currIterData['currDataFolder'], orderingName);
 
 
@@ -395,7 +397,6 @@ async function getImageList() {
       });
       
         //uid=" + UserID + "&iteration=" + currentIteration
-        
       if (response.ok){
         
         let data = await response.json();
@@ -403,8 +404,7 @@ async function getImageList() {
         const dataSet = data.images;
         const folder = data.folder;
         const ssDataSet = data.ss_images;
-        return { "dataSet": dataSet, "folder": folder, 'boardsConfig': data.boardsConfig, 'target': data.target, "ssDataSet": ssDataSet };
-  
+        return { "dataSet": dataSet, "folder": folder, 'boardsConfig': data.boardsConfig, 'target': data.target, "ssDataSet": ssDataSet };  
       }
       else{
         console.error('There was a problem with a fetch operation:', error);
@@ -421,15 +421,22 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
     }
 
     $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
-
+    let lastEmpty = false;
     const imageGrid = $('#imageGrid');
     imageFilenames.forEach(function (filename) {
         if (filename === "empty") {     // empty image
             imageGrid.append($('<div>', { class: 'image-container empty' }));
+            imageGrid.append($('<div>', { class: 'empty' }));
+            lastEmpty = true;
         } else {
+            if (lastEmpty) {    // add separator between videos
+                imageGrid.append($('<div>', { class: 'row-separator' }));
+                lastEmpty = false;
+            }
+
             imageGrid.append(
                 $('<div>', { class: 'image-container' }).append(
-                    adminEnabled ? $('<div>', { class: 'adminOverlayText', text: parseInt(filename.split("_")[0], 10) }) : null, // add overlay text if in admin mode
+                    adminEnabled ? $('<div>', { class: 'adminOverlayText'}).html(parseInt(filename.split("_")[0], 10) + "<br>vID: " + filename.split("_")[2].slice(0, -4)) : null, // add overlay text if in admin mode (from video id remove .jpg)
                     $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false', click: handleCompareClick }),
                     $('<div>', { class: 'hover-buttons' }).append(
                         $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick })
@@ -696,7 +703,6 @@ function handleSubmitClick(event) {
 
 
 // store any submission attempt
-// store any submission attempt
 async function storeSubmissionAttempt(uid, iteration, image, correct) {
 
     let firstRowImage = $('#imageGrid > div:nth-child(1)')[0];
@@ -805,18 +811,23 @@ function hideStartOverlay() {
 
 let gameEnded = false;
 
-function endTesting() {
+function endTesting(payProlific = true) {
     stopScrollTracker();
     $('#end-overlay').css('background-color', 'black');
     showEndOverlay();
     gameEnded = true;
+
+    if (payProlific) {
+        // If Prolific URL is set, redirect there after 5 seconds
+        redirectCompletionProlific();
+    }
 }
 
 function showEndOverlay() {
     let endOverlay = $('#end-overlay');
 
     endOverlay.empty();
-    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test.</div><br>");
+    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test. You'll be shortly redirected back to Prolific.</div><br>");
     if (adminEnabled) {    // hide new user button for standard users
         endOverlay.append('<button type="button" class="btn btn-primary end-btn" onclick="startWithNewUser()">Go again (new user)</button>');
     }
@@ -830,6 +841,18 @@ function hideEndOverlay() {
     let endOverlay = $('#end-overlay');
     endOverlay.fadeOut();
     endOverlay.empty();
+}
+
+function redirectCompletionProlific() {
+    const redirectProlificURL = null; //e.g. "https://app.prolific.co/submissions/complete?cc=";
+
+    if (redirectProlificURL) {
+        setTimeout(function () {
+            window.location.replace(redirectProlificURL);
+        }, 5000);
+    } else {
+        console.log("No Prolific redirect URL set.");
+    }
 }
 
 
