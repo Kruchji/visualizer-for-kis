@@ -98,12 +98,15 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
 
             # Get user ID from mapping file
             oldUser = "-1"
-            with open("CollectedData/pid_uid_mapping.csv", "r") as mappingFile:
-                reader = csv.reader(mappingFile, delimiter=';')
-                for row in reader:
-                    if row[0] == prolificPID:
-                        oldUser = row[1]
-                        break
+            try:
+                with open("CollectedData/pid_uid_mapping.csv", "r") as mappingFile:
+                    reader = csv.reader(mappingFile, delimiter=';')
+                    for row in reader:
+                        if row[0] == prolificPID:
+                            oldUser = row[1]
+                            break
+            except FileNotFoundError:
+                pass
 
             if oldUser == "-1":
                 loadFailed = 1

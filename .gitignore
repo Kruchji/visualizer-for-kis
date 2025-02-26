@@ -1,7 +1,15 @@
 __pycache__
+venv/
+
 Graphs/graph.png
 Graphs/multiGraph.png
+
 chosenTarget.txt
-venv/
+
 CollectedData/*/
-.configLatinSquare
+CollectedData/.configLatinSquare
+CollectedData/pid_uid_mapping.csv
+
+CLIP/*.pth
+
+FullDataTools/*/

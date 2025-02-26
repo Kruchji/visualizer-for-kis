@@ -74,7 +74,14 @@ for user in validUsers:
     allImages = user_data[user]["imagePos"][iteration_num]
     imagesPerRow = user_data[user]["imagesPerRow"][iteration_num]
     targePosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
-    targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
+
+    # handle missing target
+    if targePosition is None:
+        targetRow = 0
+        targetColors = ['lightcoral', 'mistyrose']   # red if target is missing
+    else:
+        targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
+        targetColors = ['lawngreen', 'palegreen']
 
     # get scroll position data
     timestamps = []
@@ -246,12 +253,12 @@ for user in validUsers:
         plt.fill_between(normalisedTime, valuesTop, valuesBottom, color='skyblue', alpha=0.3 * (1/len(validUsers)), zorder=2)
 
     # draw target image locations
-    plt.plot(normalisedTime, targetTopLocations, color='lawngreen', zorder=1, alpha=(1/len(validUsers)))
-    plt.plot(normalisedTime, targetBottomLocations, color='lawngreen', zorder=1, alpha=(1/len(validUsers)))
+    plt.plot(normalisedTime, targetTopLocations, color=targetColors[0], zorder=1, alpha=(1/len(validUsers)))
+    plt.plot(normalisedTime, targetBottomLocations, color=targetColors[0], zorder=1, alpha=(1/len(validUsers)))
     if currentUser == 1:
-        plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color='palegreen', alpha=0.3 * (1/len(validUsers)), zorder=1, label='Target image')
+        plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color=targetColors[1], alpha=0.3 * (1/len(validUsers)), zorder=1, label='Target image')
     else:
-        plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color='palegreen', alpha=0.3 * (1/len(validUsers)), zorder=1)
+        plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color=targetColors[1], alpha=0.3 * (1/len(validUsers)), zorder=1)
 
 # stay in percentage range
 plt.ylim(-2, 102)

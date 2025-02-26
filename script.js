@@ -165,16 +165,19 @@ window.addEventListener('scroll', () => {
 function storeScrollbarPos(afterLoadIndicator) {
     if (targetMissed === 0) {
         const imageToFindSrc = $('#targetImageDiv').find('img').attr('src');
-        const targetPos = $('div.image-container').find('img[src="' + imageToFindSrc + '"]')[0].getBoundingClientRect();    // position relative to viewport
-        const bottomOfTargetPos = targetPos.bottom;
-        const topOfTargetPos = targetPos.top;
+        const targetObjects = $('div.image-container').find('img[src="' + imageToFindSrc + '"]');
+        if (targetObjects.length > 0) {
+            const targetPos = targetObjects[0].getBoundingClientRect();    // position relative to viewport
+            const bottomOfTargetPos = targetPos.bottom;
+            const topOfTargetPos = targetPos.top;
 
-        if (bottomOfTargetPos < 0) {
-            targetMissed = 1;
-        } else if (topOfTargetPos < window.innerHeight) {    // on screen
-            targetWasOnScreen = true;
-        } else if (targetWasOnScreen && topOfTargetPos >= window.innerHeight) {  // already was on screen but then user scrolled up again
-            targetMissed = 1;
+            if (bottomOfTargetPos < 0) {
+                targetMissed = 1;
+            } else if (topOfTargetPos < window.innerHeight) {    // on screen
+                targetWasOnScreen = true;
+            } else if (targetWasOnScreen && topOfTargetPos >= window.innerHeight) {  // already was on screen but then user scrolled up again
+                targetMissed = 1;
+            }
         }
     }
 
@@ -748,21 +751,11 @@ function redirectCompletionProlific() {
 //=============== Start over (new user) ===============//
 
 function startWithNewUser() {
-    stopScrollTracker();
-    const loadingScreen = $('#loading-screen');
-    loadingScreen.fadeIn();
-    hideEndOverlay();
-    hideResult("setup");
-    const targetImageDiv = $('#targetImageDiv');
-    targetImageDiv.fadeOut();
-    const compareOverlay = $('#image-compare');
-    compareOverlay.fadeOut();
-    document.body.style.overflow = 'hidden';
+    // Remove parameters from URL
+    const cleanUrl = window.location.origin + window.location.pathname;
 
-    currentIteration = -1;
-    gameEnded = false;
-
-    createNewUser().then(result => { loadNextIteration(); });
+    // Refresh the page
+    window.location.replace(cleanUrl);
 }
 
 
@@ -846,18 +839,20 @@ function toggleSolutionDisplay() {
 
     const desiredImage = $('div.image-container').find('img[src="' + imageToFindSrc + '"]');
 
-    const windowHeight = $(window).height();
-    const imageTopOffset = desiredImage.offset().top;
-    const scrollPosition = imageTopOffset - (windowHeight / 2) + (desiredImage.height() / 2);
+    if (desiredImage.length > 0) {
+        const windowHeight = $(window).height();
+        const imageTopOffset = desiredImage.offset().top;
+        const scrollPosition = imageTopOffset - (windowHeight / 2) + (desiredImage.height() / 2);
 
-    if (!desiredImage.hasClass('shining')) {
-        $('html, body').animate({
-            scrollTop: scrollPosition
-        }, 0); // Adjust the duration as needed
+        if (!desiredImage.hasClass('shining')) {
+            $('html, body').animate({
+                scrollTop: scrollPosition
+            }, 0); // Adjust the duration as needed
+        }
+
+
+        desiredImage.toggleClass('shining');
     }
-
-
-    desiredImage.toggleClass('shining');
 }
 
 
@@ -902,7 +897,7 @@ function showSkipButton() {
 }
 
 let skipTimerId;
-const SKIP_BUTTON_APPEAR_TIME = 60000;  // 1 minute
+const SKIP_BUTTON_APPEAR_TIME = 30000;  // 30 seconds
 
 function startSkipTimer() {
     if (skipTimerId) {
@@ -911,7 +906,7 @@ function startSkipTimer() {
 
     skipTimerId = setTimeout(function () {
         showSkipButton();
-    }, SKIP_BUTTON_APPEAR_TIME);  // show after 1 minute
+    }, SKIP_BUTTON_APPEAR_TIME);  // show after time is up
 }
 
 function stopSkipTimer() {

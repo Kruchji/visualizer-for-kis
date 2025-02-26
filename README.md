@@ -5,7 +5,7 @@ This project creates a testing and data collection environment for known-item se
 ### Setup instructions
 
 1) Install dependencies with `pip install -r requirements.txt`.
-2) Generate targets for each dataset by running `targetsGenerator.py`.
+2) Generate datasets using scripts in `FullDataTools` folder (see README in that folder for more information).
 3) Edit `config.txt` to desired layout and ordering of images.
 4) Run `configGenerator.py` to generate configurations (using latin squares) for each user. (lower number of configs or datasets to make this run faster)
 5) Run `server.py`. (Use option `--admin` to enable admin mode.)

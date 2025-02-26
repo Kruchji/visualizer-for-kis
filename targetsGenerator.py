@@ -18,5 +18,5 @@ for folderName in os.listdir("./Data/"):
     # Sample item based on weights
     chosenTarget = random.choices(filenames, weights=weights, k=1)[0]
 
-    with open("./Data/" + folderName + '/chosenTarget.txt', 'w') as targetFile:
+    with open("./Data/" + folderName + '/chosenTarget_deprecated.txt', 'w') as targetFile:
         targetFile.write(chosenTarget)

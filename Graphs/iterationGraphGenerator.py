@@ -33,7 +33,14 @@ except KeyError:
 allImages = json_data[str(user)]["imagePos"][str(iteration)]
 targePosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
 imagesPerRow = int(json_data[str(user)]["imagesPerRow"][str(iteration)])
-targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
+
+# handle missing target
+if targePosition is None:
+    targetRow = 0
+    targetColors = ['lightcoral', 'mistyrose']   # red if target is missing
+else:
+    targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
+    targetColors = ['lawngreen', 'palegreen']
 
 # plot window size
 fig, ax = plt.subplots(figsize=(10, 7))
@@ -210,9 +217,9 @@ plt.plot(normalisedTime, valuesBottom, color='dodgerblue', zorder=2)
 plt.fill_between(normalisedTime, valuesTop, valuesBottom, color='skyblue', alpha=0.3, zorder=2, label='Viewport scroll')
 
 # draw target image locations
-plt.plot(normalisedTime, targetTopLocations, color='lawngreen', zorder=1)
-plt.plot(normalisedTime, targetBottomLocations, color='lawngreen', zorder=1)
-plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color='palegreen', alpha=0.3, zorder=1, label='Target image')
+plt.plot(normalisedTime, targetTopLocations, color=targetColors[0], zorder=1)
+plt.plot(normalisedTime, targetBottomLocations, color=targetColors[0], zorder=1)
+plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color=targetColors[1], alpha=0.3, zorder=1, label='Target image')
 
 # stay in percentage range
 plt.ylim(-2, 102)

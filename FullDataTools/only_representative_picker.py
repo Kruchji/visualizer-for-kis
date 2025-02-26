@@ -3,7 +3,6 @@
 import os, shutil
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster
-from scipy.spatial.distance import cdist
 import csv
 
 

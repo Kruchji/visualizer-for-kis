@@ -4,8 +4,6 @@
 
 import open_clip
 import torch
-import os
-import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'  # Use GPU if available (else CPU)
 

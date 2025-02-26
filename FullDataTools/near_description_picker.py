@@ -2,9 +2,6 @@
 
 import os, shutil, math
 import numpy as np
-from sklearn.cluster import KMeans
-from scipy.cluster.hierarchy import linkage, fcluster
-from scipy.spatial.distance import cdist
 import csv
 
 
@@ -40,7 +37,7 @@ number_of_descriptions = len(descriptions_embeddings)
 # Also load original representative image target paths (in target_images.txt)
 original_representative_images = []
 with open('representative_images/target_images.txt', 'r') as f:
-    original_representative_images = [os.path.normpath(line.strip()) for line in f] # Remove newline characters and normalize paths
+    original_representative_images = [os.path.normpath(line.strip()).replace('\\', '/') for line in f] # Remove newline characters and normalize paths
 
 # Find 200 most similar images for each representative description
 num_similar_images = 200
@@ -70,8 +67,8 @@ for i, rep_images in enumerate(picked_images):
         # Save images to new_datasets folder to folder with i + 1 name (padded to 2 digits)
         shutil.copy(img, f"new_datasets/{(i + 1 + attentionChecks):02}/{new_image_name}")
 
-        # if img (path) is equal to the original representative image, save the new name to the chosenTarget.txt file (use comparing paths)
-        if os.path.normpath(img) == original_representative_images[i]:
+        # if img (path) is equal to the original representative image, save the new name to the chosenTarget.txt file
+        if os.path.normpath(img) == os.path.normpath(original_representative_images[i]):
             with open(f"new_datasets/{(i + 1 + attentionChecks):02}/chosenTarget.txt", 'w') as f:
                 f.write(new_image_name)
             targetPicked = True
@@ -80,14 +77,14 @@ for i, rep_images in enumerate(picked_images):
     if not targetPicked:
         os.makedirs(f"new_datasets/{(i + 1 + attentionChecks):02}/target", exist_ok=True)
         shutil.copy(original_representative_images[i], f"new_datasets/{(i + 1 + attentionChecks):02}/target")
-        # Then in chosenTarget.txt save 'missing' string
+        # Then in chosenTarget.txt save the target image name
         with open(f"new_datasets/{(i + 1 + attentionChecks):02}/chosenTarget.txt", 'w') as f:
-            f.write('missing')
+            f.write(f"target/{os.path.basename(original_representative_images[i])}")
+            
 
     # Also save the embeddings to a CSV file - CLIPFeatures.csv
     np.savetxt(f"new_datasets/{(i + 1 + attentionChecks):02}/CLIPFeatures.csv", np.array(picked_embeddings[i]), delimiter=';', fmt='%.8e')
 
-    # Also 
         
     print()
 
