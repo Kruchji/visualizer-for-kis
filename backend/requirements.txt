@@ -1,4 +1,3 @@
-
 fastapi[all]==0.114.2
 numpy
 matplotlib
