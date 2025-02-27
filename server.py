@@ -3,6 +3,7 @@
 import json, http.server, os, csv, sys
 import numpy as np
 from urllib.parse import urlparse, parse_qs
+import random
 
 # self-sorting
 import selfSort
@@ -20,6 +21,35 @@ def getHighestUserID():
     folder_names = [name for name in os.listdir("CollectedData") if os.path.isdir(os.path.join("CollectedData", name))]
     numeric_folders = [int(name) for name in folder_names if name.isdigit()]
     return max(numeric_folders, default=-1)
+
+# Create a user config file for a new user - picks one row from the Latin square and permutes the columns
+def createUserConfig(uid):
+    # First get config row for the user
+    userConfigData = []
+    with open("CollectedData/configLatinSquare.csv", "r") as configFile:
+        reader = csv.reader(configFile, delimiter=';')
+        readRows = 0
+        for row in reader:
+            # Get current user config
+            if readRows == uid:
+                for item in row:
+                    splitItem = item.split(",")
+                    userConfigData.append({"ord": splitItem[1], "size": int(splitItem[0])})
+                break
+            readRows += 1
+
+    # Then add dataset to each config to permute datasets as well later
+    for i in range(len(userConfigData)):
+        userConfigData[i]["dataset"] = i
+
+    # Now get a random permutation of the user config
+    random.shuffle(userConfigData)
+
+    # Finally store the new user config in user's folder as a csv file (each row contains three items)
+    with open(f"CollectedData/{uid:04}/userConfig.csv", "w") as configFile:
+        writer = csv.writer(configFile, delimiter=';')
+        for configRow in userConfigData:
+            writer.writerow([configRow["dataset"], configRow["ord"], configRow["size"]])
 
 def createNewUser(prolificPID, studyID, sessionID):
     # get last user ID
@@ -48,6 +78,9 @@ def createNewUser(prolificPID, studyID, sessionID):
     with open("CollectedData/pid_uid_mapping.csv", "a") as mappingFile:
         writer = csv.writer(mappingFile, delimiter=';')
         writer.writerow([prolificPID, newUid])
+
+    # Also create a user config file
+    createUserConfig(newUid)
 
     return newUid
 
@@ -158,22 +191,16 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                 userLogs = logs.get(uid,{})
                 dataSets = userLogs.get("dataSets",{})
 
-            # load board config from config file
+            # load board config from user config file
             configData = []
-            with open("CollectedData/.configLatinSquare", "r") as configFile:
+            with open(f"CollectedData/{int(uid):04}/userConfig.csv", "r") as configFile:
                 reader = csv.reader(configFile, delimiter=';')
-                readRows = 0
                 for row in reader:
-                    # Get current user config
-                    if readRows == int(uid):
-                        for item in row:
-                            splitItem = item.split(",")
-                            configData.append({"ord": splitItem[1], "size": int(splitItem[0])})
-                        break
-                    readRows += 1
+                    configData.append({"dataset": int(row[0]), "ord": row[1], "size": int(row[2])})
 
-            # Get sorting method - pick loop over each permutation with different starting point for each user
-            sortingMethod = configData[int(iteration)]['ord']
+            # Get size and sorting method for the current iteration
+            imagesOnRow = configData[int(iteration) % len(configData)]['size']
+            sortingMethod = configData[int(iteration) % len(configData)]['ord']
             if sortingMethod == "ss":
                 featuresFileName = "CLIPFeatures.csv"
             elif sortingMethod == "lab":
@@ -182,7 +209,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             images = []
             clipFeatures = {}
             if(len(dataSets) < len(imageSets)):
-                chosenFolder = imageSets[len(dataSets)]
+                chosenFolder = imageSets[configData[int(iteration) % len(configData)]['dataset'] % len(imageSets)]
 
                 for file_name in os.listdir("./Data/" + chosenFolder + "/"):
                     if file_name.endswith('.jpg'):
@@ -230,7 +257,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                     # We need a 2D array
                     X = X.reshape(len(images), -1).astype(np.float32)
 
-                    imagesOnRow = configData[int(iteration)]['size']
+                    
 
                     print(f"Sorting images using {sortingMethod} method.")
                     _, sorted_images = selfSort.sort_with_flas(X.copy(), images, nc=49, n_images_per_site=imagesOnRow, radius_factor=0.7, wrap=False)
@@ -240,7 +267,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
 
-            response = {'images': images, 'folder' : chosenFolder, 'boardsConfig' : configData, 'target' : targetImage, 'ss_images' : sorted_images.tolist()}
+            response = {'images': images, 'folder' : chosenFolder, 'boardSize' : imagesOnRow, 'sortingMethod' : sortingMethod, 'target' : targetImage, 'ss_images' : sorted_images.tolist()}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return

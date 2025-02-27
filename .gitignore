@@ -7,7 +7,7 @@ Graphs/multiGraph.png
 chosenTarget.txt
 
 CollectedData/*/
-CollectedData/.configLatinSquare
+CollectedData/configLatinSquare.csv
 CollectedData/pid_uid_mapping.csv
 
 CLIP/*.pth

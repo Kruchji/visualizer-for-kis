@@ -244,9 +244,9 @@ function loadNextIteration() {
 
         const imageToFind = response['target'];          // always same target image for each dataset
 
-        selectedNumPerRow = response['boardsConfig'][currentIteration]["size"];
+        selectedNumPerRow = response['boardSize'];
 
-        let boardOrdering = response['boardsConfig'][currentIteration]["ord"];
+        let boardOrdering = response['sortingMethod'];
 
         // if 16 images => attention check => force board config
         if (imageFilenames.length <= 16) {
@@ -330,7 +330,7 @@ function getImageList() {
             const dataSet = data.images;
             const folder = data.folder;
             const ssDataSet = data.ss_images;
-            return { "dataSet": dataSet, "folder": folder, 'boardsConfig': data.boardsConfig, 'target': data.target, "ssDataSet": ssDataSet };
+            return { "dataSet": dataSet, "folder": folder, 'boardSize': data.boardSize, 'sortingMethod' : data.sortingMethod, 'target': data.target, "ssDataSet": ssDataSet };
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
