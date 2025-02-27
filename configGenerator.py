@@ -1,47 +1,49 @@
 
 from constraint import Problem, AllDifferentConstraint
-import itertools
 import random, math, os, csv, sys
 import time
 import numpy as np
 
-# Get number of solutions from command line arguments
+# Get number of users from command line arguments
 if len(sys.argv) >= 2:
-    numOfSolutions = int(sys.argv[1])
+    users = int(sys.argv[1])
 else:
-    numOfSolutions = 1000
+    users = 126
 
 # Use constraint library to generate a random Latin square
-def generate_random_latin_square(values, configSize, numOfDatasets, max_solutions=1, numOfUsers=126):
+def generate_random_latin_square(values, configSize, numOfDatasets, numOfUsers=126):
     n = len(values)
-    problem = Problem()
+    collected_latin_square_solutions = []
 
-    # Variable for each cell in the Latin square
-    for row in range(n):
+    # Generate each latin square with differently (randomly) shuffled domains / values
+    while len(collected_latin_square_solutions) < ((math.ceil(numOfUsers / configSize)) * (math.ceil(numOfDatasets / configSize))): # (number of users * number of datasets) / config size = 90 (default)
+        problem = Problem()
+
+        # Variable for each cell in the Latin square
+        for row in range(n):
+            for col in range(n):
+                domain = values[:]
+                random.shuffle(domain)
+                problem.addVariable((row, col), domain)
+        
+        # All rows must be unique
+        for row in range(n):
+            problem.addConstraint(AllDifferentConstraint(), [(row, col) for col in range(n)])
+        
+        # All columns must be unique
         for col in range(n):
-            problem.addVariable((row, col), values)
-    
-    # All rows must be unique
-    for row in range(n):
-        problem.addConstraint(AllDifferentConstraint(), [(row, col) for col in range(n)])
-    
-    # All columns must be unique
-    for col in range(n):
-        problem.addConstraint(AllDifferentConstraint(), [(row, col) for row in range(n)])
-    
-    # getSolutionIter => lazily evaluate solutions (and limit the number)
-    solution_iterator = problem.getSolutionIter()
-    limited_solutions = list(itertools.islice(solution_iterator, max_solutions))
-
-    if not limited_solutions:
-        raise ValueError("No Latin square possible with the given values.")
-    
-    # Randomly pick one of the solutions
-    random_solutions = random.sample(limited_solutions, (math.ceil(numOfUsers / configSize)) * (math.ceil(numOfDatasets / configSize))) # number of users / config size * number of datasets / config size
+            problem.addConstraint(AllDifferentConstraint(), [(row, col) for row in range(n)])
+        
+        # Get one solution
+        latin_solution = problem.getSolution()
+        if not latin_solution:
+            raise ValueError("No Latin square possible with the given values.")
+        
+        collected_latin_square_solutions.append(latin_solution)
     
     # Convert solution dictionaries back to 2D array (numpy) and store them in a list
     latin_squares = []
-    for random_solution in random_solutions:
+    for random_solution in collected_latin_square_solutions:
         latin_square = np.zeros((n, n), dtype=object)
         for key, value in random_solution.items():
             latin_square[key[0], key[1]] = value
@@ -72,9 +74,6 @@ for folder in datasetFolders:
 numberOfRealDatasets = len(datasetFolders) - len(attentionCheckIndexes)
 numberOfRepeatConfigs = math.ceil((numberOfRealDatasets) / baseConfigLength)    # Generate enough to cover all datasets
 
-# Define number of users
-users = 126
-
 # Make base configs unique
 uniqueConfigs = []
 for i, baseConfig in enumerate(baseConfigData):
@@ -82,8 +81,8 @@ for i, baseConfig in enumerate(baseConfigData):
 
 # Generate Latin squares
 startTime = time.time()
-generatedLatinSquareList = generate_random_latin_square(uniqueConfigs, baseConfigLength, numberOfRealDatasets, max_solutions=numOfSolutions, numOfUsers=users)
-print(f"Time taken to generate {numOfSolutions} Latin squares: {time.time() - startTime} seconds")
+generatedLatinSquareList = generate_random_latin_square(uniqueConfigs, baseConfigLength, numberOfRealDatasets, numOfUsers=users)
+print(f"Time taken to generate {((math.ceil(users / baseConfigLength)) * (math.ceil(numberOfRealDatasets / baseConfigLength)))} Latin squares: {time.time() - startTime} seconds")
 
 # Combine smaller latin squares into one large one
 latinSquareGrid = np.array(generatedLatinSquareList).reshape(math.ceil(users / baseConfigLength), math.ceil(numberOfRealDatasets / baseConfigLength), baseConfigLength, baseConfigLength)
