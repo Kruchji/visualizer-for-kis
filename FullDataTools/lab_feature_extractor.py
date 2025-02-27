@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import os
 
-main_folder = '../Data/'
+main_folder = './new_datasets/'
 
 # Get folders inside main_folder
 subfolders = [f.path for f in os.scandir(main_folder) if f.is_dir()]
