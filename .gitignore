@@ -4,12 +4,12 @@ venv/
 Graphs/graph.png
 Graphs/multiGraph.png
 
-chosenTarget.txt
-
 CollectedData/*/
 CollectedData/configLatinSquare.csv
 CollectedData/pid_uid_mapping.csv
 
 CLIP/*.pth
 
-FullDataTools/*/
+FullDataTools/mvk_eye_tracking/
+FullDataTools/extracted_images/
+FullDataTools/new_datasets/
