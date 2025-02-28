@@ -99,4 +99,4 @@ for i, rep_images in enumerate(picked_images):
         attentionChecks += 1
 
 print(f"\nTotal missing targets: {missingTargets}")
-print(f"Average target rank: {targetRanksSum / number_of_descriptions:.2f}\n")
+print(f"Average target rank: {targetRanksSum / (number_of_descriptions - missingTargets):.2f}\n")
