@@ -52,6 +52,8 @@ for descr_emb in descriptions_embeddings:
 
 # Print their most similar images
 attentionChecks = 0 # Skip folder number to make space for attention check folders
+missingTargets = 0
+targetRanksSum = 0
 for i, rep_images in enumerate(picked_images):
     os.makedirs(f"new_datasets/{(i + 1 + attentionChecks):02}", exist_ok=True)
     print(f"Most similar image {i + 1}: {rep_images[0]}")
@@ -73,6 +75,9 @@ for i, rep_images in enumerate(picked_images):
                 f.write(new_image_name)
             targetPicked = True
 
+            print(f"Target rank: {j + 1}")
+            targetRanksSum += j + 1
+
     # If target was not picked, create folder target and save it there (from the path)
     if not targetPicked:
         os.makedirs(f"new_datasets/{(i + 1 + attentionChecks):02}/target", exist_ok=True)
@@ -80,7 +85,9 @@ for i, rep_images in enumerate(picked_images):
         # Then in chosenTarget.txt save the target image name
         with open(f"new_datasets/{(i + 1 + attentionChecks):02}/chosenTarget.txt", 'w') as f:
             f.write(f"target/{os.path.basename(original_representative_images[i])}")
-            
+
+        print("Saved missing target to: ", f"new_datasets/{(i + 1 + attentionChecks):02}/target/{os.path.basename(original_representative_images[i])}")
+        missingTargets += 1
 
     # Also save the embeddings to a CSV file - CLIPFeatures.csv
     np.savetxt(f"new_datasets/{(i + 1 + attentionChecks):02}/CLIPFeatures.csv", np.array(picked_embeddings[i]), delimiter=';', fmt='%.8e')
@@ -90,3 +97,6 @@ for i, rep_images in enumerate(picked_images):
 
     if ((i + 1) % (math.ceil(number_of_descriptions / 3)) == 0):  # Make space always for 2 attention checks
         attentionChecks += 1
+
+print(f"\nTotal missing targets: {missingTargets}")
+print(f"Average target rank: {targetRanksSum / number_of_descriptions:.2f}\n")
