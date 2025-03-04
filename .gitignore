@@ -4,3 +4,4 @@ Graphs/multiGraph.png
 chosenTarget.txt
 venv/
 CollectedData/*/
+.DS_Store
