@@ -834,8 +834,18 @@ function handleCompareClick(event) {
     let clonedTarget = $('#targetImageDiv').find('img').clone();
 
     let compareOverlay = $('#image-compare');
-    compareOverlay.append(clonedImage);
-    compareOverlay.append(clonedTarget);
+
+    // Create containers
+    let clickedCompareContainer = $('<div class="compare-container"></div>');
+    let targetCompareContainer = $('<div class="compare-container"></div>');
+
+    // Add labels and images to containers
+    clickedCompareContainer.append('<div class="image-label">Clicked image</div>').append(clonedImage);
+    targetCompareContainer.append('<div class="image-label">Target image</div>').append(clonedTarget);
+
+    // Append containers to the overlay
+    compareOverlay.append(clickedCompareContainer);
+    compareOverlay.append(targetCompareContainer);
 
     compareOverlay.fadeIn();
     noOverlaySpacebarActive = false; // Disable spacebar activation when overlay is visible
