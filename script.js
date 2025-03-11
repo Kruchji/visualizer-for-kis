@@ -897,7 +897,7 @@ function showSkipButton() {
 }
 
 let skipTimerId;
-const SKIP_BUTTON_APPEAR_TIME = 30000;  // 30 seconds
+const SKIP_BUTTON_APPEAR_TIME = 60000;  // 60 seconds
 
 function startSkipTimer() {
     if (skipTimerId) {
