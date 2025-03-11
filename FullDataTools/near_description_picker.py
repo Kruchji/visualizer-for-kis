@@ -4,6 +4,10 @@ import os, shutil, math
 import numpy as np
 import csv
 
+# Extracts frame number and video ID from the image path
+def extract_frame_and_video(img):
+    parts = os.path.basename(img).split('_')
+    return int(parts[1]), parts[2].split('.')[0]  # Frame number, Video ID
 
 # Get folders inside extracted_images/mvk_1 and extracted_images/mvk_2
 folders = [f.path for f in os.scandir('extracted_images/mvk_1') if f.is_dir()] + [f.path for f in os.scandir('extracted_images/mvk_2') if f.is_dir()]
@@ -41,14 +45,64 @@ with open('representative_images/target_images.txt', 'r') as f:
 
 # Find 200 most similar images for each representative description
 num_similar_images = 200
+frame_threshold = 30  # in frames - enforced on both sides
 picked_images = []
 picked_embeddings = []
-for descr_emb in descriptions_embeddings:
+for i, descr_emb in enumerate(descriptions_embeddings):
     # Cosine similarity: (A . B) / (||A|| * ||B||)
     similarities = np.dot(embeddings, descr_emb) / (np.linalg.norm(embeddings, axis=1) * np.linalg.norm(descr_emb))
-    most_similar_indices = np.argsort(similarities)[-num_similar_images:][::-1]     # Reverse the order to get the most similar images (descending order)
-    picked_images.append([image_paths[i] for i in most_similar_indices])
-    picked_embeddings.append([embeddings[i] for i in most_similar_indices])
+    most_similar_indices = np.argsort(similarities)[-num_similar_images*3:][::-1]     # Reverse the order to get the most similar images (descending order) (plus take more to account for conflicts)
+
+    selected_images = []
+    selected_embeddings = []
+    seen_frames = {}  # Track seen frames per video
+
+    confl_counter = 0
+
+    # Loop until enough valid images are picked
+    for idx in most_similar_indices:
+        # Get image and its values
+        img_path = image_paths[idx]
+        frame_num, video_id = extract_frame_and_video(img_path)
+
+        # Check if the current image is the original representative
+        if os.path.normpath(img_path) == os.path.normpath(original_representative_images[i]):
+            # Force-include the representative image and remove conflicting ones
+            selected_images = [img for img in selected_images if extract_frame_and_video(img)[1] != video_id or abs(extract_frame_and_video(img)[0] - frame_num) > frame_threshold]
+            selected_embeddings = [embeddings[image_paths.index(img)] for img in selected_images]
+            selected_images.append(img_path)
+            selected_embeddings.append(embeddings[idx])
+
+            orig_size = len(seen_frames.get(video_id, []))
+
+            # Recompute the seen frames for this video
+            seen_frames.setdefault(video_id, [])
+            seen_frames[video_id] = [f for f in seen_frames[video_id] if abs(f - frame_num) > frame_threshold]
+            seen_frames[video_id].append(frame_num)
+
+            print(f"Force-included target: {img_path}, removed {orig_size - len(seen_frames[video_id]) + 1} conflicting images")
+            continue
+
+        # Skip if there's a conflict withing the specified range
+        if video_id in seen_frames and any(abs(frame_num - seen_frame) <= frame_threshold for seen_frame in seen_frames[video_id]):
+            #print(f"Conflict: {img_path} with {seen_frames[video_id]}")
+            confl_counter += 1
+            continue
+
+        # Add image if no conflict
+        selected_images.append(img_path)
+        selected_embeddings.append(embeddings[idx])
+        seen_frames.setdefault(video_id, []).append(frame_num)
+
+        # Stop when enough images are picked
+        if len(selected_images) == num_similar_images:
+            break
+
+    # For each description, save the most similar images and their embeddings
+    picked_images.append(selected_images)
+    picked_embeddings.append(selected_embeddings)
+    print(f"End of description {i + 1}, conflicts: {confl_counter}\n")
+
 
 # Print their most similar images
 attentionChecks = 0 # Skip folder number to make space for attention check folders
