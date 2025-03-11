@@ -4,6 +4,7 @@ $(document).ready(function () {
     let imageCompare = $("#image-compare");
     imageCompare.click(function () {
         imageCompare.fadeOut("fast", function () { imageCompare.empty(); });
+        noOverlaySpacebarActive = true; // Enable spacebar activation when overlay is not visible
         toggleScroll();
         storeSubmissionAttempt(UserID, currentIteration, "COM_CLOSE", 3);
     });
@@ -800,15 +801,27 @@ function toggleTargetAndStartTracker() {
     }
 }
 
+let spacebarOffCooldown = true; // Flag to control spacebar cooldown
+let noOverlaySpacebarActive = true; // Flag to control spacebar activation when no overlay is visible
+const SPACE_COOLDOWN = 500; // Time in milliseconds
+
 // Spacebar to toggle target image
 document.addEventListener('keydown', function (event) {
-    if (event.key === ' ') {
+    if (event.key === ' ' && spacebarOffCooldown && noOverlaySpacebarActive) {
         // Prevent the default spacebar action (scrolling)
         event.preventDefault();
 
         // Active only when button can be pressed as well (not on loading screen)
         if (scrollTrackerRunning) {
             toggleTargetImage();
+
+            // Disable spacebar press temporarily
+            spacebarOffCooldown = false;
+
+            // Re-enable spacebar press after cooldown
+            setTimeout(() => {
+                spacebarOffCooldown = true;
+            }, SPACE_COOLDOWN);
         }
     }
 });
@@ -825,6 +838,7 @@ function handleCompareClick(event) {
     compareOverlay.append(clonedTarget);
 
     compareOverlay.fadeIn();
+    noOverlaySpacebarActive = false; // Disable spacebar activation when overlay is visible
     toggleScroll();
 
     const clonedImageSrc = clonedImage.attr('src');
