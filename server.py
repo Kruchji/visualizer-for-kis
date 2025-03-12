@@ -61,7 +61,7 @@ def createNewUser(prolificPID, studyID, sessionID):
     logs = {}
 
     # store new user to .json
-    logs[str(newUid)] = {"lastCompleted" : -2, "PROLIFIC_PID" : prolificPID, "STUDY_ID" : studyID, "SESSION_ID" : sessionID, "reloads" : {}}  # -2 to indicate that the user is new
+    logs[str(newUid)] = {"lastCompleted" : -2, "PROLIFIC_PID" : prolificPID, "STUDY_ID" : studyID, "SESSION_ID" : sessionID, "reloads" : {}, "totalIncorrect" : 0}  # -2 to indicate that the user is new
     logsStr = json.dumps(logs, indent=4)
     
     os.makedirs(f"CollectedData/{newUid:04}", exist_ok=True)
@@ -175,7 +175,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
             
-            response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
+            response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode, 'totalIncorrect' : userLogs.get("totalIncorrect", 0)}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
@@ -356,6 +356,23 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             # write csv data to disk
             with open(f"CollectedData/{int(uid):04}/submissions.txt", 'a') as csvFile:
                 csvFile.write(toLogText)
+
+            # If the submission was incorrect (0), increment the total incorrect counter
+            if logJSON["correct"] == 0:
+                # load currently saved data
+                with open(f"CollectedData/{int(uid):04}/userData.json", "r") as JSONfile:
+                    logs = json.load(JSONfile)
+                    userLogs = logs.get(uid,{})
+
+                userLogs["totalIncorrect"] = userLogs.get("totalIncorrect", 0) + 1
+
+                # save new data in JSON file
+                logs[uid] = userLogs
+                logsStr = json.dumps(logs, indent=4)
+                
+                with open(f"CollectedData/{int(uid):04}/userData.json", "w") as JSONfile:
+                    JSONfile.write(logsStr)
+
             self.send_response(200)
 
 

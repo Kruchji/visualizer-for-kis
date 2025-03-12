@@ -89,7 +89,7 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="cursorCheckbox"
                         onclick="toggleSolutionDisplay()">
-                    <label class="form-check-label" for="cursorCheckbox">Show solution</label>
+                    <label class="form-check-label fw-bold" for="cursorCheckbox">Show solution</label>
                 </div>
             </div>
             <div class="nav-item">
@@ -97,8 +97,13 @@
                     Image</button>
             </div>
             <div class="nav-item">
-                <span class="navbar-text">
+                <span class="navbar-text fw-bold">
                     Progress: <span id="progress">0/X</span>
+                </span>
+            </div>
+            <div class="nav-item">
+                <span class="navbar-text fw-bold">
+                    Total incorrect submissions: <span id="incorrect-submissions">0</span>
                 </span>
             </div>
             <div class="nav-item" id="newUserButton">

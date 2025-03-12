@@ -66,6 +66,7 @@ let UserID = -1;
 let currentIteration = -1;
 let totalNumberOfSets = -1;
 let adminEnabled = false;
+let incorrectSubmissions = 0;
 
 function createNewUser(prolificQuery) {
     // create new user
@@ -285,6 +286,10 @@ function loadOldIteration(currIterData) {
     UserID = parseInt(currIterData['userID']);
     currentIteration = parseInt(currIterData['currIter']);
     updateProgress();
+
+    // setup total incorrect submissions
+    incorrectSubmissions = parseInt(currIterData['totalIncorrect']);
+    updateIncorrectSubmissions();
 
     targetMissed = 0;
     targetWasOnScreen = false;
@@ -603,6 +608,10 @@ function handleSubmitClick(event) {
         storeSubmissionAttempt(UserID, currentIteration, imageName, 0);
         shakeImage(clickedImage);
 
+        // Update incorrect submissions count
+        incorrectSubmissions++;
+        updateIncorrectSubmissions();
+
         showResult("fail");
         setTimeout(function () {
             hideResult("fail");
@@ -676,13 +685,21 @@ function hideResult(result) {
     }
 }
 
-//=============== Progress display ===============//¨
+//=============== Progress display ===============//
 
 function updateProgress() {
     const progressDisplay = document.getElementById('progress');
 
     const currDisplayIter = currentIteration + 1;
     progressDisplay.textContent = currDisplayIter + "/" + totalNumberOfSets;
+}
+
+//=============== Incorrect sumbissions display ===============//
+
+function updateIncorrectSubmissions() {
+    const incorrectDisplay = document.getElementById('incorrect-submissions');
+
+    incorrectDisplay.textContent = incorrectSubmissions;
 }
 
 //=============== Start of test (overlay) ===============//
