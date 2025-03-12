@@ -38,18 +38,48 @@ def createUserConfig(uid):
                 break
             readRows += 1
 
-    # Then add dataset to each config to permute datasets as well later
-    for i in range(len(userConfigData)):
-        userConfigData[i]["dataset"] = i
+    # Get number of datasets
+    datasetCount = len([folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))])
 
-    # Now get a random permutation of the user config
+    # Get all attention check dataset indices (each line in file)
+    attentionCheckIndices = []
+    if os.path.isfile("./Data/attentionCheckIndices.txt"):
+        with open("./Data/attentionCheckIndices.txt", "r") as attentionCheckFile:
+            for line in attentionCheckFile:
+                datasetIndex = int(line.strip())
+                if not datasetIndex in attentionCheckIndices:
+                    attentionCheckIndices.append(datasetIndex)
+    
+    # Get number of attention checks
+    numOfAttentionChecks = len(attentionCheckIndices)
+    realDatasetCount = datasetCount - numOfAttentionChecks  # Actual full datasets
+
+    # Then add (real) dataset to each config - skipping the attention check indices
+    realDatasetIndex = 0
+    for i in range(datasetCount):
+        if i not in attentionCheckIndices:
+            if realDatasetIndex < len(userConfigData):
+                userConfigData[realDatasetIndex]["dataset"] = i
+                realDatasetIndex += 1
+    
+    # Taky only the real dataset count elements from the user config
+    userConfigData = userConfigData[:realDatasetCount]
+
+    # Now get a random permutation of the user config (real datasets only)
     random.shuffle(userConfigData)
+
+    # Insert back attention checks (ord = sp and size = 4) evenly into the user config
+    for i in range(len(attentionCheckIndices)):
+        # e.g. for 3 attention checks, insert at 1/4, 2/4, 3/4
+        userConfigData.insert(int((i+1) * datasetCount / (numOfAttentionChecks + 1)), {"dataset": attentionCheckIndices[i], "ord": "sp", "size": 4})
 
     # Finally store the new user config in user's folder as a csv file (each row contains three items)
     with open(f"CollectedData/{uid:04}/userConfig.csv", "w") as configFile:
         writer = csv.writer(configFile, delimiter=';')
         for configRow in userConfigData:
             writer.writerow([configRow["dataset"], configRow["ord"], configRow["size"]])
+    
+    print(f"User config created for user {uid}.")
 
 def createNewUser(prolificPID, studyID, sessionID):
     # get last user ID

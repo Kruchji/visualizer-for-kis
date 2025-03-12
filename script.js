@@ -250,12 +250,6 @@ function loadNextIteration() {
 
         let boardOrdering = response['sortingMethod'];
 
-        // if 16 images => attention check => force board config
-        if (imageFilenames.length <= 16) {
-            selectedNumPerRow = 4;      // force 4 per row
-            boardOrdering = "sp";       // force side panel ordering
-        }
-
         const orderingName = orderImages(imageFilenames, boardOrdering, ssImageFilenames, selectedNumPerRow);
 
         setupCurrentIteration(imageFilenames, imageToFind, response['folder'], orderingName);

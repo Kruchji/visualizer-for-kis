@@ -60,15 +60,27 @@ with open("config.txt", "r") as configFile:
 baseConfigLength = len(baseConfigData)
 
 # Get dataset (images) folders
-datasetFolders = [folder for folder in os.listdir("./Data/")]
+datasetFolders = [folder for folder in os.listdir("./Data/") if os.path.isdir(f"./Data/{folder}")]
 datasetFolders.sort(key=int)
 
-# For each folder check if number of .jpg images is less than or equal to 16 => attention check
+# Get attention check indexes
 attentionCheckIndexes = []
-for folder in datasetFolders:
-    imageCount = len([file for file in os.listdir(f"./Data/{folder}") if file.endswith(".jpg")])
-    if imageCount <= 16:
-        attentionCheckIndexes.append(datasetFolders.index(folder))
+
+# First check if the file exists
+if os.path.isfile("./Data/attentionCheckIndices.txt"):
+    # On each line of attentionChecks.txt is an index of a dataset folder that should be an attention check
+    with open("./Data/attentionCheckIndices.txt", "r") as attentionCheckFile:
+        for line in attentionCheckFile:
+            datasetIndex = int(line.strip())
+            # Check if not out of bounds
+            if datasetIndex < len(datasetFolders):
+                if datasetIndex not in attentionCheckIndexes:
+                    attentionCheckIndexes.append(datasetIndex)
+                else:
+                    print(f"Attention check index {datasetIndex} is already in the list.")
+            else:
+                print(f"Attention check index {datasetIndex} is out of bounds.")
+
 
 # Get number of not attention check datasets
 numberOfRealDatasets = len(datasetFolders) - len(attentionCheckIndexes)
@@ -89,19 +101,14 @@ latinSquareGrid = np.array(generatedLatinSquareList).reshape(math.ceil(users / b
 largeLatinSquareRows = [np.hstack(row) for row in latinSquareGrid]
 largeGeneratedLatinSquare = np.vstack(largeLatinSquareRows)
 
-# Insert attention checks into the Latin square and remove the last element (index)
+# Store the Latin square differently and remove the last element (index)
 latinSquareConfigs = []
 for i in range(len(largeGeneratedLatinSquare)):
     latinSquareConfigs.append([])
-    attentionChecksAdded = 0
+
     for j in range(len(largeGeneratedLatinSquare[i])):
         # Split the tuple, remove the last element (index), and extract the size and ord
         size, ord, _ = largeGeneratedLatinSquare[i][j]  # _ => ignore the last element
-
-        # Add attention check if needed
-        if (j + attentionChecksAdded) in attentionCheckIndexes:
-            latinSquareConfigs[i].append({"ord": "sp", "size": 4})
-            attentionChecksAdded += 1
 
         latinSquareConfigs[i].append({"ord": ord, "size": int(size)})
 

@@ -6,7 +6,7 @@ import numpy as np
 
 falloffExponent = 0.4   # lower value => later images get selected more
 
-for folderName in os.listdir("./Data/"):
+for folderName in [folder for folder in os.listdir("./Data/") if os.path.isdir("./Data/" + folder)]:
 
     filenames = os.listdir("./Data/" + folderName + "/")
 
