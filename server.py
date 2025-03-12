@@ -116,7 +116,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
 
-            response = {'new_id': newUid, 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
+            response = {'new_id': newUid, 'numOfSets': len([folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]), 'adminMode' : adminMode}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
@@ -175,14 +175,14 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
             
-            response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode, 'totalIncorrect' : userLogs.get("totalIncorrect", 0)}
+            response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]), 'adminMode' : adminMode, 'totalIncorrect' : userLogs.get("totalIncorrect", 0)}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
 
         ############### Get images in a folder ###############
         elif self.path.startswith('/getImages'):    
-            imageSets = [folder for folder in os.listdir("./Data/")]
+            imageSets = [folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]
             imageSets.sort(key=int)
 
             # load currently saved data
