@@ -54,6 +54,7 @@ targetBottomLocations = []
 
 previousCompare = {"x" : 0, "y" : 0, "height" : 0}
 previousTargetOverlay = {"x" : 0}
+previousInstructionsOverlay = {"x" : 0}
 
 afterLoadIndices = []
 
@@ -111,6 +112,7 @@ firstCorrect = True
 firstCompare = True
 firstSkip = True
 firstTargetOverlay = True
+firstInstructionsOverlay = True
 
 with open(f'../CollectedData/{user:04}/submissions.txt', 'r') as file:     # TODO: remove submission parameters
     reader = csv.reader(file, delimiter=';')
@@ -209,6 +211,26 @@ with open(f'../CollectedData/{user:04}/submissions.txt', 'r') as file:     # TOD
             elif subCorrect == 6:
                 rectWidth = ((subTimestamp - minTime) / 1000) - previousTargetOverlay['x']
                 rectangle = patches.Rectangle((previousTargetOverlay['x'], normaliseHeight(0, subTotalScroll)), rectWidth, normaliseHeight(subTotalScroll, subTotalScroll) - normaliseHeight(0, subTotalScroll), linewidth=1, edgecolor='darkturquoise', facecolor='lightgray')
+                ax.add_patch(rectangle)
+
+            # instructions overlay
+            elif subCorrect == 7:
+                # for label display
+                if firstInstructionsOverlay:
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='purple', zorder=3, label='Instructions overlay')
+                    firstInstructionsOverlay = False
+                else:
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='purple', zorder=3)
+
+                plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(subTotalScroll, subTotalScroll), color='purple', zorder=3)
+                plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(0, subTotalScroll), normaliseHeight(subTotalScroll, subTotalScroll)], color='purple', zorder=3)
+
+                previousInstructionsOverlay['x'] = (subTimestamp - minTime) / 1000
+
+            # instructions overlay end
+            elif subCorrect == 8:
+                rectWidth = ((subTimestamp - minTime) / 1000) - previousInstructionsOverlay['x']
+                rectangle = patches.Rectangle((previousInstructionsOverlay['x'], normaliseHeight(0, subTotalScroll)), rectWidth, normaliseHeight(subTotalScroll, subTotalScroll) - normaliseHeight(0, subTotalScroll), linewidth=1, edgecolor='darkorchid', facecolor='lightgray')
                 ax.add_patch(rectangle)
 
 # draw viewport locations
