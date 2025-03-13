@@ -959,6 +959,7 @@ function skipCurrentIteration() {
     storeSubmissionAttempt(UserID, currentIteration, "SKIP", 4);
     storeScrollbarPos(false);   // store last scroll position
     stopScrollTracker();
+    sendScrollData(UserID, currentIteration);   // send any remaining scroll data
     showResult("skip");
     hideSkipButton();
 
