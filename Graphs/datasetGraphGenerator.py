@@ -74,14 +74,14 @@ for user in validUsers:
     currentTarget = user_data[user]["targets"][iteration_num]
     allImages = user_data[user]["imagePos"][iteration_num]
     imagesPerRow = user_data[user]["imagesPerRow"][iteration_num]
-    targePosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
+    targetPosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
 
     # handle missing target
-    if targePosition is None:
+    if targetPosition is None:
         targetRow = 0
         targetColors = ['lightcoral', 'mistyrose']   # red if target is missing
     else:
-        targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
+        targetRow = targetPosition // imagesPerRow      # 4 or 8 images per row
         targetColors = ['lawngreen', 'palegreen']
 
     # get scroll position data

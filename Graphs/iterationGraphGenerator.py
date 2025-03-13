@@ -31,15 +31,15 @@ except KeyError:
     print("Iteration or player not found!")
     exit()
 allImages = json_data[str(user)]["imagePos"][str(iteration)]
-targePosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
+targetPosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
 imagesPerRow = int(json_data[str(user)]["imagesPerRow"][str(iteration)])
 
 # handle missing target
-if targePosition is None:
+if targetPosition is None:
     targetRow = 0
     targetColors = ['lightcoral', 'mistyrose']   # red if target is missing
 else:
-    targetRow = targePosition // imagesPerRow      # 4 or 8 images per row
+    targetRow = targetPosition // imagesPerRow      # 4 or 8 images per row
     targetColors = ['lawngreen', 'palegreen']
 
 # plot window size
