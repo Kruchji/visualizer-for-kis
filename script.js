@@ -29,7 +29,7 @@ $(document).ready(function () {
 
 function firstRunLoad() {
     // hide instruction overlay
-    hideStartOverlay();
+    hideStartOverlayFirst(); // TODO: remove video here (if added)
 
     // Try to get Prolific PID from URL (if not found, use empty string)
     const params = new URLSearchParams(window.location.search);
@@ -330,7 +330,7 @@ function getImageList() {
             const dataSet = data.images;
             const folder = data.folder;
             const ssDataSet = data.ss_images;
-            return { "dataSet": dataSet, "folder": folder, 'boardSize': data.boardSize, 'sortingMethod' : data.sortingMethod, 'target': data.target, "ssDataSet": ssDataSet };
+            return { "dataSet": dataSet, "folder": folder, 'boardSize': data.boardSize, 'sortingMethod': data.sortingMethod, 'target': data.target, "ssDataSet": ssDataSet };
         }).catch(error => {
             console.error('There was a problem with a fetch operation:', error);
         });
@@ -361,7 +361,7 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
 
             imageGrid.append(
                 $('<div>', { class: 'image-container' }).append(
-                    adminEnabled ? $('<div>', { class: 'adminOverlayText'}).html(parseInt(filename.split("_")[0], 10) + "<br>vID: " + filename.split("_")[2].slice(0, -4)) : null, // add overlay text if in admin mode (from video id remove .jpg)
+                    adminEnabled ? $('<div>', { class: 'adminOverlayText' }).html(parseInt(filename.split("_")[0], 10) + "<br>vID: " + filename.split("_")[2].slice(0, -4)) : null, // add overlay text if in admin mode (from video id remove .jpg)
                     $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false', click: handleCompareClick }),
                     $('<div>', { class: 'hover-buttons' }).append(
                         $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick })
@@ -374,7 +374,17 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
     const targetImageDiv = $('#targetImageDiv');
     targetImageDiv.hide();
 
-    targetImageDiv.append($('<img>', { src: 'Data/' + dataFolder + '/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
+    //targetImageDiv.append($('<img>', { src: 'Data/' + dataFolder + '/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
+    targetImageDiv.append(
+        $('<div>', { class: 'target-content' }).append(
+            $('<div>', { text: 'Target image', class: 'target-text' }),
+            $('<img>', { 
+                src: 'Data/' + dataFolder + '/' + imageToFind, 
+                class: 'target-image img-fluid', 
+                draggable: 'false' 
+            })
+        )
+    );
 }
 
 
@@ -709,7 +719,20 @@ function showStartOverlay() {
 function hideStartOverlay() {
     let startOverlay = $('#start-overlay');
     startOverlay.fadeOut();
-    startOverlay.empty();
+
+    const body = document.body;
+    body.style.overflow = '';   // Re-enable scrolling
+}
+
+// Called on first hide (to replace button)
+function hideStartOverlayFirst() {
+    let startOverlay = $('#start-overlay');
+    startOverlay.fadeOut(function () {
+        // Replace the "Begin the Test" button with a "Back to the Test" button
+        $('.start-btn').replaceWith(
+            '<button type="button" class="btn btn-primary start-btn" onclick="hideInstructionsButton()">Back to the Test</button>'
+        );
+    });
 }
 
 //=============== End of test (overlay) ===============//
@@ -785,6 +808,9 @@ function toggleLoadingScreen(boolScroll) {
 
 //=============== Target image overlay ===============//
 
+let targetClickOffCooldown = true; // Flag to control target cooldown
+const TARGET_COOLDOWN = 500; // Time in milliseconds
+
 function toggleTargetImage() {
     const targetImageDiv = $('#targetImageDiv');
 
@@ -805,20 +831,28 @@ function toggleTargetButton() {
 }
 
 function toggleTargetAndStartTracker() {
-    toggleTargetImage();
-    if (!scrollTrackerRunning) {
-        startScrollTracker();   // start tracker on close
-        startSkipTimer();
+    if (targetClickOffCooldown) {
+        toggleTargetImage();
+        if (!scrollTrackerRunning) {
+            startScrollTracker();   // start tracker on close
+            startSkipTimer();
+        }
+
+        // Disable spacebar press temporarily
+        targetClickOffCooldown = false;
+
+        // Re-enable spacebar press after cooldown
+        setTimeout(() => {
+            targetClickOffCooldown = true;
+        }, TARGET_COOLDOWN);
     }
 }
 
-let spacebarOffCooldown = true; // Flag to control spacebar cooldown
 let noOverlaySpacebarActive = true; // Flag to control spacebar activation when no overlay is visible
-const SPACE_COOLDOWN = 500; // Time in milliseconds
 
 // Spacebar to toggle target image
 document.addEventListener('keydown', function (event) {
-    if (event.key === ' ' && spacebarOffCooldown && noOverlaySpacebarActive) {
+    if (event.key === ' ' && targetClickOffCooldown && noOverlaySpacebarActive) {
         // Prevent the default spacebar action (scrolling)
         event.preventDefault();
 
@@ -827,12 +861,12 @@ document.addEventListener('keydown', function (event) {
             toggleTargetImage();
 
             // Disable spacebar press temporarily
-            spacebarOffCooldown = false;
+            targetClickOffCooldown = false;
 
             // Re-enable spacebar press after cooldown
             setTimeout(() => {
-                spacebarOffCooldown = true;
-            }, SPACE_COOLDOWN);
+                targetClickOffCooldown = true;
+            }, TARGET_COOLDOWN);
         }
     }
 });
@@ -864,6 +898,20 @@ function handleCompareClick(event) {
 
     const clonedImageSrc = clonedImage.attr('src');
     storeSubmissionAttempt(UserID, currentIteration, clonedImageSrc.substring(clonedImageSrc.lastIndexOf('/') + 1), 2);    // track compare usage
+}
+
+//=============== Instructions overlay ===============//
+
+function showInstructionsButton() {
+    showStartOverlay();
+
+    storeSubmissionAttempt(UserID, currentIteration, "INSTR_OPEN", 7);    // track instructions usage
+}
+
+function hideInstructionsButton() {
+    hideStartOverlay();
+
+    storeSubmissionAttempt(UserID, currentIteration, "INSTR_CLOSE", 8);    // track instructions usage
 }
 
 
