@@ -3,6 +3,7 @@
 import os, shutil, math
 import numpy as np
 import csv
+from PIL import Image
 
 # Extracts frame number and video ID from the image path
 def extract_frame_and_video(img):
@@ -43,9 +44,13 @@ original_representative_images = []
 with open('representative_images/target_images.txt', 'r') as f:
     original_representative_images = [os.path.normpath(line.strip()).replace('\\', '/') for line in f] # Remove newline characters and normalize paths
 
+# Create a directory to save conflicting images
+CONFLICTING_IMAGES_DIR = "conflicting_images"
+os.makedirs(CONFLICTING_IMAGES_DIR, exist_ok=True)
+
 # Find 200 most similar images for each representative description
 num_similar_images = 200
-frame_threshold = 30  # in frames - enforced on both sides
+frame_threshold = 25  # in frames - enforced on both sides
 picked_images = []
 picked_embeddings = []
 for i, descr_emb in enumerate(descriptions_embeddings):
@@ -67,25 +72,47 @@ for i, descr_emb in enumerate(descriptions_embeddings):
 
         # Check if the current image is the original representative
         if os.path.normpath(img_path) == os.path.normpath(original_representative_images[i]):
-            # Force-include the representative image and remove conflicting ones
-            selected_images = [img for img in selected_images if extract_frame_and_video(img)[1] != video_id or abs(extract_frame_and_video(img)[0] - frame_num) > frame_threshold]
-            selected_embeddings = [embeddings[image_paths.index(img)] for img in selected_images]
-            selected_images.append(img_path)
-            selected_embeddings.append(embeddings[idx])
+            # Identify and print conflicting images with their cosine similarity
+            interfering_images = []
+            for img in selected_images:
+                img_frame, img_video_id = extract_frame_and_video(img)
+                if img_video_id == video_id and abs(img_frame - frame_num) <= frame_threshold:
+                    embIndex = image_paths.index(img)
+                    similarity = np.dot(embeddings[embIndex], embeddings[idx]) / (np.linalg.norm(embeddings[embIndex]) * np.linalg.norm(embeddings[idx]))
+                    interfering_images.append((img, similarity))
 
-            orig_size = len(seen_frames.get(video_id, []))
+            if interfering_images:
+                print(f"Target image: {img_path} has {len(interfering_images)} conflicting images:")
+                for img, similarity in interfering_images:
+                    print(f"  - {img} (Cosine Similarity: {similarity:.4f})")
 
-            # Recompute the seen frames for this video
-            seen_frames.setdefault(video_id, [])
-            seen_frames[video_id] = [f for f in seen_frames[video_id] if abs(f - frame_num) > frame_threshold]
-            seen_frames[video_id].append(frame_num)
+                    # Create a side-by-side comparison image
+                    target_img = Image.open(img_path)
+                    conflicting_img = Image.open(img)
 
-            print(f"Force-included target: {img_path}, removed {orig_size - len(seen_frames[video_id]) + 1} conflicting images")
-            continue
+                    # Resize images to have the same height
+                    height = max(target_img.height, conflicting_img.height)
+                    target_img = target_img.resize((int(target_img.width * (height / target_img.height)), height))
+                    conflicting_img = conflicting_img.resize((int(conflicting_img.width * (height / conflicting_img.height)), height))
+
+                    # Create a new image combining both
+                    combined_img = Image.new("RGB", (conflicting_img.width + target_img.width, height))
+                    combined_img.paste(conflicting_img, (0, 0))
+                    combined_img.paste(target_img, (conflicting_img.width, 0))
+
+                    # Save the combined image
+                    combined_img_path = os.path.join(CONFLICTING_IMAGES_DIR, f"comparison_{i}_{os.path.basename(img)}")
+                    combined_img.save(combined_img_path)
+
+            # Replace the original representative with the most similar conflicting image
+            if interfering_images:
+                most_similar_image = max(interfering_images, key=lambda x: x[1])[0]
+                original_representative_images[i] = most_similar_image
+                print(f"Replaced target image with {most_similar_image}\n")
+            
 
         # Skip if there's a conflict withing the specified range
         if video_id in seen_frames and any(abs(frame_num - seen_frame) <= frame_threshold for seen_frame in seen_frames[video_id]):
-            #print(f"Conflict: {img_path} with {seen_frames[video_id]}")
             confl_counter += 1
             continue
 

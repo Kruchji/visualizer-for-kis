@@ -1,0 +1,356 @@
+End of description 1, conflicts: 90
+
+End of description 2, conflicts: 48
+
+End of description 3, conflicts: 131
+
+End of description 4, conflicts: 48
+
+End of description 5, conflicts: 73
+
+End of description 6, conflicts: 61
+
+Target image: extracted_images/mvk_2\TelAviv1_Oct2022_0052\0010_0155_0161.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\TelAviv1_Oct2022_0052\0008_0135_0161.jpg (Cosine Similarity: 0.9182)
+Replaced target image with extracted_images/mvk_2\TelAviv1_Oct2022_0052\0008_0135_0161.jpg
+
+End of description 7, conflicts: 79
+
+End of description 8, conflicts: 92
+
+Target image: extracted_images/mvk_2\Eqypt_Oct2022_0054\0002_0040_0042.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\Eqypt_Oct2022_0054\0001_0020_0042.jpg (Cosine Similarity: 0.9437)
+Replaced target image with extracted_images/mvk_2\Eqypt_Oct2022_0054\0001_0020_0042.jpg
+
+End of description 9, conflicts: 70
+
+End of description 10, conflicts: 45
+
+End of description 11, conflicts: 73
+
+End of description 12, conflicts: 63
+
+End of description 13, conflicts: 47
+
+End of description 14, conflicts: 45
+
+Target image: extracted_images/mvk_2\WestPalm_May2023_0046\0008_0370_0180.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\WestPalm_May2023_0046\0009_0390_0180.jpg (Cosine Similarity: 0.9280)
+Replaced target image with extracted_images/mvk_2\WestPalm_May2023_0046\0009_0390_0180.jpg
+
+End of description 15, conflicts: 50
+
+Target image: extracted_images/mvk_2\BigIsland1_Jan2023_0010\0056_1075_0032.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\BigIsland1_Jan2023_0010\0055_1060_0032.jpg (Cosine Similarity: 0.9095)
+Replaced target image with extracted_images/mvk_2\BigIsland1_Jan2023_0010\0055_1060_0032.jpg
+
+End of description 16, conflicts: 74
+
+Target image: extracted_images/mvk_2\Maldive_Jun2023_0008\0033_0985_0105.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\Maldive_Jun2023_0008\0032_0965_0105.jpg (Cosine Similarity: 0.9526)
+Replaced target image with extracted_images/mvk_2\Maldive_Jun2023_0008\0032_0965_0105.jpg
+
+End of description 17, conflicts: 86
+
+End of description 18, conflicts: 42
+
+Target image: extracted_images/mvk_2\OkinawaUSSEmmons_Aug2024_0025\0035_0545_0132.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\OkinawaUSSEmmons_Aug2024_0025\0034_0525_0132.jpg (Cosine Similarity: 0.9720)
+Replaced target image with extracted_images/mvk_2\OkinawaUSSEmmons_Aug2024_0025\0034_0525_0132.jpg
+
+End of description 19, conflicts: 100
+
+Target image: extracted_images/mvk_2\NusaPenida2_Jul2024_0002\0013_0405_0115.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\NusaPenida2_Jul2024_0002\0012_0390_0115.jpg (Cosine Similarity: 0.9537)
+Replaced target image with extracted_images/mvk_2\NusaPenida2_Jul2024_0002\0012_0390_0115.jpg
+
+End of description 20, conflicts: 64
+
+End of description 21, conflicts: 56
+
+End of description 22, conflicts: 99
+
+End of description 23, conflicts: 47
+
+End of description 24, conflicts: 80
+
+End of description 25, conflicts: 64
+
+End of description 26, conflicts: 87
+
+Target image: extracted_images/mvk_2\HongKong2_Jun2024_0080\0049_0860_0069.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\HongKong2_Jun2024_0080\0050_0885_0069.jpg (Cosine Similarity: 0.8657)
+Replaced target image with extracted_images/mvk_2\HongKong2_Jun2024_0080\0050_0885_0069.jpg
+
+End of description 27, conflicts: 82
+
+End of description 28, conflicts: 77
+
+End of description 29, conflicts: 101
+
+End of description 30, conflicts: 111
+
+End of description 31, conflicts: 60
+
+End of description 32, conflicts: 85
+
+End of description 33, conflicts: 84
+
+End of description 34, conflicts: 66
+
+End of description 35, conflicts: 107
+
+End of description 36, conflicts: 57
+
+Target image: extracted_images/mvk_2\Maldive2_Jun2023_0008\0019_0430_0104.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\Maldive2_Jun2023_0008\0018_0405_0104.jpg (Cosine Similarity: 0.9437)
+Replaced target image with extracted_images/mvk_2\Maldive2_Jun2023_0008\0018_0405_0104.jpg
+
+End of description 37, conflicts: 93
+
+End of description 38, conflicts: 65
+
+Target image: extracted_images/mvk_1\Silverstrand_Aug2022_0016\0132_3705_0019.jpg has 1 conflicting images:
+  - extracted_images/mvk_1\Silverstrand_Aug2022_0016\0131_3695_0019.jpg (Cosine Similarity: 0.9753)
+Replaced target image with extracted_images/mvk_1\Silverstrand_Aug2022_0016\0131_3695_0019.jpg
+
+End of description 39, conflicts: 78
+
+Target image: extracted_images/mvk_2\SaudiArabia_Jun2023_0028\0012_0215_0146.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\SaudiArabia_Jun2023_0028\0011_0205_0146.jpg (Cosine Similarity: 0.9249)
+Replaced target image with extracted_images/mvk_2\SaudiArabia_Jun2023_0028\0011_0205_0146.jpg
+
+End of description 40, conflicts: 73
+
+End of description 41, conflicts: 34
+
+End of description 42, conflicts: 72
+
+End of description 43, conflicts: 75
+
+Target image: extracted_images/mvk_1\Tulamben2_Jun2022_0050\0022_0820_0025.jpg has 2 conflicting images:
+  - extracted_images/mvk_1\Tulamben2_Jun2022_0050\0021_0800_0025.jpg (Cosine Similarity: 0.9646)
+  - extracted_images/mvk_1\Tulamben2_Jun2022_0050\0023_0840_0025.jpg (Cosine Similarity: 0.9050)
+Replaced target image with extracted_images/mvk_1\Tulamben2_Jun2022_0050\0021_0800_0025.jpg
+
+End of description 44, conflicts: 84
+
+End of description 45, conflicts: 87
+
+End of description 46, conflicts: 80
+
+End of description 47, conflicts: 90
+
+End of description 48, conflicts: 119
+
+End of description 49, conflicts: 56
+
+Target image: extracted_images/mvk_2\Sydney_2023_0037\0019_0265_0151.jpg has 1 conflicting images:
+  - extracted_images/mvk_2\Sydney_2023_0037\0017_0240_0151.jpg (Cosine Similarity: 0.9153)
+Replaced target image with extracted_images/mvk_2\Sydney_2023_0037\0017_0240_0151.jpg
+
+End of description 50, conflicts: 84
+
+Most similar image 1: extracted_images/mvk_1\KauSaiWan_Oct2022_0014\0036_0525_0000.jpg
+Copying most similar images
+Target rank: 110
+
+Most similar image 2: extracted_images/mvk_2\NusaPenida_Jul2024_0030\0003_0100_0129.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/02/target/0020_0500_0114.jpg
+
+Most similar image 3: extracted_images/mvk_2\SaudiArabia_Jun2023_0023\0036_0820_0145.jpg
+Copying most similar images
+Target rank: 14
+
+Most similar image 4: extracted_images/mvk_2\HongKong_Aug2022_0017\0184_4540_0089.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/04/target/0012_0390_0077.jpg
+
+Most similar image 5: extracted_images/mvk_1\Oahu2_Jul2022_0022\0010_0650_0014.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/05/target/0010_0275_0147.jpg
+
+Most similar image 6: extracted_images/mvk_2\HongKong5_Aug2023_0012\0003_0175_0082.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/06/target/0030_0615_0047.jpg
+
+Most similar image 7: extracted_images/mvk_2\NusaPenida_Jul2024_0029\0009_0175_0128.jpg
+Copying most similar images
+Target rank: 31
+
+Most similar image 8: extracted_images/mvk_2\Eqypt_Oct2022_0008\0045_0855_0039.jpg
+Copying most similar images
+Target rank: 10
+
+Most similar image 9: extracted_images/mvk_2\HongKong3_Aug2023_0013\0051_1045_0073.jpg
+Copying most similar images
+Target rank: 15
+
+Most similar image 10: extracted_images/mvk_2\HongKong3_Aug2023_0011\0033_0915_0072.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/10/target/0044_1195_0148.jpg
+
+Most similar image 11: extracted_images/mvk_1\Silverstrand_Aug2022_0016\0082_2430_0019.jpg
+Copying most similar images
+Target rank: 148
+
+Most similar image 12: extracted_images/mvk_2\HongKong3_Aug2023_0033\0083_1630_0078.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/12/target/0011_0430_0126.jpg
+
+Most similar image 13: extracted_images/mvk_2\TelAviv2_Oct2022_0058\0007_0180_0165.jpg
+Copying most similar images
+Target rank: 93
+
+Most similar image 14: extracted_images/mvk_1\Molokai_Jul2022_0042\0024_1405_0008.jpg
+Copying most similar images
+Target rank: 141
+
+Most similar image 15: extracted_images/mvk_2\WestPalm_May2023_0046\0009_0390_0180.jpg
+Copying most similar images
+Target rank: 1
+
+Most similar image 16: extracted_images/mvk_2\Maldive_Jun2023_0008\0003_0250_0105.jpg
+Copying most similar images
+Target rank: 7
+
+Most similar image 17: extracted_images/mvk_2\HongKong_Aug2022_0017\0181_4315_0089.jpg
+Copying most similar images
+Target rank: 13
+
+Most similar image 18: extracted_images/mvk_2\Eqypt_Oct2022_0091\0044_1240_0050.jpg
+Copying most similar images
+Target rank: 38
+
+Most similar image 19: extracted_images/mvk_2\OkinawaUSSEmmons_Aug2024_0025\0034_0525_0132.jpg
+Copying most similar images
+Target rank: 1
+
+Most similar image 20: extracted_images/mvk_2\OkinawaUSSEmmons_Aug2024_0025\0029_0455_0132.jpg
+Copying most similar images
+Target rank: 5
+
+Most similar image 21: extracted_images/mvk_2\HongKong2_Aug2023_0012\0005_0390_0057.jpg
+Copying most similar images
+Target rank: 5
+
+Most similar image 22: extracted_images/mvk_2\WestPalm_May2023_0193\0020_0595_0196.jpg
+Copying most similar images
+Target rank: 8
+
+Most similar image 23: extracted_images/mvk_2\WestPalm_May2023_0151\0024_1125_0193.jpg
+Copying most similar images
+Target rank: 11
+
+Most similar image 24: extracted_images/mvk_2\HongKong7_Aug2023_0002\0021_0655_0088.jpg
+Copying most similar images
+Target rank: 12
+
+Most similar image 25: extracted_images/mvk_2\SanDiego1_Apr2022_0005\0019_0520_0134.jpg
+Copying most similar images
+Target rank: 84
+
+Most similar image 26: extracted_images/mvk_2\SanDiego1_Apr2022_0003\0029_1045_0133.jpg
+Copying most similar images
+Target rank: 18
+
+Most similar image 27: extracted_images/mvk_2\HongKong2_Jun2024_0080\0003_0080_0069.jpg
+Copying most similar images
+Target rank: 101
+
+Most similar image 28: extracted_images/mvk_1\Tulamben_Jun2022_0084\0009_0510_0031.jpg
+Copying most similar images
+Target rank: 17
+
+Most similar image 29: extracted_images/mvk_2\HongKong3_Aug2023_0018\0031_0550_0075.jpg
+Copying most similar images
+Target rank: 7
+
+Most similar image 30: extracted_images/mvk_2\HongKong3_Aug2023_0033\0056_0985_0078.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/30/target/0017_0430_0078.jpg
+
+Most similar image 31: extracted_images/mvk_1\Molokini_Jul2022_0078\0030_0805_0010.jpg
+Copying most similar images
+Target rank: 16
+
+Most similar image 32: extracted_images/mvk_2\Tulamben_Jun2024_0032\0014_0920_0172.jpg
+Copying most similar images
+Target rank: 34
+
+Most similar image 33: extracted_images/mvk_2\MontereyBay_Aug2023_0027\0027_0670_0109.jpg
+Copying most similar images
+Target rank: 5
+
+Most similar image 34: extracted_images/mvk_2\HongKong5_Aug2023_0023\0011_0495_0086.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/34/target/0005_0275_0096.jpg
+
+Most similar image 35: extracted_images/mvk_2\Sydney_2023_0037\0040_0555_0151.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/35/target/0017_0245_0175.jpg
+
+Most similar image 36: extracted_images/mvk_2\Sydney_2023_0037\0025_0345_0151.jpg
+Copying most similar images
+Target rank: 198
+
+Most similar image 37: extracted_images/mvk_2\Maldive2_Jun2023_0008\0018_0405_0104.jpg
+Copying most similar images
+Target rank: 1
+
+Most similar image 38: extracted_images/mvk_2\BigIsland1_Jan2023_0041\0014_0470_0033.jpg
+Copying most similar images
+Target rank: 52
+
+Most similar image 39: extracted_images/mvk_1\LittlePalm_May2021_0004\0053_0880_0002.jpg
+Copying most similar images
+Target rank: 13
+
+Most similar image 40: extracted_images/mvk_2\SaudiArabia_Jun2023_0028\0056_0905_0146.jpg
+Copying most similar images
+Target rank: 2
+
+Most similar image 41: extracted_images/mvk_2\Maldive1_Jun2023_0023\0008_0410_0100.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/41/target/0014_0560_0199.jpg
+
+Most similar image 42: extracted_images/mvk_2\HongKong_Jun2024_0001\0001_0110_0090.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/42/target/0042_1475_0165.jpg
+
+Most similar image 43: extracted_images/mvk_1\LittlePalm_May2021_0004\0048_0780_0002.jpg
+Copying most similar images
+Saved missing target to:  new_datasets/43/target/0027_0575_0019.jpg
+
+Most similar image 44: extracted_images/mvk_2\SanDiego_Apr2022_0005\0008_0115_0138.jpg
+Copying most similar images
+Target rank: 27
+
+Most similar image 45: extracted_images/mvk_2\BigIsland_Jan2023_0043\0001_0015_0037.jpg
+Copying most similar images
+Target rank: 8
+
+Most similar image 46: extracted_images/mvk_2\Eqypt_Oct2022_0084\0061_2000_0048.jpg
+Copying most similar images
+Target rank: 128
+
+Most similar image 47: extracted_images/mvk_1\Silverstrand_Aug2022_0016\0112_3190_0019.jpg
+Copying most similar images
+Target rank: 5
+
+Most similar image 48: extracted_images/mvk_2\Lajolle_Apr2023_0033\0002_0120_0097.jpg
+Copying most similar images
+Target rank: 4
+
+Most similar image 49: extracted_images/mvk_2\SanDiego_Apr2022_0088\0015_0175_0140.jpg
+Copying most similar images
+Target rank: 5
+
+Most similar image 50: extracted_images/mvk_2\HongKong3_Aug2023_0013\0033_0785_0073.jpg
+Copying most similar images
+Target rank: 69
+
+
+Total missing targets: 12
+Average target rank: 38.34
