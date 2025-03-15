@@ -160,7 +160,6 @@ body {
 #end-overlay,
 #start-overlay {
     display: flex;
-    justify-content: center;
     align-items: center;
     position: fixed;
     top: 0;
@@ -169,6 +168,13 @@ body {
     height: 100%;
     color: rgba(13, 110, 253, 1);
     font-size: 2vw;
+}
+
+#loading-screen,
+#image-compare,
+#result-overlay,
+#end-overlay {
+    justify-content: center;
 }
 
 #loading-screen,
@@ -184,11 +190,14 @@ body {
 
 #start-overlay {
     flex-direction: column;
+    overflow: overlay;
+    padding-bottom: 2vw;
 }
 
 h1 {
     font-size: 3vw;
-    margin-bottom: 4vw;
+    margin-bottom: 3vw;
+    margin-top: 2vw;
     color: #ff9600;
 }
 
@@ -263,6 +272,20 @@ h1 {
 .startOfTest {
     font-size: 1vw;
     max-width: 60%;
+}
+
+/* start video element */
+#instructional-video {
+    width: 100%;
+    max-width: 60%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    margin-bottom: 20px;
+    border: 3px solid rgba(13, 110, 253, 1);
+    border-radius: 12px;
+    display: block;
+    margin-left: auto;  /* Center horizontally */
+    margin-right: auto; /* Center horizontally */
 }
 
 .highlightText {

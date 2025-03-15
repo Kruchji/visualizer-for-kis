@@ -29,7 +29,7 @@ $(document).ready(function () {
 
 function firstRunLoad() {
     // hide instruction overlay
-    hideStartOverlayFirst(); // TODO: remove video here (if added)
+    hideStartOverlayFirst();
 
     // Try to get Prolific PID from URL (if not found, use empty string)
     const params = new URLSearchParams(window.location.search);
@@ -728,6 +728,8 @@ function hideStartOverlay() {
 function hideStartOverlayFirst() {
     let startOverlay = $('#start-overlay');
     startOverlay.fadeOut(function () {
+        // Remove the video element
+        $('#instructional-video').remove();
         // Replace the "Begin the Test" button with a "Back to the Test" button
         $('.start-btn').replaceWith(
             '<button type="button" class="btn btn-primary start-btn" onclick="hideInstructionsButton()">Back to the Test</button>'
