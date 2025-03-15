@@ -199,7 +199,7 @@ function storeScrollbarPos(afterLoadIndicator) {
         "windowH": window.innerHeight,
         "navbarH": document.getElementsByClassName("navbar")[0].clientHeight,
         "firstRowStart": firstRowImage.offsetTop,
-        "secondRowStart": secondRowImage.offsetTop,
+        "secondRowStart": secondRowImage.offsetTop - parseInt($(secondRowImage).css('margin-top'),10),  // remove margin - if second row is a row separator (has margin)
         "imageHeight": firstRowImage.offsetHeight,
         "missedTarget": targetMissed,
         "afterLoad": afterLoad
@@ -347,18 +347,14 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
 
     $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
 
-    let lastEmpty = false;
     const imageGrid = $('#imageGrid');
     imageFilenames.forEach(function (filename) {
         if (filename === "empty") {     // empty image
             imageGrid.append($('<div>', { class: 'empty' }));
-            lastEmpty = true;
+        } else if (filename === "row-separator") {    // separator between rows
+            imageGrid.append($('<div>', { class: 'row-separator' }));
         } else {
-            if (lastEmpty) {    // add separator between videos
-                imageGrid.append($('<div>', { class: 'row-separator' }));
-                lastEmpty = false;
-            }
-
+            // add image to grid
             imageGrid.append(
                 $('<div>', { class: 'image-container' }).append(
                     adminEnabled ? $('<div>', { class: 'adminOverlayText' }).html(parseInt(filename.split("_")[0], 10) + "<br>vID: " + filename.split("_")[2].slice(0, -4)) : null, // add overlay text if in admin mode (from video id remove .jpg)
@@ -378,10 +374,10 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
     targetImageDiv.append(
         $('<div>', { class: 'target-content' }).append(
             $('<div>', { text: 'Target image', class: 'target-text' }),
-            $('<img>', { 
-                src: 'Data/' + dataFolder + '/' + imageToFind, 
-                class: 'target-image img-fluid', 
-                draggable: 'false' 
+            $('<img>', {
+                src: 'Data/' + dataFolder + '/' + imageToFind,
+                class: 'target-image img-fluid',
+                draggable: 'false'
             })
         )
     );
@@ -514,7 +510,22 @@ function groupSort(imageArray, imagesPerRow) {
         .sort((a, b) => a.lowestRank - b.lowestRank);  // Sort groups by the lowest rank in each group
 
     // Step 3: Flatten the sorted groups into a single array of image names
-    const sortedImageArray = sortedGroups.flatMap(group => group.images.map(image => image.name));
+    const sortedImageArray = [];
+    let previousGroupId = null;
+
+    sortedGroups.forEach(group => {
+        // Add a row separator if the group ID has changed
+        if (previousGroupId !== null && previousGroupId !== group.groupId) {
+            sortedImageArray.push("row-separator"); // Insert the row-separator
+        }
+
+        // Add the images of the current group
+        group.images.forEach(image => {
+            sortedImageArray.push(image.name);
+        });
+
+        previousGroupId = group.groupId; // Update the group id to the current one
+    });
 
     // replace array
     imageArray.length = 0;
@@ -637,7 +648,7 @@ function storeSubmissionAttempt(uid, iteration, image, correct) {
         "navbarH": document.getElementsByClassName("navbar")[0].clientHeight,
         "windowH": window.innerHeight,
         "firstRowStart": firstRowImage.offsetTop,
-        "secondRowStart": secondRowImage.offsetTop,
+        "secondRowStart": secondRowImage.offsetTop - parseInt($(secondRowImage).css('margin-top'),10),  // remove margin - if second row is a row separator (has margin)
         "imageHeight": firstRowImage.offsetHeight,
         "correct": correct,
         "image": image

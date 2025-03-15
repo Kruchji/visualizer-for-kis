@@ -30,17 +30,29 @@ try:
 except KeyError:
     print("Iteration or player not found!")
     exit()
-allImages = json_data[str(user)]["imagePos"][str(iteration)]
+
+# define row separator size
+ROW_SEPARATOR_SIZE = 33 # 10px margin on top and bottom, 10px grid spacing (but only 1 is added when row separator is added) and 3px line size = 10 + 10 + 10 + 3 = 33px
+
+# get data about images
+allGridItems = json_data[str(user)]["imagePos"][str(iteration)] # also contains row-separators
+allImages = [item for item in allGridItems if item['image'] != "row-separator"]
+
 targetPosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
 imagesPerRow = int(json_data[str(user)]["imagesPerRow"][str(iteration)])
 
 # handle missing target
+rowSeparatorsBeforeTarget = 0
 if targetPosition is None:
     targetRow = 0
     targetColors = ['lightcoral', 'mistyrose']   # red if target is missing
 else:
     targetRow = targetPosition // imagesPerRow      # 4 or 8 images per row
     targetColors = ['lawngreen', 'palegreen']
+
+    # Get the number of row separators before the clicked image (in group display)
+    targetIndexInGrid = next((index for index, item in enumerate(allGridItems) if item['image'] == currentTarget), None)
+    rowSeparatorsBeforeTarget = sum(1 for i in range(targetIndexInGrid) if allGridItems[i]['image'] == "row-separator")
 
 # plot window size
 fig, ax = plt.subplots(figsize=(10, 7))
@@ -80,8 +92,8 @@ with open(f'../CollectedData/{user:04}/scrollPositions.txt', 'r') as file:
             imageHeight = float(row[10])
 
             # get difference between rows to calculate position of target
-            targetTopLocations.append(normaliseHeight(FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
-            targetBottomLocations.append(normaliseHeight(imageHeight + FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight), totalScroll))
+            targetTopLocations.append(normaliseHeight(FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight) + rowSeparatorsBeforeTarget * ROW_SEPARATOR_SIZE, totalScroll))
+            targetBottomLocations.append(normaliseHeight(imageHeight + FirstRowHeight + targetRow * (SecondRowHeight - FirstRowHeight) + rowSeparatorsBeforeTarget * ROW_SEPARATOR_SIZE, totalScroll))
 
             afterLoad = int(row[12])
             if afterLoad == 1:
@@ -130,9 +142,15 @@ with open(f'../CollectedData/{user:04}/submissions.txt', 'r') as file:     # TOD
             subClickedImage = row[11]
 
             if subCorrect < 3:
-                # get position of clicked image
+                # get row of clicked image
                 clickedImageRow = next((index for index, item in enumerate(allImages) if item['image'] == subClickedImage), None) // imagesPerRow
-                clickedImageLocation = subFirstRow + clickedImageRow * (subSecondRow - subFirstRow)
+
+                # Get the number of row separators before the clicked image (in group display)
+                clickedImageIndexInGrid = next((index for index, item in enumerate(allGridItems) if item['image'] == subClickedImage), None)
+                rowSeparatorsBeforeClickedImage = sum(1 for i in range(clickedImageIndexInGrid) if allGridItems[i]['image'] == "row-separator")
+
+                # calculate position of clicked image
+                clickedImageLocation = subFirstRow + clickedImageRow * (subSecondRow - subFirstRow) + rowSeparatorsBeforeClickedImage * ROW_SEPARATOR_SIZE
 
             # display dot based on submission type, time and image position
             # incorrect
