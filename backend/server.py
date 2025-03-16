@@ -38,19 +38,49 @@ def createUserConfig(uid):
                 break
             readRows += 1
 
-    # Then add dataset to each config to permute datasets as well later
-    for i in range(len(userConfigData)):
-        userConfigData[i]["dataset"] = i
+    # Get number of datasets
+    datasetCount = len([folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))])
+ 
+    # Get all attention check dataset indices (each line in file)
+    attentionCheckIndices = []
+    if os.path.isfile("./Data/attentionCheckIndices.txt"):
+        with open("./Data/attentionCheckIndices.txt", "r") as attentionCheckFile:
+            for line in attentionCheckFile:
+                datasetIndex = int(line.strip())
+                if not datasetIndex in attentionCheckIndices:
+                    attentionCheckIndices.append(datasetIndex)
+     
+    # Get number of attention checks
+    numOfAttentionChecks = len(attentionCheckIndices)
+    realDatasetCount = datasetCount - numOfAttentionChecks  # Actual full datasets
+ 
+    # Then add (real) dataset to each config - skipping the attention check indices
+    realDatasetIndex = 0
+    for i in range(datasetCount):
+        if i not in attentionCheckIndices:
+            if realDatasetIndex < len(userConfigData):
+                userConfigData[realDatasetIndex]["dataset"] = i
+                realDatasetIndex += 1
+     
+    # Taky only the real dataset count elements from the user config
+    userConfigData = userConfigData[:realDatasetCount]
 
-    # Now get a random permutation of the user config
+    # Now get a random permutation of the user config (real datasets only)
     random.shuffle(userConfigData)
+
+    # Insert back attention checks (ord = sp and size = 4) evenly into the user config
+    for i in range(len(attentionCheckIndices)):
+        # e.g. for 3 attention checks, insert at 1/4, 2/4, 3/4
+        userConfigData.insert(int((i+1) * datasetCount / (numOfAttentionChecks + 1)), {"dataset": attentionCheckIndices[i], "ord": "sp", "size": 4})
+
 
     # Finally store the new user config in user's folder as a csv file (each row contains three items)
     with open(f"CollectedData/{uid:04}/userConfig.csv", "w") as configFile:
         writer = csv.writer(configFile, delimiter=';')
         for configRow in userConfigData:
             writer.writerow([configRow["dataset"], configRow["ord"], configRow["size"]])
-
+            
+    print(f"User config created for user {uid}.")
 def getHighestUserID():
     folder_names = [name for name in os.listdir("CollectedData") if os.path.isdir(os.path.join("CollectedData", name))]
     numeric_folders = [int(name) for name in folder_names if name.isdigit()]
@@ -66,7 +96,7 @@ def createNewUser(prolificPID, studyID, sessionID):
     logs = {}
 
     # store new user to .json
-    logs[str(newUid)] = {"lastCompleted" : -2, "prolificPID" : prolificPID, "studyID" : studyID, "sessionID" : sessionID, "reloads" : {}}  # -2 to indicate that the user is new
+    logs[str(newUid)] = {"lastCompleted" : -2, "prolificPID" : prolificPID, "studyID" : studyID, "sessionID" : sessionID, "reloads" : {}, "totalIncorrect" : 0}  # -2 to indicate that the user is new
     logsStr = json.dumps(logs, indent=4)
     
     os.makedirs(f"CollectedData/{newUid:04}", exist_ok=True)
@@ -113,7 +143,7 @@ async def newUser(req: Request):
 
     newUid = createNewUser(prolificPID, studyID, sessionID)
 
-    response = {'new_id': newUid, 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
+    response = {'new_id': newUid, 'numOfSets': len([folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]), 'adminMode' : adminMode}
     response = json.dumps(response).encode('utf-8')
     return response
 
@@ -125,7 +155,7 @@ async def getImages(req: Request):
     if uid == None or iteration == None:
         return
 
-    imageSets = [folder for folder in os.listdir("./Data/")]
+    imageSets = [folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]
     imageSets.sort(key=int)
 
             # load currently saved data
@@ -242,6 +272,22 @@ async def submissions(req: Request):
     with open(f"CollectedData/{int(uid):04}/submissions.txt", 'a') as csvFile:
         csvFile.write(toLogText)
     
+        # If the submission was incorrect (0), increment the total incorrect counter
+        if logJSON["correct"] == 0:
+            # load currently saved data
+            with open(f"CollectedData/{int(uid):04}/userData.json", "r") as JSONfile:
+                logs = json.load(JSONfile)
+                userLogs = logs.get(uid,{})
+ 
+            userLogs["totalIncorrect"] = userLogs.get("totalIncorrect", 0) + 1
+ 
+            # save new data in JSON file
+            logs[uid] = userLogs
+            logsStr = json.dumps(logs, indent=4)
+                 
+            with open(f"CollectedData/{int(uid):04}/userData.json", "w") as JSONfile:
+                JSONfile.write(logsStr)
+
     response = {}
     response = json.dumps(response).encode('utf-8')
     return response
@@ -299,7 +345,7 @@ async def oldUser(req: Request):
         with open(f"CollectedData/{int(oldUser):04}/userData.json", "w") as JSONfile:
             JSONfile.write(logsStr)
 
-    response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/")]), 'adminMode' : adminMode}
+    response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]), 'adminMode' : adminMode, 'totalIncorrect' : userLogs.get("totalIncorrect", 0)}
     response = json.dumps(response).encode('utf-8')
     return response
 

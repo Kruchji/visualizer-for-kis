@@ -33,6 +33,10 @@
             <h2>
                 <div class="highlightText">Instructions:</div>
             </h2>
+            <video id="instructional-video" controls>
+                <source src="Resources/instructional_video.mp4" type="video/mp4">
+                Your browser could not display the instructional video.
+            </video>
             <ol>
                 <li>
                     <div class="highlightText">Target Image:</div> The target image is displayed before each set of
@@ -80,6 +84,8 @@
     <!-- Image comparison overlay -->
     <div id="image-compare"></div>
 
+    <!-- Target image overlay -->
+    <div id="targetImageDiv"></div>
 
     <!-- Navigation bar -->
     <nav class="navbar navbar-expand navbar-light fixed-top">
@@ -87,7 +93,7 @@
             <div class="nav-item" id="solutionButton">
                 <div class="form-check">
                     <input id="solution-button" class="form-check-input" type="checkbox" id="cursorCheckbox">
-                    <label class="form-check-label" for="cursorCheckbox">Show solution</label>
+                    <label class="form-check-label fw-bold" for="cursorCheckbox">Show solution</label>
                 </div>
             </div>
             <div class="nav-item">
@@ -95,17 +101,22 @@
                     Image</button>
             </div>
             <div class="nav-item">
-                <span class="navbar-text">
+                <button id="instruction-button" type="button" class="btn btn-primary">Show Instructions</button>
+            </div>
+
+            <div class="nav-item">
+                <span class="navbar-text fw-bold">
                     Progress: <span id="progress">0/X</span>
+                </span>
+            </div>
+            <div class="nav-item">
+                <span class="navbar-text fw-bold">
+                    Total incorrect submissions: <span id="incorrect-submissions">0</span>
                 </span>
             </div>
             <div class="nav-item" id="newUserButton">
                 <button id="new-user-button" type="button" class="btn btn-primary">Start over (new
                     user)</button>
-            </div>
-            <div class="nav-item">
-                <button id="full-screen-button" type="button" class="btn btn-secondary ml-2">Use Full-Screen
-                    Mode</button>
             </div>
             <div class="nav-item" id="skipButton">
                 <button id="current-iteration-button" type="button" class="btn btn-secondary ml-2 shining">Image not in list</button>
@@ -113,9 +124,6 @@
 
         </div>
     </nav>
-
-    <!-- Target image overlay -->
-    <div id="targetImageDiv"></div>
 
     <!-- Blank side panel -->
     <div id="sidePanel"></div>

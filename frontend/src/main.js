@@ -5,11 +5,11 @@ const service_server = ""
 
 // start javascript after page loads
 $(document).ready(function () {
-    console.log("Test");
     // setup image compare overlay
     let imageCompare = $("#image-compare");
     imageCompare.click(function () {
         imageCompare.fadeOut("fast", function () { imageCompare.empty(); });
+        noOverlaySpacebarActive = true; // Enable spacebar activation when overlay is not visible
         toggleScroll();
         storeSubmissionAttempt(UserID, currentIteration, "COM_CLOSE", 3);
     });
@@ -47,15 +47,14 @@ document.addEventListener("DOMContentLoaded", () => {
     target_button.addEventListener("click", () => {
         toggleTargetButton();
     });
+    const instruction_button = document.querySelector("#instruction-button");
+    instruction_button.addEventListener("click", () => {
+        showInstructionsButton();
+    });
 
     const new_user_button = document.querySelector("#new-user-button");
     new_user_button.addEventListener("click", () => {
         startWithNewUser();
-    });
-
-    const full_screen_button = document.querySelector("#full-screen-button");
-    full_screen_button.addEventListener("click", () => {
-        toggleFullScreen();
     });
 
     const current_iteration_button = document.querySelector("#current-iteration-button");
@@ -67,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function firstRunLoad() {
     // hide instruction overlay
-    hideStartOverlay();
+    hideStartOverlayFirst();
   
 
     const params = new URLSearchParams(window.location.search);
@@ -106,6 +105,7 @@ async function firstRunLoad() {
     let currentIteration = -1;
     let totalNumberOfSets = -1;
     let adminEnabled = false;
+    let incorrectSubmissions = 0;
 
 async function createNewUser(request_body) {
     let response = await fetch(service_server + "/api/newUser", {
@@ -146,6 +146,7 @@ async function loadOldUser(request_body) {
         
         let data = await response.json();
         data = JSON.parse(data)
+        totalNumberOfSets = data.numOfSets;
         return data;
       }
       else{
@@ -249,7 +250,7 @@ function storeScrollbarPos(afterLoadIndicator) {
         "windowH": window.innerHeight,
         "navbarH": document.getElementsByClassName("navbar")[0].clientHeight,
         "firstRowStart": firstRowImage.offsetTop,
-        "secondRowStart": secondRowImage.offsetTop,
+        "secondRowStart": secondRowImage.offsetTop - parseInt($(secondRowImage).css('margin-top'),10),  // remove margin - if second row is a row separator (has margin)
         "imageHeight": firstRowImage.offsetHeight,
         "missedTarget": targetMissed,
         "afterLoad": afterLoad
@@ -261,6 +262,8 @@ function storeScrollbarPos(afterLoadIndicator) {
 
 
 async function sendScrollData(uid, iteration) {
+    if (scrollPayloads['multipleScrollData'].length === 0) return;
+
     let request_body = JSON.stringify({
         "uid": UserID,
         "iteration": currentIteration,
@@ -309,20 +312,13 @@ function loadNextIteration() {
         if (response['folder'] == "END") return Promise.reject('END_OF_TEST');
 
         const imageFilenames = response['dataSet'];
-
         const ssImageFilenames = response['ssDataSet'];
-
         const imageToFind = response['target'];          // always same target image for each dataset
-
+        
         selectedNumPerRow = response['boardSize'];
 
         let boardOrdering = response['sortingMethod'];
 
-        // if 16 images => attention check => force board config
-        if (imageFilenames.length <= 16) {
-            selectedNumPerRow = 4;      // force 4 per row
-            boardOrdering = "sp";       // force side panel ordering
-        }
 
         const orderingName = orderImages(imageFilenames, boardOrdering, ssImageFilenames, selectedNumPerRow);
 
@@ -354,6 +350,10 @@ function loadOldIteration(currIterData) {
     UserID = parseInt(currIterData['userID']);
     currentIteration = parseInt(currIterData['currIter']);
     updateProgress();
+
+    // setup total incorrect submissions
+    incorrectSubmissions = parseInt(currIterData['totalIncorrect']);
+    updateIncorrectSubmissions();
 
     targetMissed = 0;
     targetWasOnScreen = false;
@@ -408,7 +408,7 @@ async function getImageList() {
         const dataSet = data.images;
         const folder = data.folder;
         const ssDataSet = data.ss_images;
-        return { "dataSet": dataSet, "folder": folder, 'boardSize': data.boardSize, 'sortingMethod' : data.sortingMethod, 'target': data.target, "ssDataSet": ssDataSet };  
+        return { "dataSet": dataSet, "folder": folder, 'boardSize': data.boardSize, 'sortingMethod': data.sortingMethod, 'target': data.target, "ssDataSet": ssDataSet }; 
       }
       else{
         console.error('There was a problem with a fetch operation:', error);
@@ -425,22 +425,19 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
     }
 
     $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
-    let lastEmpty = false;
     const imageGrid = $('#imageGrid');
     imageFilenames.forEach(function (filename) {
         if (filename === "empty") {     // empty image
             imageGrid.append($('<div>', { class: 'image-container empty' }));
             imageGrid.append($('<div>', { class: 'empty' }));
             lastEmpty = true;
+        } else if (filename === "row-separator") {    // separator between rows
+            imageGrid.append($('<div>', { class: 'row-separator' }));
         } else {
-            if (lastEmpty) {    // add separator between videos
-                imageGrid.append($('<div>', { class: 'row-separator' }));
-                lastEmpty = false;
-            }
-
+            // add image to grid
             imageGrid.append(
                 $('<div>', { class: 'image-container' }).append(
-                    adminEnabled ? $('<div>', { class: 'adminOverlayText'}).html(parseInt(filename.split("_")[0], 10) + "<br>vID: " + filename.split("_")[2].slice(0, -4)) : null, // add overlay text if in admin mode (from video id remove .jpg)
+                    adminEnabled ? $('<div>', { class: 'adminOverlayText' }).html(parseInt(filename.split("_")[0], 10) + "<br>vID: " + filename.split("_")[2].slice(0, -4)) : null, // add overlay text if in admin mode (from video id remove .jpg)
                     $('<img>', { src: 'Data/' + dataFolder + '/' + filename, class: 'image-item', draggable: 'false', click: handleCompareClick }),
                     $('<div>', { class: 'hover-buttons' }).append(
                         $('<button>', { class: 'btn btn-success', text: 'Submit', click: handleSubmitClick })
@@ -453,7 +450,17 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
     const targetImageDiv = $('#targetImageDiv');
     targetImageDiv.hide();
 
-    targetImageDiv.append($('<img>', { src: 'Data/' + dataFolder + '/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
+    //targetImageDiv.append($('<img>', { src: 'Data/' + dataFolder + '/' + imageToFind, class: 'target-image img-fluid', draggable: 'false' }));
+    targetImageDiv.append(
+        $('<div>', { class: 'target-content' }).append(
+            $('<div>', { text: 'Target image', class: 'target-text' }),
+            $('<img>', {
+                src: 'Data/' + dataFolder + '/' + imageToFind,
+                class: 'target-image img-fluid',
+                draggable: 'false'
+            })
+        )
+    );
 }
 
 
@@ -599,7 +606,22 @@ function groupSort(imageArray, imagesPerRow) {
         .sort((a, b) => a.lowestRank - b.lowestRank);  // Sort groups by the lowest rank in each group
 
     // Step 3: Flatten the sorted groups into a single array of image names
-    const sortedImageArray = sortedGroups.flatMap(group => group.images.map(image => image.name));
+    const sortedImageArray = [];
+    let previousGroupId = null;
+ 
+     sortedGroups.forEach(group => {
+         // Add a row separator if the group ID has changed
+         if (previousGroupId !== null && previousGroupId !== group.groupId) {
+             sortedImageArray.push("row-separator"); // Insert the row-separator
+         }
+ 
+         // Add the images of the current group
+         group.images.forEach(image => {
+             sortedImageArray.push(image.name);
+         });
+ 
+         previousGroupId = group.groupId; // Update the group id to the current one
+     });
 
     // replace array
     imageArray.length = 0;
@@ -697,6 +719,10 @@ function handleSubmitClick(event) {
         storeSubmissionAttempt(UserID, currentIteration, imageName, 0);
         shakeImage(clickedImage);
 
+        // Update incorrect submissions count
+        incorrectSubmissions++;
+        updateIncorrectSubmissions();
+
         showResult("fail");
         setTimeout(function () {
             hideResult("fail");
@@ -720,7 +746,7 @@ async function storeSubmissionAttempt(uid, iteration, image, correct) {
         "navbarH": document.getElementsByClassName("navbar")[0].clientHeight,
         "windowH": window.innerHeight,
         "firstRowStart": firstRowImage.offsetTop,
-        "secondRowStart": secondRowImage.offsetTop,
+        "secondRowStart": secondRowImage.offsetTop - parseInt($(secondRowImage).css('margin-top'),10),  // remove margin - if second row is a row separator (has margin)
         "imageHeight": firstRowImage.offsetHeight,
         "correct": correct,
         "image": image
@@ -786,7 +812,7 @@ function hideResult(result) {
     }
 }
 
-//=============== Progress display ===============//¨
+//=============== Progress display ===============//
 
 function updateProgress() {
     const progressDisplay = document.getElementById('progress');
@@ -795,12 +821,20 @@ function updateProgress() {
     progressDisplay.textContent = currDisplayIter + "/" + totalNumberOfSets;
 }
 
+//=============== Incorrect sumbissions display ===============//
+ 
+function updateIncorrectSubmissions() {
+    const incorrectDisplay = document.getElementById('incorrect-submissions');
+
+    incorrectDisplay.textContent = incorrectSubmissions;
+}
+
+
 //=============== Start of test (overlay) ===============//
 
 function showStartOverlay() {
     let startOverlay = $('#start-overlay');
     startOverlay.fadeIn();
-
     const body = document.body;
     body.style.overflow = 'hidden';
 }
@@ -808,7 +842,26 @@ function showStartOverlay() {
 function hideStartOverlay() {
     let startOverlay = $('#start-overlay');
     startOverlay.fadeOut();
-    startOverlay.empty();
+ 
+    const body = document.body;
+    body.style.overflow = '';   // Re-enable scrolling
+}
+
+// Called on first hide (to replace button)
+function hideStartOverlayFirst() {
+    let startOverlay = $('#start-overlay');
+    startOverlay.fadeOut(function () {
+        // Remove the video element
+        $('#instructional-video').remove();
+        // Replace the "Begin the Test" button with a "Back to the Test" button
+        $('.start-btn').replaceWith(
+            '<button id="hide-instruction-button" type="button" class="btn btn-primary start-btn">Back to the Test</button>'
+        );
+        const hide_instruction_button = document.querySelector("#hide-instruction-button");
+        hide_instruction_button.addEventListener("click", () => {
+        hideInstructionsButton();
+    });
+    });
 }
 
 //=============== End of test (overlay) ===============//
@@ -884,6 +937,9 @@ function toggleLoadingScreen(boolScroll) {
 
 //=============== Target image overlay ===============//
 
+let targetClickOffCooldown = true; // Flag to control target cooldown
+const TARGET_COOLDOWN = 500; // Time in milliseconds
+
 function toggleTargetImage() {
     const targetImageDiv = $('#targetImageDiv');
 
@@ -904,22 +960,43 @@ function toggleTargetButton() {
 }
 
 function toggleTargetAndStartTracker() {
-    toggleTargetImage();
-    if (!scrollTrackerRunning) {
-        startScrollTracker();   // start tracker on close
-        startSkipTimer();
+    if (targetClickOffCooldown) {
+        toggleTargetImage();
+        if (!scrollTrackerRunning) {
+            startScrollTracker();   // start tracker on close
+            startSkipTimer();
+        }
+
+        // Disable spacebar press temporarily
+        targetClickOffCooldown = false;
+
+        // Re-enable spacebar press after cooldown
+        setTimeout(() => {
+            targetClickOffCooldown = true;
+        }, TARGET_COOLDOWN);
+
     }
 }
 
+let noOverlaySpacebarActive = true; // Flag to control spacebar activation when no overlay is visible
+
 // Spacebar to toggle target image
 document.addEventListener('keydown', function (event) {
-    if (event.key === ' ') {
+    if (event.key === ' ' && targetClickOffCooldown && noOverlaySpacebarActive) {
         // Prevent the default spacebar action (scrolling)
         event.preventDefault();
 
         // Active only when button can be pressed as well (not on loading screen)
         if (scrollTrackerRunning) {
             toggleTargetImage();
+
+            // Disable spacebar press temporarily
+            targetClickOffCooldown = false;
+ 
+            // Re-enable spacebar press after cooldown
+            setTimeout(() => {
+                targetClickOffCooldown = true;
+             }, TARGET_COOLDOWN);
         }
     }
 });
@@ -932,16 +1009,40 @@ function handleCompareClick(event) {
     let clonedTarget = $('#targetImageDiv').find('img').clone();
 
     let compareOverlay = $('#image-compare');
-    compareOverlay.append(clonedImage);
-    compareOverlay.append(clonedTarget);
+    
+     // Create containers
+     let clickedCompareContainer = $('<div class="compare-container"></div>');
+     let targetCompareContainer = $('<div class="compare-container"></div>');
+ 
+     // Add labels and images to containers
+     clickedCompareContainer.append('<div class="image-label">Selected image</div>').append(clonedImage);
+     targetCompareContainer.append('<div class="image-label">Target image</div>').append(clonedTarget);
+ 
+     // Append containers to the overlay
+     compareOverlay.append(clickedCompareContainer);
+     compareOverlay.append(targetCompareContainer);
 
     compareOverlay.fadeIn();
+    noOverlaySpacebarActive = false; // Disable spacebar activation when overlay is visible
     toggleScroll();
 
     const clonedImageSrc = clonedImage.attr('src');
     storeSubmissionAttempt(UserID, currentIteration, clonedImageSrc.substring(clonedImageSrc.lastIndexOf('/') + 1), 2);    // track compare usage
 }
 
+//=============== Instructions overlay ===============//
+ 
+function showInstructionsButton() {
+    showStartOverlay();
+
+    storeSubmissionAttempt(UserID, currentIteration, "INSTR_OPEN", 7);    // track instructions usage
+}
+
+function hideInstructionsButton() {
+    hideStartOverlay();
+
+    storeSubmissionAttempt(UserID, currentIteration, "INSTR_CLOSE", 8);    // track instructions usage
+}
 
 //=============== Display solution checkmark ===============//
 
@@ -987,6 +1088,7 @@ function skipCurrentIteration() {
     storeSubmissionAttempt(UserID, currentIteration, "SKIP", 4);
     storeScrollbarPos(false);   // store last scroll position
     stopScrollTracker();
+    sendScrollData(UserID, currentIteration);   // send any remaining scroll data
     showResult("skip");
     hideSkipButton();
 
@@ -1008,7 +1110,7 @@ function showSkipButton() {
 }
 
 let skipTimerId;
-const SKIP_BUTTON_APPEAR_TIME = 30000;  // 30 seconds
+const SKIP_BUTTON_APPEAR_TIME = 60000;  // 60 seconds
 
 function startSkipTimer() {
     if (skipTimerId) {
