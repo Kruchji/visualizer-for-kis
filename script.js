@@ -827,13 +827,13 @@ const TARGET_COOLDOWN = 500; // Time in milliseconds
 function toggleTargetImage() {
     const targetImageDiv = $('#targetImageDiv');
 
-    if (scrollTrackerRunning) { // skip first close
-        if (targetImageDiv.is(':visible')) {
-            storeSubmissionAttempt(UserID, currentIteration, "TAR_CLOSE", 6);
-        } else {
-            storeSubmissionAttempt(UserID, currentIteration, "TAR_OPEN", 5);
-        }
+
+    if (targetImageDiv.is(':visible')) {
+        storeSubmissionAttempt(UserID, currentIteration, "TAR_CLOSE", 6);
+    } else {
+        storeSubmissionAttempt(UserID, currentIteration, "TAR_OPEN", 5);
     }
+    
 
     targetImageDiv.fadeToggle();
     toggleScroll();
