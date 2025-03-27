@@ -48,6 +48,7 @@ for subfolder in subfolders:
 
             # Load all images and compute embeddings
             image_paths = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.jpg')]
+            image_paths.sort()
             
             clip_features = []
             for img_path in image_paths:

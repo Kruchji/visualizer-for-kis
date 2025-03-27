@@ -36,6 +36,7 @@ def get_image_embedding(image_path):
 # Load all images and compute embeddings
 image_folder = 'Images'
 image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith('.jpg')]
+image_paths.sort()
 embeddings = []
 for img_path in image_paths:
     embeddings.append(get_image_embedding(img_path))

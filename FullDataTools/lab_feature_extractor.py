@@ -14,6 +14,7 @@ for subfolder in subfolders:
     print(f"Processing {subfolder}...")
 
     image_paths = [os.path.join(subfolder, f) for f in os.listdir(subfolder) if f.endswith('.jpg')]
+    image_paths.sort()
 
     lab_features = []
     for img_path in image_paths:

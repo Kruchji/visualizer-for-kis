@@ -241,9 +241,11 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             if(len(dataSets) < len(imageSets)):
                 chosenFolder = imageSets[configData[int(iteration) % len(configData)]['dataset'] % len(imageSets)]
 
-                for file_name in os.listdir("./Data/" + chosenFolder + "/"):
-                    if file_name.endswith('.jpg'):
-                        images.append(file_name)
+                # Get list of only .jpg files in the folder
+                images = [file_name for file_name in os.listdir("./Data/" + chosenFolder + "/") if file_name.endswith('.jpg')]
+
+                # Sort the images by name (to ensure consistent order across different platforms)
+                images.sort()
                 
                 if sortingMethod == "ss" or sortingMethod == "lab":
                     # store features data

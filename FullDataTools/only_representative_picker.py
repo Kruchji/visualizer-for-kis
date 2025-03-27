@@ -14,7 +14,10 @@ embeddings = []
 
 # For each folder, get the image paths and embeddings
 for folder in folders:
-    image_paths.extend([os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.jpg')])
+    added_image_paths = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.jpg')]
+    added_image_paths.sort()
+
+    image_paths.extend(added_image_paths)
 
     # GeneratedCLIPFeatures.csv contains the CLIP embeddings for each image (one line per image, each line containing float values separated by ';')
     # put them in embeddings variable (np.array)
