@@ -308,7 +308,6 @@ function loadNextIteration() {
 
     // load everything
     getImageList().then(response => {
-
         if (response['folder'] == "END") return Promise.reject('END_OF_TEST');
 
         const imageFilenames = response['dataSet'];
@@ -319,9 +318,7 @@ function loadNextIteration() {
 
         let boardOrdering = response['sortingMethod'];
 
-
         const orderingName = orderImages(imageFilenames, boardOrdering, ssImageFilenames, selectedNumPerRow);
-
         setupCurrentIteration(imageFilenames, imageToFind, response['folder'], orderingName);
         return { "target": imageToFind, "allImages": imageFilenames, "dataset": response['folder'], "ordering": orderingName, "perRow": selectedNumPerRow }
 
@@ -425,12 +422,11 @@ function setupCurrentIteration(imageFilenames, imageToFind, dataFolder, ordering
     }
 
     $('#imageGrid').css('grid-template-columns', 'repeat(' + selectedNumPerRow + ', 1fr)');
+
     const imageGrid = $('#imageGrid');
     imageFilenames.forEach(function (filename) {
         if (filename === "empty") {     // empty image
-            imageGrid.append($('<div>', { class: 'image-container empty' }));
             imageGrid.append($('<div>', { class: 'empty' }));
-            lastEmpty = true;
         } else if (filename === "row-separator") {    // separator between rows
             imageGrid.append($('<div>', { class: 'row-separator' }));
         } else {
