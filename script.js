@@ -293,9 +293,15 @@ function loadOldIteration(currIterData) {
     $('#imageGrid').empty();
     $('#targetImageDiv').empty();
 
-    // setup everything
-    if (currIterData['currDataFolder'] == "END") return endTesting(false);
+    // missing board config for current iteration (most likely fetch failed and user reloaded page)
+    if (currIterData['currDataFolder'] == "MISSING") {
+        currentIteration -= 1;  // go back one iteration (to not skip one)
+        return loadNextIteration();  // load next iteration (gets new board config - the one lost in fetch)
+    } else if (currIterData['currDataFolder'] == "END") {
+        return endTesting(false);  // end test (user already finished all iterations)
+    }
 
+    // setup everything
     const imageFilenames = currIterData['currImages'];
     const imageToFind = currIterData['currTarget'];
     selectedNumPerRow = parseInt(currIterData['currBoardSize']);

@@ -191,6 +191,19 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             reloads[currIter] = reloads.get(str(currIter), 0) + 1
             userLogs["reloads"] = reloads
 
+            # Check if the user has already completed all datasets (set to "END")
+            imageSets = [folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]
+            
+            if lastCompletedIter >= len(imageSets) - 1:
+                currentDataFolder = "END"
+                currentTarget = "END"
+                currOrdering = "END"
+            else:
+                # Get the current dataset and target image for the user (or "MISSING" if not found - user will request new config)
+                currentDataFolder = userLogs.get("dataSets",{}).get(currIter, "MISSING")
+                currentTarget = userLogs.get("targets", {}).get(currIter, "MISSING")
+                currOrdering = userLogs.get("orderings", {}).get(currIter, "MISSING")
+
             if (loadFailed == 0):
                 # update user data in json
                 logs[str(oldUser)] = userLogs
@@ -205,7 +218,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
             
-            response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : userLogs.get("targets", {}).get(currIter, "END"), 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : userLogs.get("dataSets", {}).get(currIter, "END"), 'currOrdering' : userLogs.get("orderings", {}).get(currIter, "missing"), 'numOfSets': len([folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]), 'adminMode' : adminMode, 'totalIncorrect' : userLogs.get("totalIncorrect", 0)}
+            response = {'loadFailed': loadFailed, 'userID' : oldUser, 'currIter' : int(currIter),'currImages' : [item['image'] for item in userLogs.get("imagePos", {}).get(currIter, [])], 'currTarget' : currentTarget, 'currBoardSize' : userLogs.get("imagesPerRow", {}).get(currIter, 4), 'currDataFolder' : currentDataFolder, 'currOrdering' : currOrdering, 'numOfSets': len([folder for folder in os.listdir("./Data/") if os.path.isdir(os.path.join("./Data/", folder))]), 'adminMode' : adminMode, 'totalIncorrect' : userLogs.get("totalIncorrect", 0)}
             self.wfile.write(json.dumps(response).encode('utf-8'))
 
             return
@@ -259,11 +272,14 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
             else: # end of test - out of dataSets
                 chosenFolder = "END"
 
-            lastCompletedIter = userLogs.get("lastCompleted", -2)
-            userLogs["lastCompleted"] = lastCompletedIter + 1
+            # update progress and reloads in user data
+            lastCompletedIter = userLogs.get("lastCompleted", -1)
+            print(lastCompletedIter, iteration)
+            if lastCompletedIter < int(iteration):  # to not decrease progress counter
+                userLogs["lastCompleted"] = int(iteration) - 1
 
             reloads = userLogs.get("reloads",{})
-            reloads[lastCompletedIter + 2] = 0
+            reloads[int(iteration)] = reloads.get(str(iteration), 0)
             userLogs["reloads"] = reloads
 
             logs[uid] = userLogs
@@ -294,7 +310,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                     print(f"Sorting images using {sortingMethod} method.")
                     _, sorted_images = selfSort.sort_with_flas(X.copy(), images, nc=49, n_images_per_site=imagesOnRow, radius_factor=0.7, wrap=False)
 
-            # send dataset and list of contents back to JS
+            # send dataset and list of contents back to JS 
             self.send_response(200) 
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
