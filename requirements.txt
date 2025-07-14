@@ -2,3 +2,4 @@ numpy
 matplotlib
 scipy
 lapx
+python-constraint

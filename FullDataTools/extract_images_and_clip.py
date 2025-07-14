@@ -11,7 +11,7 @@ skipped = 0
 
 currentDatasetID = -1
 
-for folder in ['mvk_1/', 'mvk_2/']: # Use both sources
+for folder in [f.name for f in os.scandir(main_folder) if f.is_dir()]: # Use both sources
     # Get subfolders
     file_path = main_folder + folder + 'images.hdf5'
     subfolders = [os.path.basename(f.path) for f in os.scandir(main_folder + folder) if f.is_dir()]

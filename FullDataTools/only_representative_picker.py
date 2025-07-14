@@ -6,8 +6,14 @@ from scipy.cluster.hierarchy import linkage, fcluster
 import csv
 
 
-# Get folders inside extracted_images/mvk_1 and extracted_images/mvk_2
-folders = [f.path for f in os.scandir('extracted_images/mvk_1') if f.is_dir()] + [f.path for f in os.scandir('extracted_images/mvk_2') if f.is_dir()]
+# Get folders inside extracted_images
+top_level_dirs = [f.path for f in os.scandir('extracted_images') if f.is_dir()]
+
+# Get all subfolders inside these directories
+folders = []
+for dir_path in top_level_dirs:
+    subdirs = [f.path for f in os.scandir(dir_path) if f.is_dir()]
+    folders.extend(subdirs)
 
 image_paths = []
 embeddings = []

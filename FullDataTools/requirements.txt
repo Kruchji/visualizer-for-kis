@@ -1,0 +1,6 @@
+opencv-python
+h5py
+numpy
+scikit-learn
+open-clip-torch
+scipy

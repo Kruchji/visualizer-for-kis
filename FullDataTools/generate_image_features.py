@@ -33,7 +33,7 @@ def get_image_embedding(image_path):
 
 
 base_folder = 'extracted_images'
-subfolders = ['mvk_1', 'mvk_2']
+subfolders = [f.name for f in os.scandir(base_folder) if f.is_dir()]
 
 # Loop over all subfolders
 for subfolder in subfolders:
