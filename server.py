@@ -6,7 +6,7 @@ from urllib.parse import urlparse, parse_qs
 import random
 
 # self-sorting
-import selfSort
+from Libs import LAS_FLAS
 
 # Handle admin argument
 adminMode = False
@@ -308,7 +308,7 @@ class TrackingServer (http.server.SimpleHTTPRequestHandler):
                     
 
                     print(f"Sorting images using {sortingMethod} method.")
-                    _, sorted_images = selfSort.sort_with_flas(X.copy(), images, nc=49, n_images_per_site=imagesOnRow, radius_factor=0.7, wrap=False)
+                    _, sorted_images = LAS_FLAS.sort_with_flas(X.copy(), images, nc=49, n_images_per_site=imagesOnRow, radius_factor=0.7, wrap=False)
 
             # send dataset and list of contents back to JS 
             self.send_response(200) 

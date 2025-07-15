@@ -1,0 +1,2 @@
+Modifications made by Jiří Kruchina:
+- Changed script to support rectangual grids.
