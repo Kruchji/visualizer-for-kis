@@ -4,7 +4,15 @@ import os, shutil
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster
 import csv
+import sys
 
+# Get number of representatives from command line argument or default to 50
+try:
+    num_representatives = int(sys.argv[1]) if len(sys.argv) > 1 else 50
+    print(f"Number of representatives: {num_representatives}")
+except ValueError:
+    print("Invalid number of representatives.")
+    exit()
 
 # Get folders inside extracted_images
 top_level_dirs = [f.path for f in os.scandir('extracted_images') if f.is_dir()]
@@ -39,7 +47,6 @@ embeddings = np.array(embeddings)
 Z = linkage(embeddings, method='ward')
 
 # Cut the dendrogram to get only 'num_representatives' clusters
-num_representatives = 50
 labels = fcluster(Z, num_representatives, criterion='maxclust')
 
 # For each cluster, compute the centroid (mean of points in the cluster)
