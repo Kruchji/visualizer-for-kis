@@ -42,10 +42,13 @@ def extract_frames_from_videos(source_folder):
             if not ret:
                 continue
 
+            # Resize the frame to 640x360 (to take less space)
+            resized_frame = cv2.resize(frame, (640, 360), interpolation=cv2.INTER_AREA)
+
             # Save the frame as an image
             filename = f"{extracted_count:04}_{frame_idx:04}_{video_index:04}.jpg"
             filepath = video_output_folder / filename
-            cv2.imwrite(str(filepath), frame)
+            cv2.imwrite(str(filepath), resized_frame)
             extracted_count += 1
 
         cap.release()

@@ -10,6 +10,9 @@ import os
 # Use GPU if available (else CPU)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+print(f"Using device: {device}")
+print("Loading model... (this may take a while)")
+
 # Define the model
 model, _, preprocess = open_clip.create_model_and_transforms(
     'ViT-SO400M-14-SigLIP-384',
