@@ -318,7 +318,7 @@ for user in validUsers:
 plt.ylim(-2, 102)
 
 # plot labels
-plt.xlabel('Seconds')
+plt.xlabel('Time (s)')
 plt.ylabel('Percentage not scrolled')
 plt.title('Scroll over time, ordering: ' + str(ordering) + ", images/row: " + str(imagesPerRow) + ", dataset: " + str(dataset))
 plt.legend()

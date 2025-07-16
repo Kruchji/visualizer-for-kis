@@ -265,7 +265,7 @@ plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, colo
 plt.ylim(-2, 102)
 
 # plot labels
-plt.xlabel('Seconds')
+plt.xlabel('Time (s)')
 plt.ylabel('Percentage not scrolled')
 plt.title('Scroll over time, ordering: ' + json_data[str(user)]["orderings"][str(iteration)] + ", images/row: " + str(json_data[str(user)]["imagesPerRow"][str(iteration)]) + ", dataset: " + json_data[str(user)]["dataSets"][str(iteration)])
 plt.legend()
