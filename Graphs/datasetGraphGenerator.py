@@ -164,11 +164,11 @@ for user in validUsers:
         currentTimestamp = normalisedTime[afterLoadIndex]
 
         if(firstLoadLine):
-            plt.axvline(x=lastTimestamp, color='red', linestyle='--', label='Unload/load', alpha=(1/len(validUsers)))
+            plt.axvline(x=lastTimestamp, color='red', linestyle='--', label='Unload/load', alpha=(min(1,2/len(validUsers))))
             firstLoadLine = False
         else:
-            plt.axvline(x=lastTimestamp, color='red', linestyle='--', alpha=(1/len(validUsers)))
-        plt.axvline(x=currentTimestamp, color='red', linestyle='--', alpha=(1/len(validUsers)))
+            plt.axvline(x=lastTimestamp, color='red', linestyle='--', alpha=(min(1,2/len(validUsers))))
+        plt.axvline(x=currentTimestamp, color='red', linestyle='--', alpha=(min(1,2/len(validUsers))))
 
 
 
@@ -203,37 +203,37 @@ for user in validUsers:
                 if subCorrect == 0:
                     # for label display
                     if firstIncorrect:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='red', zorder=3, label='Wrong guess', alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='red', zorder=3, label='Wrong guess', alpha=(min(1,2/len(validUsers))))
                         firstIncorrect = False
                     else:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='red', zorder=3, alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='red', zorder=3, alpha=(min(1,2/len(validUsers))))
 
-                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='red', zorder=3, alpha=(1/len(validUsers)))
-                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='red', zorder=3, alpha=(1/len(validUsers)))
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='red', zorder=3, alpha=(min(1,2/len(validUsers))))
+                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='red', zorder=3, alpha=(min(1,2/len(validUsers))))
 
                 # correct
                 elif subCorrect == 1:
                     # for label display
                     if firstCorrect:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='green', zorder=3, label='Correct guess', alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='green', zorder=3, label='Correct guess', alpha=(min(1,2/len(validUsers))))
                         firstCorrect = False
                     else:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='green', zorder=3, alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='green', zorder=3, alpha=(min(1,2/len(validUsers))))
 
-                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='green', zorder=3, alpha=(1/len(validUsers)))
-                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='green', zorder=3, alpha=(1/len(validUsers)))
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='green', zorder=3, alpha=(min(1,2/len(validUsers))))
+                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='green', zorder=3, alpha=(min(1,2/len(validUsers))))
 
                 # compare
                 elif subCorrect == 2:
                     # for label display
                     if firstCompare:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='blue', zorder=3, label='Compare use', alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='blue', zorder=3, label='Compare use', alpha=(min(1,2/len(validUsers))))
                         firstCompare = False
                     else:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='blue', zorder=3, alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation, subTotalScroll), color='blue', zorder=3, alpha=(min(1,2/len(validUsers))))
 
-                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='blue', zorder=3, alpha=(1/len(validUsers)))
-                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='blue', zorder=3, alpha=(1/len(validUsers)))
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll), color='blue', zorder=3, alpha=(min(1,2/len(validUsers))))
+                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(clickedImageLocation, subTotalScroll), normaliseHeight(clickedImageLocation + subImageHeight, subTotalScroll)], color='blue', zorder=3, alpha=(min(1,2/len(validUsers))))
 
                     previousCompare['x'] = (subTimestamp - minTime) / 1000
                     previousCompare['y'] = normaliseHeight(clickedImageLocation, subTotalScroll)
@@ -242,39 +242,39 @@ for user in validUsers:
                 # compare end
                 elif subCorrect == 3:
                     rectWidth = ((subTimestamp - minTime) / 1000) - previousCompare['x']
-                    rectangle = patches.Rectangle((previousCompare['x'], previousCompare['y']), rectWidth, previousCompare['height'], linewidth=1, edgecolor='darkgray', facecolor='lightgray', alpha=(1/len(validUsers)))
+                    rectangle = patches.Rectangle((previousCompare['x'], previousCompare['y']), rectWidth, previousCompare['height'], linewidth=1, edgecolor='darkgray', facecolor='lightgray', alpha=(min(1,2/len(validUsers))))
                     ax.add_patch(rectangle)
 
                 # skip
                 elif subCorrect == 4:
                     # for label display
                     if firstSkip:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='hotpink', zorder=3, label='Skip', alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='hotpink', zorder=3, label='Skip', alpha=(min(1,2/len(validUsers))))
                         firstSkip = False
                     else:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='hotpink', zorder=3, alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='hotpink', zorder=3, alpha=(min(1,2/len(validUsers))))
 
-                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(subTotalScroll, subTotalScroll), color='hotpink', zorder=3, alpha=(1/len(validUsers)))
-                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(0, subTotalScroll), normaliseHeight(subTotalScroll, subTotalScroll)], color='hotpink', zorder=3, alpha=(1/len(validUsers)))
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(subTotalScroll, subTotalScroll), color='hotpink', zorder=3, alpha=(min(1,2/len(validUsers))))
+                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(0, subTotalScroll), normaliseHeight(subTotalScroll, subTotalScroll)], color='hotpink', zorder=3, alpha=(min(1,2/len(validUsers))))
 
                 # target overlay
                 elif subCorrect == 5:
                     # for label display
                     if firstTargetOverlay:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='cyan', zorder=3, label='Target overlay', alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='cyan', zorder=3, label='Target overlay', alpha=(min(1,2/len(validUsers))))
                         firstTargetOverlay = False
                     else:
-                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='cyan', zorder=3, alpha=(1/len(validUsers)))
+                        plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(0, subTotalScroll), color='cyan', zorder=3, alpha=(min(1,2/len(validUsers))))
 
-                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(subTotalScroll, subTotalScroll), color='cyan', zorder=3, alpha=(1/len(validUsers)))
-                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(0, subTotalScroll), normaliseHeight(subTotalScroll, subTotalScroll)], color='cyan', zorder=3, alpha=(1/len(validUsers)))
+                    plt.scatter((subTimestamp - minTime) / 1000, normaliseHeight(subTotalScroll, subTotalScroll), color='cyan', zorder=3, alpha=(min(1,2/len(validUsers))))
+                    plt.plot([(subTimestamp - minTime) / 1000, (subTimestamp - minTime) / 1000], [normaliseHeight(0, subTotalScroll), normaliseHeight(subTotalScroll, subTotalScroll)], color='cyan', zorder=3, alpha=(min(1,2/len(validUsers))))
 
                     previousTargetOverlay['x'] = (subTimestamp - minTime) / 1000
                 
                 # target overlay end
                 elif subCorrect == 6:
                     rectWidth = ((subTimestamp - minTime) / 1000) - previousTargetOverlay['x']
-                    rectangle = patches.Rectangle((previousTargetOverlay['x'], normaliseHeight(0, subTotalScroll)), rectWidth, normaliseHeight(subTotalScroll, subTotalScroll) - normaliseHeight(0, subTotalScroll), linewidth=1, edgecolor='darkturquoise', facecolor='lightgray', alpha=(1/len(validUsers)))
+                    rectangle = patches.Rectangle((previousTargetOverlay['x'], normaliseHeight(0, subTotalScroll)), rectWidth, normaliseHeight(subTotalScroll, subTotalScroll) - normaliseHeight(0, subTotalScroll), linewidth=1, edgecolor='darkturquoise', facecolor='lightgray', alpha=(min(1,2/len(validUsers))))
                     ax.add_patch(rectangle)
 
                 # instructions overlay
@@ -299,16 +299,16 @@ for user in validUsers:
 
 
     # draw viewport locations
-    plt.plot(normalisedTime, valuesTop, color='dodgerblue', zorder=2, alpha=(1/len(validUsers)))
-    plt.plot(normalisedTime, valuesBottom, color='dodgerblue', zorder=2, alpha=(1/len(validUsers)))
+    plt.plot(normalisedTime, valuesTop, color='dodgerblue', zorder=2, alpha=(min(1,2/len(validUsers))))
+    plt.plot(normalisedTime, valuesBottom, color='dodgerblue', zorder=2, alpha=(min(1,2/len(validUsers))))
     if currentUser == 1:
         plt.fill_between(normalisedTime, valuesTop, valuesBottom, color='skyblue', alpha=0.3 * (1/len(validUsers)), zorder=2, label='Viewport scroll')
     else:
         plt.fill_between(normalisedTime, valuesTop, valuesBottom, color='skyblue', alpha=0.3 * (1/len(validUsers)), zorder=2)
 
     # draw target image locations
-    plt.plot(normalisedTime, targetTopLocations, color=targetColors[0], zorder=1, alpha=(1/len(validUsers)))
-    plt.plot(normalisedTime, targetBottomLocations, color=targetColors[0], zorder=1, alpha=(1/len(validUsers)))
+    plt.plot(normalisedTime, targetTopLocations, color=targetColors[0], zorder=1, alpha=(min(1,2/len(validUsers))))
+    plt.plot(normalisedTime, targetBottomLocations, color=targetColors[0], zorder=1, alpha=(min(1,2/len(validUsers))))
     if currentUser == 1:
         plt.fill_between(normalisedTime, targetTopLocations, targetBottomLocations, color=targetColors[1], alpha=0.3 * (1/len(validUsers)), zorder=1, label='Target image')
     else:
