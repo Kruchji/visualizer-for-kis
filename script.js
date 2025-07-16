@@ -774,7 +774,7 @@ function showEndOverlay() {
     let endOverlay = $('#end-overlay');
 
     endOverlay.empty();
-    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test. You'll be shortly redirected back to Prolific.</div><br>");
+    endOverlay.append("<div class='endOfTest'>All tasks done! This marks the end of the test.</div><br>");
     if (adminEnabled) {    // hide new user button for standard users
         endOverlay.append('<button type="button" class="btn btn-primary end-btn" onclick="startWithNewUser()">Go again (new user)</button>');
     }
