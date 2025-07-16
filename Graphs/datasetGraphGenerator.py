@@ -50,6 +50,11 @@ for user in all_users:
 
     validUsers.append(user)
 
+
+if len(validUsers) == 0:
+    print("No valid users found for the specified dataset and ordering.")
+    exit()
+
 print("Users displayed on this graph: ", validUsers)
 
 # to prevent multiple labels
