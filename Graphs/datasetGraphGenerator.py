@@ -29,6 +29,7 @@ all_users = [str(str_name) for str_name in [int(name) for name in folder_names i
 fig, ax = plt.subplots(figsize=(10, 7))
 
 validUsers = []
+iteration_nums = []
 
 # iterate over all users, pick the ones that have the requested dataset and ordering
 for user in all_users:
@@ -55,6 +56,7 @@ for user in all_users:
         continue
 
     validUsers.append(user)
+    iteration_nums.append(iteration_num)
 
 
 if len(validUsers) == 0:
@@ -83,6 +85,8 @@ for user in validUsers:
 
     with open(f'../CollectedData/{int(user):04}/userData.json', "r") as json_file:
         user_data = json.load(json_file)
+
+    iteration_num = iteration_nums[currentUser - 1]  # get iteration number for this user
 
     # get data about target image
     currentTarget = user_data[user]["targets"][iteration_num]
@@ -322,7 +326,7 @@ plt.legend()
 plt.grid(True)  # background grid
 
 # show plot (or save to file)
-if len(sys.argv) >= 4 and int(sys.argv[3]) == 1:
+if len(sys.argv) >= 5 and int(sys.argv[4]) == 1:
     plt.savefig("multiGraph.png", dpi=400)
 else:
     plt.show()
