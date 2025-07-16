@@ -8,12 +8,17 @@ import matplotlib.patches as patches
 def normaliseHeight(currHeight, totalHeight):
     return (100 - 100*(currHeight / totalHeight))
 
-# dataset and ordering must be specified
-if len(sys.argv) >= 3:
-    dataset = sys.argv[1]       # First argument
-    ordering = sys.argv[2]      # Second argument
-else:
-    print("Please provide at least two arguments. (dataset, ordering, to_file)")
+# dataset, ordering and number of images must be specified
+try:
+    if len(sys.argv) >= 3:
+        dataset = sys.argv[1]       # First argument
+        ordering = sys.argv[2]      # Second argument
+        imagesPerRow = int(sys.argv[3]) # Third argument
+    else:
+        print("Please provide at least three arguments. (dataset, ordering, images_per_row, to_file)")
+        exit()
+except ValueError:
+    print("Invalid argument(s). Please provide images_per_row as an integer.")
     exit()
 
 # get all user IDs
@@ -32,6 +37,7 @@ for user in all_users:
 
     user_data_sets = user_data[user]["dataSets"]
     user_orderings = user_data[user]["orderings"]
+    user_imagesPerRow = user_data[user]["imagesPerRow"]
 
     # check if this user has the requested dataset and ordering
     iteration_num = None
@@ -45,7 +51,7 @@ for user in all_users:
         continue
 
     # user has completed this dataset on a different ordering
-    if user_orderings[iteration_num] != ordering:
+    if user_orderings[iteration_num] != ordering or user_imagesPerRow[iteration_num] != imagesPerRow:
         continue
 
     validUsers.append(user)
@@ -85,7 +91,6 @@ for user in validUsers:
     allGridItems = user_data[str(user)]["imagePos"][str(iteration_num)] # also contains row-separators
     allImages = [item for item in allGridItems if item['image'] != "row-separator"]
     
-    imagesPerRow = user_data[user]["imagesPerRow"][iteration_num]
     targetPosition = next((index for index, item in enumerate(allImages) if item['image'] == currentTarget), None)   # find position of target in grid
 
     # handle missing target
